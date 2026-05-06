@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { environment } from '../../environments/environment.prod';
 
 export enum MaintenanceStatus {
   Open = 0,
@@ -31,7 +32,7 @@ export interface UpdateMaintenanceDto {
   providedIn: 'root'
 })
 export class MaintenanceService {
-  private baseUrl = 'https://localhost:7262/api/Maintenance';
+  private baseUrl = `${environment.baseUrl}/Maintenance`;
 
   constructor(private http: HttpClient) {}
 

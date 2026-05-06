@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { environment } from '../../environments/environment.prod';
 
 export interface Extra {
   id: number;
@@ -24,7 +25,7 @@ export interface ExtraUpdateDto {
   providedIn: 'root'
 })
 export class ExtrasService {
-  private apiUrl = 'https://localhost:7262/api/Extra';
+  private apiUrl = `${environment.baseUrl}/Extra`;
 
   constructor(private http: HttpClient) {}
 

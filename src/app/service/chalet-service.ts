@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
+import { environment } from '../../environments/environment.prod';
 
 export interface ChaletImage {
   id: number;
@@ -113,7 +114,7 @@ export function periodsArrayToBitmask(periods: number[]): number {
 
 @Injectable({ providedIn: 'root' })
 export class ChaletService {
-  private apiUrl = 'https://localhost:7262/api/Chalet';
+  private apiUrl = `${environment.baseUrl}/Chalet`;
 
   constructor(private http: HttpClient) {}
 

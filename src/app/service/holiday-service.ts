@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { environment } from '../../environments/environment.prod';
 
 export interface Holiday {
   id: number;
@@ -16,7 +17,7 @@ export interface CreateHolidayDto {
 
 @Injectable({ providedIn: 'root' })
 export class HolidayService {
-  private apiUrl = 'https://localhost:7262/api/Holiday';
+  private apiUrl = `${environment.baseUrl}/Holiday`;
 
   constructor(private http: HttpClient) {}
 

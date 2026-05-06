@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { environment } from '../../environments/environment.prod';
 
 export type WaitingStatus = 'Pending' | 'Contacted' | 'Booked' | 'Cancelled';
 
@@ -50,7 +51,7 @@ export interface UpdateStatusResponse {
   providedIn: 'root',
 })
 export class WaitingListService {
-  private baseUrl = 'https://localhost:7262/api/WaitingList';
+  private baseUrl = `${environment.baseUrl}/WaitingList`;
 
   constructor(private http: HttpClient) {}
 

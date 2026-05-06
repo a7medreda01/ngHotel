@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, tap } from 'rxjs';
 import { Router } from '@angular/router';
+import { environment } from '../../environments/environment.prod';
 
 export interface LoginRequest {
   email: string;
@@ -40,7 +41,7 @@ const STORAGE_KEY = 'auth_user';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
-  private baseUrl = 'https://localhost:7262/api/Auth';
+  private baseUrl = `${environment.baseUrl}/Auth`;
 
   constructor(private http: HttpClient, private router: Router) {}
 

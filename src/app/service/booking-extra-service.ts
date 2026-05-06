@@ -1,6 +1,7 @@
 import { HttpClient, HttpParams } from "@angular/common/http";
 import { Injectable } from "@angular/core";
 import { Observable } from "rxjs";
+import { environment } from "../../environments/environment.prod";
 
 export interface Bookings {
   id: number;
@@ -61,7 +62,7 @@ export interface PricingResult {
 
 @Injectable({ providedIn: 'root' })
 export class BookingService {
-  private baseUrl = 'https://localhost:7262/api';
+  private baseUrl = `${environment.baseUrl}/Auth`;
 
   constructor(private http: HttpClient) {}
 

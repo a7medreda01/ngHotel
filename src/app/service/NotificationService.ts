@@ -2,6 +2,7 @@ import { Injectable, OnDestroy } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, Observable, interval, Subscription } from 'rxjs';
 import { Router } from '@angular/router';
+import { environment } from '../../environments/environment.prod';
 
 export interface AppNotification {
   id: number;
@@ -14,7 +15,7 @@ export interface AppNotification {
 
 @Injectable({ providedIn: 'root' })
 export class NotificationService implements OnDestroy {
-  private readonly BASE = 'https://localhost:7262/api/notifications';
+  private BASE = `${environment.baseUrl}/notifications`;
 
   private _notifications$ = new BehaviorSubject<AppNotification[]>([]);
   notifications$ = this._notifications$.asObservable();

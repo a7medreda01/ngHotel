@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { environment } from '../../environments/environment.prod';
 
 export interface ChaletPartner {
   userId: number;
@@ -16,7 +17,7 @@ export interface ChaletWithPartners {
 
 @Injectable({ providedIn: 'root' })
 export class ChaletOwnerService {
-  private apiUrl = 'https://localhost:7262/api/ChaletOwner';
+  private apiUrl = `${environment.baseUrl}/ChaletOwner`;
 
   constructor(private http: HttpClient) {}
 

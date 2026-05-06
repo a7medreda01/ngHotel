@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { environment } from '../../environments/environment.prod';
 
 // يتوافق مع الـ enums في الباك
 // ChaletType: 0=Normal, 1=Royal
@@ -32,7 +33,7 @@ export interface PricingCalculateResult {
 
 @Injectable({ providedIn: 'root' })
 export class PricingService {
-  private apiUrl = 'https://localhost:7262/api/Pricing';
+  private apiUrl = `${environment.baseUrl}/Pricing`;
 
   constructor(private http: HttpClient) {}
 
