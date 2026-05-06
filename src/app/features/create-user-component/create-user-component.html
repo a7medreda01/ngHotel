@@ -1,0 +1,227 @@
+<!-- create-user.component.html -->
+<div class="create-user-page" dir="rtl">
+
+  <!-- ══ Header ══ -->
+  <div class="page-header">
+    <div class="header-icon"><i class="bi bi-person-plus-fill"></i></div>
+    <div>
+      <h1>إدارة المستخدمين</h1>
+      <p>إضافة وعرض وحذف المستخدمين (صلاحية المدير فقط)</p>
+    </div>
+  </div>
+
+  <!-- ══ Create Form Card ══ -->
+  <div class="form-card">
+    <div class="section-title">
+      <i class="bi bi-person-plus-fill"></i>
+      إنشاء حساب جديد
+    </div>
+
+    <div class="alert-success" *ngIf="successMessage">
+      <i class="bi bi-check-circle-fill"></i> {{ successMessage }}
+    </div>
+    <div class="alert-error" *ngIf="errorMessage">
+      <i class="bi bi-exclamation-circle-fill"></i> {{ errorMessage }}
+    </div>
+
+    <div class="form-grid">
+      <!-- Full Name -->
+      <div class="form-group">
+        <label><i class="bi bi-person-fill"></i> الاسم الكامل</label>
+        <div class="input-wrapper">
+          <input type="text" [(ngModel)]="form.fullName" placeholder="مثال: أحمد محمد" />
+        </div>
+      </div>
+      <!-- Email -->
+      <div class="form-group">
+        <label><i class="bi bi-envelope-fill"></i> البريد الإلكتروني</label>
+        <div class="input-wrapper">
+          <input type="email" [(ngModel)]="form.email" placeholder="example@email.com" />
+        </div>
+      </div>
+      <!-- Password -->
+      <div class="form-group">
+        <label><i class="bi bi-lock-fill"></i> كلمة المرور</label>
+        <div class="input-wrapper">
+          <input [type]="showPassword ? 'text' : 'password'" [(ngModel)]="form.password" placeholder="••••••••" />
+          <button class="toggle-pw" (click)="showPassword = !showPassword" type="button">
+            <i class="bi" [ngClass]="showPassword ? 'bi-eye-slash-fill' : 'bi-eye-fill'"></i>
+          </button>
+        </div>
+      </div>
+      <!-- Role -->
+      <div class="form-group">
+        <label><i class="bi bi-shield-fill"></i> الصلاحية</label>
+        <div class="role-selector">
+          <button
+            class="role-btn"
+            [class.active-employee]="form.role === 'Employee'"
+            (click)="form.role = 'Employee'"
+            type="button"
+          >
+            <i class="bi bi-person-fill"></i> موظف
+          </button>
+          <button
+            class="role-btn"
+            [class.active-manager]="form.role === 'Manager'"
+            (click)="form.role = 'Manager'"
+            type="button"
+          >
+            <i class="bi bi-star-fill"></i> مدير
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-actions">
+      <button class="btn-reset" (click)="resetForm()" type="button">
+        <i class="bi bi-arrow-counterclockwise"></i> مسح
+      </button>
+      <button
+        class="btn-submit"
+        (click)="onSubmit()"
+        [disabled]="isLoading || !form.email || !form.password || !form.fullName"
+      >
+        <span class="btn-spinner" *ngIf="isLoading"></span>
+        <i class="bi bi-person-check-fill" *ngIf="!isLoading"></i>
+        {{ isLoading ? 'جاري الإنشاء...' : 'إنشاء الحساب' }}
+      </button>
+    </div>
+  </div>
+
+  <!-- ══ Users List Card ══ -->
+  <div class="form-card users-card">
+    <div class="section-title">
+      <i class="bi bi-people-fill"></i>
+      جميع المستخدمين
+      <span class="users-count" *ngIf="!isLoadingUsers">{{ users.length }} مستخدم</span>
+    </div>
+
+    <!-- Error -->
+    <div class="alert-error" *ngIf="usersError">
+      <i class="bi bi-exclamation-circle-fill"></i> {{ usersError }}
+    </div>
+
+    <!-- Loading -->
+    <div class="loading-state" *ngIf="isLoadingUsers">
+      <div class="spinner"></div>
+      <span>جاري تحميل المستخدمين...</span>
+    </div>
+
+    <!-- Desktop Table -->
+    <div class="table-wrapper" *ngIf="!isLoadingUsers">
+      <table class="users-table d-none d-md-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>الاسم الكامل</th>
+            <th>البريد الإلكتروني</th>
+            <th>الصلاحية</th>
+            <th>إجراءات</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let user of users" class="user-row">
+            <td class="id-cell">{{ user.id }}</td>
+            <td>
+              <div class="user-cell">
+                <div class="user-avatar" [ngClass]="getRoleClass(user.role)">
+                  {{ user.fullName.charAt(0) }}
+                </div>
+                <span class="user-name">{{ user.fullName }}</span>
+              </div>
+            </td>
+            <td class="email-cell">{{ user.email }}</td>
+            <td>
+              <span class="role-badge" [ngClass]="getRoleClass(user.role)">
+                <i class="bi" [ngClass]="getRoleIcon(user.role)"></i>
+                {{ getRoleLabel(user.role) }}
+              </span>
+            </td>
+            <td>
+              <button
+                class="btn-delete-user"
+                (click)="openDeleteConfirm(user)"
+                [disabled]="deletingId === user.id"
+                title="حذف المستخدم"
+              >
+                <span *ngIf="deletingId === user.id" class="btn-spinner-sm"></span>
+                <i *ngIf="deletingId !== user.id" class="bi bi-trash3-fill"></i>
+              </button>
+            </td>
+          </tr>
+          <tr *ngIf="users.length === 0">
+            <td colspan="5" class="empty-cell">
+              <i class="bi bi-inbox"></i>
+              <p>لا يوجد مستخدمون</p>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <!-- Mobile Cards -->
+      <div class="mobile-users d-md-none">
+        <div *ngFor="let user of users" class="user-mobile-card">
+          <div class="user-mobile-header">
+            <div class="user-cell">
+              <div class="user-avatar" [ngClass]="getRoleClass(user.role)">
+                {{ user.fullName.charAt(0) }}
+              </div>
+              <div>
+                <div class="user-name">{{ user.fullName }}</div>
+                <div class="user-email-sm">{{ user.email }}</div>
+              </div>
+            </div>
+            <div style="display:flex; align-items:center; gap:8px;">
+              <span class="role-badge" [ngClass]="getRoleClass(user.role)">
+                <i class="bi" [ngClass]="getRoleIcon(user.role)"></i>
+                {{ getRoleLabel(user.role) }}
+              </span>
+              <button
+                class="btn-delete-user"
+                (click)="openDeleteConfirm(user)"
+                [disabled]="deletingId === user.id"
+              >
+                <span *ngIf="deletingId === user.id" class="btn-spinner-sm"></span>
+                <i *ngIf="deletingId !== user.id" class="bi bi-trash3-fill"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+        <div *ngIf="users.length === 0" class="empty-cell">
+          <i class="bi bi-inbox"></i>
+          <p>لا يوجد مستخدمون</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ Delete Confirm Modal ══ -->
+  <div class="modal-overlay" *ngIf="showDeleteConfirm" (click)="closeDeleteConfirm()">
+    <div class="modal-box" (click)="$event.stopPropagation()">
+      <div class="modal-header danger-header">
+        <h3><i class="bi bi-exclamation-triangle-fill"></i> تأكيد الحذف</h3>
+        <button class="modal-close" (click)="closeDeleteConfirm()">
+          <i class="bi bi-x-lg"></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="delete-icon-wrap"><i class="bi bi-person-x-fill"></i></div>
+        <p class="delete-msg">
+          هل أنت متأكد من حذف حساب
+          <strong>{{ userToDelete?.fullName }}</strong>؟
+        </p>
+        <p class="delete-note">لا يمكن التراجع عن هذا الإجراء</p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-cancel-modal" (click)="closeDeleteConfirm()">إلغاء</button>
+        <button class="btn-danger-modal" (click)="confirmDelete()" [disabled]="deletingId !== null">
+          <span *ngIf="deletingId !== null" class="btn-spinner-sm white"></span>
+          <i *ngIf="deletingId === null" class="bi bi-trash3-fill"></i>
+          {{ deletingId !== null ? 'جاري الحذف...' : 'حذف' }}
+        </button>
+      </div>
+    </div>
+  </div>
+
+</div>

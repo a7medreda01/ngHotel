@@ -1,0 +1,73 @@
+<!-- login.component.html -->
+<div class="auth-page" dir="rtl">
+  <div class="auth-bg">
+    <div class="bg-shape shape-1"></div>
+    <div class="bg-shape shape-2"></div>
+    <div class="bg-shape shape-3"></div>
+  </div>
+
+  <div class="auth-card">
+    <!-- Logo / Brand -->
+    <div class="auth-brand">
+      <div class="brand-icon">
+        <!-- <i class="bi bi-building-fill"></i> -->
+         <img src="favicon.ico" alt="" class="img-fluid">
+      </div>
+      <h1>مرحباً بك</h1>
+      <p>نظام إدارة الشاليهات — تسجيل الدخول</p>
+    </div>
+
+    <!-- Error -->
+    <div class="alert-error" *ngIf="errorMessage">
+      <i class="bi bi-exclamation-circle-fill"></i>
+      {{ errorMessage }}
+    </div>
+
+    <!-- Form -->
+    <div class="auth-form">
+      <div class="form-group">
+        <label>البريد الإلكتروني</label>
+        <div class="input-wrapper">
+          <i class="bi bi-envelope-fill input-icon"></i>
+          <input
+            type="email"
+            [(ngModel)]="email"
+            placeholder="example@email.com"
+            (keyup.enter)="onSubmit()"
+            autocomplete="email"
+          />
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>
+          كلمة المرور
+          <a routerLink="/forget-password" class="forgot-link">نسيت كلمة المرور؟</a>
+        </label>
+        <div class="input-wrapper">
+          <i class="bi bi-lock-fill input-icon"></i>
+          <input
+            [type]="showPassword ? 'text' : 'password'"
+            [(ngModel)]="password"
+            placeholder="••••••••"
+            (keyup.enter)="onSubmit()"
+            autocomplete="current-password"
+          />
+          <button class="toggle-pw" (click)="togglePassword()" type="button" tabindex="-1">
+            <i class="bi" [ngClass]="showPassword ? 'bi-eye-slash-fill' : 'bi-eye-fill'"></i>
+          </button>
+        </div>
+      </div>
+
+      <button
+        class="btn-login"
+        (click)="onSubmit()"
+        [disabled]="isLoading || !email || !password"
+      >
+        <span class="btn-spinner" *ngIf="isLoading"></span>
+        <i class="bi bi-box-arrow-in-right" *ngIf="!isLoading"></i>
+        {{ isLoading ? 'جاري تسجيل الدخول...' : 'تسجيل الدخول' }}
+      </button>
+    </div>
+  </div>
+</div>

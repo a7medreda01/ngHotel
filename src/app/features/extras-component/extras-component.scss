@@ -1,0 +1,792 @@
+// =============================================
+// Dark Theme Variables (Profile Style)
+// =============================================
+$primary: #3b82f6;
+$primary-dark: #2563eb;
+$primary-light: rgba(59,130,246,0.12);
+$primary-soft: rgba(59,130,246,0.08);
+
+$danger: #ef4444;
+$danger-light: rgba(239,68,68,0.1);
+
+$warning: #f59e0b;
+$warning-light: rgba(245,158,11,0.1);
+
+$info: #38bdf8;
+$info-light: rgba(56,189,248,0.1);
+
+$success: #10b981;
+$success-light: rgba(16,185,129,0.1);
+
+$text-main: #f1f5f9;
+$text-muted: #94a3b8;
+
+$border: #1e293b;
+$bg-page: #0f172a;
+$white: #1e293b;
+
+$shadow: 0 4px 20px rgba(0,0,0,0.35);
+$shadow-md: 0 10px 40px rgba(0,0,0,0.5);
+// =============================================
+// Base Page
+// =============================================
+.extras-page {
+  background: $bg-page;
+  min-height: 100vh;
+  padding: 24px 20px;
+  font-family: 'Segoe UI', 'Cairo', sans-serif;
+  direction: rtl;
+}
+
+// =============================================
+// Toast
+// =============================================
+.toast-wrapper {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%) translateY(-80px);
+  z-index: 9999;
+  transition: transform 0.3s ease;
+
+  &.show {
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+.toast-box {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 24px;
+  border-radius: 50px;
+  font-size: 14px;
+  font-weight: 600;
+  color: $white;
+  box-shadow: $shadow-md;
+
+  i { font-size: 18px; }
+
+  &.toast-success { background: $success; }
+  &.toast-error { background: $danger; }
+}
+
+// =============================================
+// Page Header
+// =============================================
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.header-title {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+
+  > i {
+    font-size: 32px;
+    color: $primary;
+    background: $primary-light;
+    width: 56px;
+    height: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 14px;
+  }
+
+  h1 {
+    font-size: 22px;
+    font-weight: 700;
+    color: $text-main;
+    margin: 0;
+  }
+
+  p {
+    font-size: 13px;
+    color: $text-muted;
+    margin: 2px 0 0;
+  }
+}
+
+// =============================================
+// Buttons
+// =============================================
+.btn-add {
+  background: $primary;
+  color: $white;
+  border: none;
+  border-radius: 12px;
+  padding: 12px 24px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 14px rgba(26, 188, 156, 0.35);
+
+  i { font-size: 16px; }
+
+  &:hover {
+    background: $primary-dark;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 18px rgba(26, 188, 156, 0.45);
+  }
+
+  &:active { transform: translateY(0); }
+}
+
+.btn-save {
+  background: $primary;
+  color: $white;
+  border: none;
+  border-radius: 10px;
+  padding: 12px 28px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.2s ease;
+
+  &:hover:not(:disabled) {
+    background: $primary-dark;
+  }
+
+  &:disabled {
+    opacity: 0.65;
+    cursor: not-allowed;
+  }
+}
+
+.btn-cancel {
+  background: $white;
+  color: $text-muted;
+  border: 1.5px solid $border;
+  border-radius: 10px;
+  padding: 12px 24px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: $bg-page;
+    color: $text-main;
+  }
+}
+
+.btn-delete {
+  background: $danger;
+  color: $white;
+  border: none;
+  border-radius: 10px;
+  padding: 12px 28px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.2s ease;
+
+  &:hover:not(:disabled) {
+    background: #c0392b;
+  }
+
+  &:disabled {
+    opacity: 0.65;
+    cursor: not-allowed;
+  }
+}
+
+// =============================================
+// Stats Cards
+// =============================================
+.stats-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 24px;
+
+  @media (max-width: 768px) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  @media (max-width: 400px) {
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+}
+
+.stat-card {
+  background: $white;
+  border-radius: 16px;
+  padding: 20px 18px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  box-shadow: $shadow;
+  border-right: 4px solid transparent;
+  transition: transform 0.2s ease;
+
+  &:hover { transform: translateY(-2px); }
+
+  &.stat-active  { border-right-color: $success; .stat-icon { background: $success-light; color: $success; } }
+  &.stat-inactive{ border-right-color: $danger;  .stat-icon { background: $danger-light;  color: $danger;  } }
+  &.stat-total   { border-right-color: $info;    .stat-icon { background: $info-light;    color: $info;    } }
+  &.stat-price   { border-right-color: $warning; .stat-icon { background: $warning-light; color: $warning; } }
+}
+
+.stat-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+
+  i { font-size: 22px; }
+}
+
+.stat-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.stat-value {
+  font-size: 26px;
+  font-weight: 800;
+  color: $text-main;
+  line-height: 1;
+}
+
+.stat-label {
+  font-size: 12px;
+  color: $text-muted;
+  margin-top: 4px;
+}
+
+// =============================================
+// Search Bar
+// =============================================
+.search-bar {
+  background: $white;
+  border-radius: 14px;
+  padding: 14px 18px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  box-shadow: $shadow;
+  margin-bottom: 20px;
+}
+
+.search-icon {
+  font-size: 17px;
+  color: $text-muted;
+}
+
+.search-input {
+  flex: 1;
+  border: none;
+  outline: none;
+  font-size: 14px;
+  color: $text-main;
+  background: transparent;
+  text-align: right;
+  direction: rtl;
+
+  &::placeholder { color: #adb5bd; }
+}
+
+.results-count {
+  font-size: 13px;
+  color: $primary;
+  font-weight: 700;
+  white-space: nowrap;
+  background: $primary-light;
+  padding: 4px 12px;
+  border-radius: 20px;
+}
+
+// =============================================
+// Loading / Empty
+// =============================================
+.loading-state, .empty-state {
+  background: $white;
+  border-radius: 16px;
+  padding: 60px 20px;
+  text-align: center;
+  box-shadow: $shadow;
+  color: $text-muted;
+
+  i { font-size: 48px; display: block; margin-bottom: 12px; }
+  p { font-size: 15px; margin-bottom: 20px; }
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid $border;
+  border-top-color: $primary;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin: 0 auto 16px;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+// =============================================
+// Table (Desktop)
+// =============================================
+.table-wrapper {
+  background: $white;
+  border-radius: 16px;
+  box-shadow: $shadow;
+  overflow: hidden;
+}
+
+.extras-table {
+  width: 100%;
+  border-collapse: collapse;
+
+  thead tr {
+    background: $bg-page;
+  }
+
+  th {
+    padding: 14px 18px;
+    font-size: 13px;
+    font-weight: 700;
+    color: $text-muted;
+    text-align: right;
+    border-bottom: 1.5px solid $border;
+  }
+
+  td {
+    padding: 16px 18px;
+    font-size: 14px;
+    color: $text-main;
+    border-bottom: 1px solid $border;
+    vertical-align: middle;
+  }
+
+  tbody tr {
+    transition: background 0.15s ease;
+
+    &:hover { background: $primary-light; }
+    &:last-child td { border-bottom: none; }
+  }
+}
+
+.row-num {
+  color: $text-muted;
+  font-weight: 600;
+  font-size: 13px;
+}
+
+.name-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+
+  i { color: $primary; font-size: 15px; }
+}
+
+.price-cell { font-weight: 700; }
+
+.price-tag {
+  background: $warning-light;
+  color: $warning;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 14px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 700;
+
+  &.active   { background: $success-light; color: $success; }
+  &.inactive { background: $danger-light;  color: $danger;  }
+}
+
+// =============================================
+// Action Buttons (Table)
+// =============================================
+.actions-cell {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.action-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 15px;
+  transition: all 0.2s ease;
+
+  &.edit-btn {
+    background: $primary-light;
+    color: $primary;
+    &:hover { background: $primary; color: $white; }
+  }
+
+  &.delete-btn {
+    background: $danger-light;
+    color: $danger;
+    &:hover { background: $danger; color: $white; }
+  }
+
+  &.toggle-btn {
+    background: #f8f9fa;
+    color: $text-muted;
+    font-size: 20px;
+    width: 40px;
+    height: 36px;
+    &:hover { background: $primary-soft; color: $primary; }
+  }
+}
+
+// =============================================
+// Mobile Cards
+// =============================================
+.mobile-cards {
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.service-card {
+  background: $white;
+  border: 1.5px solid $border;
+  border-radius: 14px;
+  padding: 16px;
+  transition: box-shadow 0.2s ease;
+
+  &:hover { box-shadow: $shadow-md; }
+}
+
+.card-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.card-name {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 700;
+  color: $text-main;
+  font-size: 15px;
+
+  i { color: $primary; }
+}
+
+.card-num {
+  background: $bg-page;
+  color: $text-muted;
+  width: 26px;
+  height: 26px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.card-price {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: $text-muted;
+  margin-bottom: 12px;
+
+  i { color: $warning; }
+  strong { color: $warning; font-size: 14px; }
+}
+
+.card-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+
+  .action-btn {
+    flex: 1;
+    width: auto;
+    height: 36px;
+    border-radius: 8px;
+    padding: 0 12px;
+    gap: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    white-space: nowrap;
+
+    &.toggle-btn {
+      font-size: 13px;
+      width: auto;
+    }
+  }
+}
+
+// =============================================
+// Modal
+// =============================================
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(3px);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.modal-box {
+  background: $white;
+  border-radius: 20px;
+  width: 100%;
+  max-width: 480px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+  overflow: hidden;
+  animation: slideUp 0.25s ease;
+  direction: rtl;
+
+  &.modal-sm { max-width: 400px; }
+}
+
+@keyframes slideUp {
+  from { transform: translateY(30px); opacity: 0; }
+  to   { transform: translateY(0);    opacity: 1; }
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 24px;
+  border-bottom: 1.5px solid $border;
+  background: $bg-page;
+}
+
+.modal-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 17px;
+  font-weight: 700;
+  color: $text-main;
+
+  i { font-size: 20px; color: $primary; }
+
+  &.delete-header i { color: $danger; }
+}
+
+.delete-header { background: $danger-light; }
+
+.modal-close {
+  background: none;
+  border: none;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: $text-muted;
+  font-size: 16px;
+  transition: all 0.2s ease;
+
+  &:hover { background: $border; color: $text-main; }
+}
+
+.modal-body {
+  padding: 24px;
+}
+
+.modal-footer {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 18px 24px;
+  border-top: 1.5px solid $border;
+  background: $bg-page;
+}
+
+// =============================================
+// Form
+// =============================================
+.form-group {
+  margin-bottom: 20px;
+
+  label {
+    display: block;
+    font-size: 13px;
+    font-weight: 700;
+    color: $text-main;
+    margin-bottom: 8px;
+  }
+}
+
+.required { color: $danger; margin-right: 2px; }
+
+.input-wrap {
+  position: relative;
+
+  .input-icon {
+    position: absolute;
+    right: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: $primary;
+    font-size: 16px;
+    pointer-events: none;
+  }
+
+  input {
+    width: 100%;
+    padding: 12px 42px 12px 14px;
+    border: 1.5px solid $border;
+    border-radius: 10px;
+    font-size: 14px;
+    color: $text-main;
+    background: $white;
+    outline: none;
+    transition: border-color 0.2s ease;
+    text-align: right;
+    direction: rtl;
+    box-sizing: border-box;
+
+    &:focus { border-color: $primary; box-shadow: 0 0 0 3px rgba(26, 188, 156, 0.12); }
+    &.error { border-color: $danger; }
+    &::placeholder { color: #bdc3c7; }
+  }
+}
+
+.error-msg {
+  display: block;
+  font-size: 12px;
+  color: $danger;
+  margin-top: 5px;
+}
+
+// =============================================
+// Status Toggle (Edit Mode)
+// =============================================
+.toggle-row {
+  display: flex;
+  gap: 10px;
+}
+
+.status-option {
+  flex: 1;
+  padding: 12px;
+  border: 2px solid $border;
+  border-radius: 10px;
+  background: $white;
+  font-size: 13px;
+  font-weight: 600;
+  color: $text-muted;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.2s ease;
+
+  i { font-size: 16px; }
+
+  &.selected-active {
+    border-color: $success;
+    background: $success-light;
+    color: $success;
+  }
+
+  &.selected-inactive {
+    border-color: $danger;
+    background: $danger-light;
+    color: $danger;
+  }
+}
+
+// =============================================
+// Delete Modal
+// =============================================
+.delete-icon {
+  width: 72px;
+  height: 72px;
+  background: $danger-light;
+  color: $danger;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 16px;
+
+  i { font-size: 32px; }
+}
+
+.delete-msg {
+  font-size: 15px;
+  font-weight: 600;
+  color: $text-main;
+  margin-bottom: 6px;
+}
+
+.delete-sub {
+  font-size: 13px;
+  color: $text-muted;
+}
+
+.text-center { text-align: center; }
+.text-danger { color: $danger !important; }
+
+// =============================================
+// Spinner animation for buttons
+// =============================================
+.spin {
+  display: inline-block;
+  animation: spin 0.8s linear infinite;
+}

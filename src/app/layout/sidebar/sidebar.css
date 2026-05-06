@@ -1,0 +1,53 @@
+.sidebar {
+  width: 250px;
+  height: 100vh;
+  transition: 0.3s;
+  overflow: hidden;
+}
+
+/* collapsed width */
+.sidebar.collapsed {
+  width: 80px;
+}
+
+/* header */
+.sidebar-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* menu */
+.nav-link {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.nav{
+    padding: 0;
+}
+
+/* center icons when collapsed */
+.sidebar.collapsed .nav-link {
+  justify-content: center;
+}
+
+/* icons */
+.nav-link i {
+  font-size: 18px;
+}
+
+/* text animation */
+.link-text {
+  transition: 0.2s;
+}
+
+.link-text.hidden {
+  opacity: 0;
+  width: 0;
+  overflow: hidden;
+  display: inline-block;
+}

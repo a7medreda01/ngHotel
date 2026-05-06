@@ -1,0 +1,97 @@
+<!-- TOP NAVBAR — Desktop (≥768px) -->
+<nav class="top-nav" dir="rtl" [class.scrolled]="isScrolled">
+
+  <div class="nav-brand">
+    <div class="brand-icon">
+      <i class="bi bi-building"></i>
+    </div>
+    <span class="brand-name">إدارة اكواخ الغزال</span>
+  </div>
+
+  <ul class="nav-links">
+    <li *ngFor="let item of navItems; let i = index" [style.--i]="i">
+      <a [routerLink]="item.route"
+         routerLinkActive="nav-active"
+         class="nav-link-item">
+        <i class="{{ item.icon }}"></i>
+        <span class="link-text">{{ item.label }}</span>
+        <span class="link-dot"></span>
+      </a>
+    </li>
+  </ul>
+
+  <div class="nav-actions">
+    <!-- ✅ Notification Component -->
+    <app-notification-component></app-notification-component>
+
+    <button class="new-booking-btn" type="button" [routerLink]="'/booking/new'">
+      <i class="bi bi-plus-lg"></i>
+      حجز جديد
+    </button>
+  </div>
+
+</nav>
+
+<!-- BOTTOM NAVBAR — Mobile (<768px) -->
+<nav class="bottom-nav" dir="rtl">
+  <a *ngFor="let item of mobileNavItems; let i = index"
+     [routerLink]="item.route"
+     routerLinkActive="bn-active"
+     class="bn-item"
+     [style.--i]="i">
+    <div class="bn-icon-wrap">
+      <i class="{{ item.icon }}"></i>
+    </div>
+    <span class="bn-label">{{ item.label }}</span>
+  </a>
+
+  <!-- ✅ زر الإشعارات في الـ Mobile bottom nav -->
+  <button class="bn-item bn-notif-btn" type="button" (click)="toggleMobileNotif()">
+    <div class="bn-icon-wrap bn-notif-wrap">
+      <i class="bi bi-bell-fill"></i>
+      <span class="bn-badge" *ngIf="unreadCount > 0">{{ unreadCount > 9 ? '9+' : unreadCount }}</span>
+    </div>
+    <span class="bn-label">إشعارات</span>
+  </button>
+</nav>
+
+<!-- Mobile Notification Drawer -->
+<div class="mobile-notif-drawer" [class.open]="showMobileNotif" dir="rtl">
+  <div class="drawer-header">
+    <span class="drawer-title"><i class="bi bi-bell-fill"></i> الإشعارات</span>
+    <button class="drawer-close" (click)="toggleMobileNotif()"><i class="bi bi-x-lg"></i></button>
+  </div>
+  <div class="drawer-list">
+    <ng-container *ngIf="mobileNotifications.length > 0; else mobileEmpty">
+      <div
+        class="drawer-item"
+        *ngFor="let n of mobileNotifications"
+        [class.unread]="!n.isRead"
+        [class.clickable]="n.bookingId"
+        (click)="onMobileNotifClick(n)"
+      >
+        <div class="drawer-icon" [class.icon-new]="!n.isRead">
+          <i class="bi bi-calendar-check-fill"></i>
+        </div>
+        <div class="drawer-content">
+          <div class="drawer-item-title">{{ n.title }}</div>
+          <div class="drawer-item-msg">{{ n.message }}</div>
+          <div class="drawer-time">{{ formatTime(n.createdAt) }}</div>
+        </div>
+        <span class="drawer-dot" *ngIf="!n.isRead"></span>
+      </div>
+    </ng-container>
+    <ng-template #mobileEmpty>
+      <div class="drawer-empty">
+        <i class="bi bi-bell-slash"></i>
+        <p>لا توجد إشعارات</p>
+      </div>
+    </ng-template>
+  </div>
+  <div class="drawer-footer" *ngIf="unreadCount > 0">
+    <button (click)="markAllRead()" class="drawer-mark-all">
+      <i class="bi bi-check2-all"></i> تحديد الكل كمقروء
+    </button>
+  </div>
+</div>
+<div class="mobile-notif-overlay" *ngIf="showMobileNotif" (click)="toggleMobileNotif()"></div>

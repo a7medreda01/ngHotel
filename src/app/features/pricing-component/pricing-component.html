@@ -1,0 +1,314 @@
+<div class="pricing-wrap" dir="rtl">
+
+    <!-- Toast -->
+    <div class="pr-toast" [class.show]="showToast" [class.toast-success]="toastType==='success'"
+        [class.toast-error]="toastType==='error'">
+        <i class="bi" [class.bi-check-circle-fill]="toastType==='success'"
+            [class.bi-x-circle-fill]="toastType==='error'"></i>
+        {{ toast }}
+    </div>
+
+    <!-- Header -->
+    <div class="pr-header">
+        <div class="pr-title">
+            <i class="bi bi-currency-dollar"></i>
+            <div>
+                <h2>إدارة الأسعار</h2>
+                <p>تسعير الشاليهات حسب النوع والفترة واليوم</p>
+            </div>
+        </div>
+
+        <button class="pr-btn-add" (click)="openAdd()">
+            <i class="bi bi-plus-lg"></i> إضافة سعر
+        </button>
+    </div>
+
+    <!-- Loading -->
+    <div class="pr-loading" *ngIf="loading">
+        <i class="bi bi-hourglass-split spin"></i> جاري التحميل...
+    </div>
+
+    <ng-container *ngIf="!loading">
+
+        <!-- ══ Calculator ══ -->
+        <div class="pr-calc-card">
+            <div class="pr-calc-title">
+                <i class="bi bi-calculator-fill"></i> حاسبة السعر
+            </div>
+
+            <div class="pr-calc-body">
+
+                <div class="pr-calc-fields">
+
+                    <div class="pr-select-group">
+                        <label>نوع الشاليه</label>
+                        <select [(ngModel)]="calcType" class="pr-select">
+                            <option *ngFor="let o of chaletTypeOptions" [value]="o.value">
+                                {{ o.label }}
+                            </option>
+                        </select>
+                    </div>
+
+                    <div class="pr-select-group">
+                        <label>الفترة</label>
+                        <select [(ngModel)]="calcPeriod" class="pr-select">
+                            <option *ngFor="let o of periodOptions" [value]="o.value">
+                                {{ o.label }}
+                            </option>
+                        </select>
+                    </div>
+
+                    <div class="pr-select-group">
+                        <label>نوع اليوم</label>
+                        <select [(ngModel)]="calcDayType" class="pr-select">
+                            <option *ngFor="let o of dayTypeOptions" [value]="o.value">
+                                {{ o.label }}
+                            </option>
+                        </select>
+                    </div>
+
+                    <button class="pr-btn-calc" (click)="calculate()" [disabled]="calcLoading">
+                        <i class="bi" [class.bi-search]="!calcLoading" [class.bi-hourglass-split]="calcLoading"></i>
+
+                        {{ calcLoading ? 'جاري...' : 'احسب' }}
+                    </button>
+
+                </div>
+
+                <div class="pr-calc-result" *ngIf="calcResult !== null">
+                    <span class="result-label">السعر المحسوب</span>
+                    <span class="result-value">
+                        {{ calcResult }} <small>د.أ</small>
+                    </span>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- ══ Pricing Table ══ -->
+        <div class="pr-table-card">
+
+            <div class="pr-table-header">
+                <h3><i class="bi bi-table"></i> جدول الأسعار</h3>
+                <span class="pr-count">{{ pricings.length }} سعر</span>
+            </div>
+
+            <div class="pr-empty" *ngIf="pricings.length === 0">
+                <i class="bi bi-tag"></i>
+                <p>لا توجد أسعار مسجلة</p>
+            </div>
+
+            <div class="pr-table-wrapper" *ngIf="pricings.length > 0">
+
+                <table class="pr-table">
+
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>نوع الشاليه</th>
+                            <th>الفترة</th>
+                            <th>نوع اليوم</th>
+                            <th>السعر</th>
+                            <th>إجراءات</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        <tr *ngFor="let p of pricings">
+
+                            <td class="pr-cell-id" data-label="#">
+                                {{ p.id }}
+                            </td>
+
+                            <td data-label="نوع الشاليه">
+                                <span class="pr-type-badge" [class.type-royal]="p.chaletType==='Royal'">
+                                    {{ getChaletTypeLabel(p.chaletType) }}
+                                </span>
+                            </td>
+
+                            <td data-label="الفترة">
+                                <span class="pr-period-badge" [ngClass]="getPeriodClass(p.period)">
+                                    {{ getPeriodLabel(p.period) }}
+                                </span>
+                            </td>
+
+                            <td data-label="نوع اليوم">
+                                <span class="pr-day-badge" [ngClass]="getDayTypeClass(p.dayType)">
+                                    {{ getDayTypeLabel(p.dayType) }}
+                                </span>
+                            </td>
+
+                            <td data-label="السعر" class="pr-cell-price">
+                                <div class=" d-flex flex-row justify-content-end">
+                                    <strong >{{ p.price }}</strong>
+                                    <small class="m-1">د.أ</small>
+                                </div>
+
+                            </td>
+
+                            <td data-label="إجراءات">
+                                <div class="pr-actions">
+                                    <button class="pr-act-btn edit" (click)="openEdit(p)">
+                                        <i class="bi bi-pencil-fill"></i>
+                                    </button>
+
+                                    <button class="pr-act-btn delete" (click)="confirmDelete(p)">
+                                        <i class="bi bi-trash-fill"></i>
+                                    </button>
+                                </div>
+                            </td>
+
+                        </tr>
+                    </tbody>
+
+                </table>
+
+            </div>
+        </div>
+
+        <!-- ══ Chalets ══ -->
+        <div class="pr-chalets-card">
+
+            <div class="pr-table-header">
+                <h3><i class="bi bi-house-fill"></i> الشاليهات والفترات المتاحة</h3>
+            </div>
+
+            <div class="pr-chalets-grid">
+
+                <div class="pr-chalet-item" *ngFor="let c of chalets">
+
+                    <div class="pr-chalet-icon" [class.chalet-royal]="c.type==='Royal'">
+                        <i class="bi" [class.bi-house-fill]="c.type==='Normal'"
+                            [class.bi-building-fill]="c.type==='Royal'"></i>
+                    </div>
+
+                    <div class="pr-chalet-body">
+                        <span class="pr-chalet-name">{{ c.name }}</span>
+                        <span class="pr-chalet-type">
+                            {{ c.type === 'Royal' ? '👑 رويال' : '🏠 عادي' }}
+                        </span>
+                        <span class="pr-chalet-periods">
+                            {{ getPeriodsText(c) }}
+                        </span>
+                    </div>
+
+                    <div class="pr-chalet-status">
+                        <span class="pr-status-dot" [class.status-available]="c.status==='Available'"
+                            [class.status-booked]="c.status==='Booked'" [class.status-maint]="c.status==='Maintenance'">
+                        </span>
+
+                        <span class="pr-status-label">
+                            {{ c.status==='Available' ? 'متاح' :
+                            c.status==='Booked' ? 'محجوز' : 'صيانة' }}
+                        </span>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </ng-container>
+
+    <!-- ══ Modal ══ -->
+    <div class="pr-overlay" *ngIf="showModal" (click)="closeModal()">
+
+        <div class="pr-modal" (click)="$event.stopPropagation()">
+
+            <div class="pr-modal-header">
+                <i class="bi" [class.bi-plus-circle-fill]="!isEdit" [class.bi-pencil-fill]="isEdit"></i>
+
+                <h3>{{ isEdit ? 'تعديل السعر' : 'إضافة سعر جديد' }}</h3>
+
+                <button class="pr-modal-close" (click)="closeModal()">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+            </div>
+
+            <div class="pr-modal-body">
+
+                <div class="pr-form-row">
+
+                    <div class="pr-form-group">
+                        <label>نوع الشاليه</label>
+                        <select [(ngModel)]="form.chaletType" class="pr-select">
+                            <option *ngFor="let o of chaletTypeOptions" [value]="o.value">
+                                {{ o.label }}
+                            </option>
+                        </select>
+                    </div>
+
+                    <div class="pr-form-group">
+                        <label>الفترة</label>
+                        <select [(ngModel)]="form.period" class="pr-select">
+                            <option *ngFor="let o of periodOptions" [value]="o.value">
+                                {{ o.label }}
+                            </option>
+                        </select>
+                    </div>
+
+                </div>
+
+                <div class="pr-form-row">
+
+                    <div class="pr-form-group">
+                        <label>نوع اليوم</label>
+                        <select [(ngModel)]="form.dayType" class="pr-select">
+                            <option *ngFor="let o of dayTypeOptions" [value]="o.value">
+                                {{ o.label }}
+                            </option>
+                        </select>
+                    </div>
+
+                    <div class="pr-form-group">
+                        <label>السعر (د.أ)</label>
+                        <input type="number" [(ngModel)]="form.price" class="pr-input" />
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="pr-modal-footer">
+                <button class="pr-btn-ghost" (click)="closeModal()">إلغاء</button>
+
+                <button class="pr-btn-primary" (click)="submit()" [disabled]="submitting">
+                    <i class="bi" [class.bi-check-lg]="!submitting" [class.bi-hourglass-split]="submitting"></i>
+
+                    {{ submitting ? 'جاري الحفظ...' : (isEdit ? 'حفظ التعديل' : 'إضافة') }}
+                </button>
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- ══ Delete Modal ══ -->
+    <div class="pr-overlay" *ngIf="showDeleteModal" (click)="cancelDelete()">
+
+        <div class="pr-modal pr-modal-sm" (click)="$event.stopPropagation()">
+
+            <div class="pr-modal-header danger">
+                <i class="bi bi-exclamation-triangle-fill"></i>
+                <h3>تأكيد الحذف</h3>
+            </div>
+
+            <div class="pr-modal-body">
+                <p class="pr-danger-text">
+                    هل تريد حذف هذا السعر؟
+                </p>
+            </div>
+
+            <div class="pr-modal-footer">
+                <button class="pr-btn-ghost" (click)="cancelDelete()">تراجع</button>
+                <button class="pr-btn-danger" (click)="doDelete()">
+                    <i class="bi bi-trash-fill"></i> حذف
+                </button>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>

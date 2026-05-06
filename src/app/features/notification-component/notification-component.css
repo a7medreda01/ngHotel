@@ -1,0 +1,278 @@
+/* ══════════════════════════════════════════
+   NOTIFICATION COMPONENT STYLES
+   ══════════════════════════════════════════ */
+
+.notif-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+/* ── زر الجرس ── */
+.notif-trigger {
+  position: relative;
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  border: 1.5px solid rgba(255,255,255,0.12);
+  background: rgba(255,255,255,0.07);
+  color: #fff;
+  font-size: 17px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+.notif-trigger:hover,
+.notif-trigger.active {
+  background: rgba(255,255,255,0.15);
+  border-color: rgba(255,255,255,0.25);
+  transform: scale(1.05);
+}
+
+/* Badge عدد الإشعارات */
+.notif-badge {
+  position: absolute;
+  top: -5px;
+  left: -5px;
+  min-width: 18px;
+  height: 18px;
+  border-radius: 9px;
+  background: #ef4444;
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 4px;
+  border: 2px solid var(--nav-bg, #1e293b);
+  line-height: 1;
+}
+
+/* نبضة حمراء */
+.notif-pulse {
+  position: absolute;
+  top: -5px;
+  left: -5px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: rgba(239, 68, 68, 0.5);
+  animation: pulse-ring 1.5s ease-out infinite;
+}
+@keyframes pulse-ring {
+  0%   { transform: scale(1);   opacity: 0.8; }
+  100% { transform: scale(2.2); opacity: 0; }
+}
+
+/* ── Dropdown ── */
+.notif-dropdown {
+  position: absolute;
+  top: calc(100% + 12px);
+  left: 0;
+  width: 360px;
+  max-height: 0;
+  overflow: hidden;
+  background: #1e2940;
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 16px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+  transition: max-height 0.35s cubic-bezier(0.4,0,0.2,1), opacity 0.25s;
+  opacity: 0;
+  z-index: 1100;
+  direction: rtl;
+}
+.notif-dropdown.open {
+  max-height: 520px;
+  opacity: 1;
+}
+
+/* على الموبايل */
+@media (max-width: 767px) {
+  .notif-dropdown {
+    position: fixed;
+    top: auto;
+    bottom: 70px;   /* فوق الـ bottom nav */
+    left: 8px;
+    right: 8px;
+    width: auto;
+  }
+}
+
+/* ── Header ── */
+.notif-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 16px 12px;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+.notif-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 15px;
+  font-weight: 700;
+  color: #f1f5f9;
+}
+.notif-title i { color: #f59e0b; font-size: 16px; }
+
+.unread-chip {
+  background: rgba(239,68,68,0.2);
+  color: #fca5a5;
+  border-radius: 20px;
+  padding: 1px 8px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.mark-all-btn {
+  background: rgba(99,102,241,0.15);
+  border: 1px solid rgba(99,102,241,0.3);
+  color: #a5b4fc;
+  font-size: 12px;
+  padding: 4px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+.mark-all-btn:hover {
+  background: rgba(99,102,241,0.25);
+  color: #c7d2fe;
+}
+
+/* ── List ── */
+.notif-list {
+  overflow-y: auto;
+  max-height: 380px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255,255,255,0.1) transparent;
+}
+
+/* ── Item ── */
+.notif-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px 14px;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+  transition: background 0.15s;
+  position: relative;
+}
+.notif-item:last-child { border-bottom: none; }
+
+.notif-item.unread {
+  background: rgba(99,102,241,0.06);
+}
+.notif-item.clickable {
+  cursor: pointer;
+}
+.notif-item.clickable:hover {
+  background: rgba(99,102,241,0.12);
+}
+
+/* أيقونة الإشعار */
+.notif-icon-wrap {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: rgba(255,255,255,0.06);
+  color: #94a3b8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 15px;
+  flex-shrink: 0;
+}
+.notif-icon-wrap.icon-new {
+  background: rgba(99,102,241,0.2);
+  color: #a5b4fc;
+}
+
+/* المحتوى */
+.notif-content { flex: 1; min-width: 0; }
+.notif-item-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: #f1f5f9;
+  margin-bottom: 3px;
+}
+.notif-item-msg {
+  font-size: 12px;
+  color: #94a3b8;
+  line-height: 1.5;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.notif-time {
+  font-size: 11px;
+  color: #64748b;
+  margin-top: 5px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* نقطة الـ unread */
+.notif-unread-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #6366f1;
+  flex-shrink: 0;
+  margin-top: 4px;
+}
+
+/* سهم الانتقال */
+.notif-arrow {
+  color: #475569;
+  font-size: 12px;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+/* ── Empty ── */
+.notif-empty {
+  padding: 40px 20px;
+  text-align: center;
+  color: #475569;
+}
+.notif-empty i { font-size: 36px; display: block; margin-bottom: 10px; }
+.notif-empty p { font-size: 14px; margin: 0; }
+
+/* ── Footer ── */
+.notif-footer {
+  padding: 10px 14px;
+  border-top: 1px solid rgba(255,255,255,0.06);
+  display: flex;
+  justify-content: center;
+}
+.refresh-btn {
+  background: none;
+  border: none;
+  color: #64748b;
+  font-size: 12px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 8px;
+  border-radius: 6px;
+  transition: color 0.2s;
+}
+.refresh-btn:hover { color: #94a3b8; }
+
+/* ── Overlay ── */
+.notif-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1099;
+}

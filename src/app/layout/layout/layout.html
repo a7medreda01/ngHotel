@@ -1,0 +1,15 @@
+<div class="layout">
+
+  <!-- <app-sidebar [isOpen]="isOpen"></app-sidebar> -->
+
+  <div class="main">
+
+    <app-navbar (toggle)="toggleSidebar()"></app-navbar>
+
+    <div class="content">
+      <router-outlet></router-outlet>
+    </div>
+
+  </div>
+
+</div>

@@ -1,0 +1,174 @@
+<!-- profile-component.html -->
+<div class="profile-page" dir="rtl">
+
+  <!-- ══ Sidebar ══ -->
+  <aside class="profile-sidebar">
+    <!-- User identity -->
+    <div class="sidebar-identity">
+      <div class="avatar-circle">{{ initials }}</div>
+      <div class="sidebar-user-info">
+        <span class="sidebar-name">{{ user?.fullName }}</span>
+        <span class="role-badge" [ngClass]="roleClass">
+          <i class="bi" [ngClass]="roleIcon"></i>
+          {{ roleLabel }}
+        </span>
+      </div>
+    </div>
+
+    <!-- Nav tabs -->
+    <nav class="sidebar-nav">
+      <button
+        *ngFor="let t of tabs"
+        class="sidebar-tab"
+        [class.active]="activeTab === t.id"
+        (click)="setTab(t.id)">
+        <i class="bi" [ngClass]="t.icon"></i>
+        <span>{{ t.label }}</span>
+      </button>
+    </nav>
+
+    <!-- Logout -->
+    <button class="sidebar-logout" (click)="logout()">
+      <i class="bi bi-box-arrow-right"></i>
+      <span>تسجيل الخروج</span>
+    </button>
+  </aside>
+
+  <!-- ══ Main Content ══ -->
+  <main class="profile-main">
+
+    <!-- ── Tab: الحساب ── -->
+    <ng-container *ngIf="activeTab === 'profile'">
+
+      <!-- User Info Card -->
+      <div class="info-card">
+        <div class="card-title">
+          <i class="bi bi-person-vcard-fill"></i>
+          بيانات الحساب
+        </div>
+        <div class="info-rows">
+          <div class="info-row">
+            <span class="info-label"><i class="bi bi-person-fill"></i> الاسم الكامل</span>
+            <span class="info-value">{{ user?.fullName }}</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label"><i class="bi bi-envelope-fill"></i> البريد الإلكتروني</span>
+            <span class="info-value">{{ user?.email }}</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label"><i class="bi bi-shield-fill"></i> الصلاحية</span>
+            <span class="role-badge small-badge" [ngClass]="roleClass">{{ roleLabel }}</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label"><i class="bi bi-hash"></i> رقم المستخدم</span>
+            <span class="info-value">#{{ user?.userId }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Change Password Card -->
+      <div class="info-card">
+        <div class="card-title">
+          <i class="bi bi-lock-fill"></i>
+          تغيير كلمة المرور
+        </div>
+
+        <div class="alert-success" *ngIf="pwSuccess">
+          <i class="bi bi-check-circle-fill"></i> {{ pwSuccess }}
+        </div>
+        <div class="alert-error" *ngIf="pwError">
+          <i class="bi bi-exclamation-circle-fill"></i> {{ pwError }}
+        </div>
+
+        <div class="pw-form">
+          <div class="form-group">
+            <label>كلمة المرور الحالية</label>
+            <div class="input-wrapper">
+              <i class="bi bi-lock input-icon"></i>
+              <input [type]="showCurrent ? 'text' : 'password'" [(ngModel)]="currentPassword" placeholder="••••••••" />
+              <button class="toggle-pw" (click)="showCurrent = !showCurrent" type="button">
+                <i class="bi" [ngClass]="showCurrent ? 'bi-eye-slash-fill' : 'bi-eye-fill'"></i>
+              </button>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>كلمة المرور الجديدة</label>
+            <div class="input-wrapper">
+              <i class="bi bi-lock-fill input-icon"></i>
+              <input [type]="showNew ? 'text' : 'password'" [(ngModel)]="newPassword" placeholder="••••••••" />
+              <button class="toggle-pw" (click)="showNew = !showNew" type="button">
+                <i class="bi" [ngClass]="showNew ? 'bi-eye-slash-fill' : 'bi-eye-fill'"></i>
+              </button>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>تأكيد كلمة المرور</label>
+            <div class="input-wrapper" [class.input-error]="confirmPassword && !passwordsMatch">
+              <i class="bi bi-lock-fill input-icon"></i>
+              <input [type]="showConfirm ? 'text' : 'password'" [(ngModel)]="confirmPassword" placeholder="••••••••" />
+              <button class="toggle-pw" (click)="showConfirm = !showConfirm" type="button">
+                <i class="bi" [ngClass]="showConfirm ? 'bi-eye-slash-fill' : 'bi-eye-fill'"></i>
+              </button>
+            </div>
+            <span class="field-hint error-hint" *ngIf="confirmPassword && !passwordsMatch">
+              <i class="bi bi-x-circle"></i> كلمتا المرور غير متطابقتين
+            </span>
+          </div>
+          <button class="btn-change-pw" (click)="onChangePassword()" [disabled]="!isValid">
+            <span class="btn-spinner" *ngIf="isChangingPw"></span>
+            <i class="bi bi-shield-check" *ngIf="!isChangingPw"></i>
+            {{ isChangingPw ? 'جاري التغيير...' : 'تغيير كلمة المرور' }}
+          </button>
+        </div>
+      </div>
+
+      <!-- إضافة مستخدم — للمدير فقط -->
+      <!-- <button class="info-card bookings-placeholder" routerLink="/create-user" *ngIf="user?.role === 'Manager'">
+        <div class="card-title">
+          <i class="bi bi-person-plus-fill"></i>
+          إضافة مستخدم جديد
+        </div>
+        <p class="placeholder-hint">انقر للانتقال لصفحة إنشاء مستخدم</p>
+      </button> -->
+
+    </ng-container>
+
+    <!-- ── Tab: الأسعار ── -->
+    <ng-container *ngIf="activeTab === 'pricing'">
+      <app-pricing-component></app-pricing-component>
+    </ng-container>
+
+    <!-- ── Tab: الإجازات ── -->
+    <ng-container *ngIf="activeTab === 'holidays'">
+      <app-holiday-copmonent></app-holiday-copmonent>
+    </ng-container>
+
+    <!-- ── Tab: الشركاء ── -->
+    <ng-container *ngIf="activeTab === 'partners'">
+      <app-partners-component></app-partners-component>
+    </ng-container>
+
+    <!-- ── Tab: العملاء ── -->
+    <ng-container *ngIf="activeTab === 'customers'">
+      <app-customers-component></app-customers-component>
+    </ng-container>
+    <!-- ── Tab: المستخدمين ── -->
+    <ng-container *ngIf="activeTab === 'users'">
+      <app-create-user-component></app-create-user-component>
+    </ng-container>
+    <!-- ── Tab: الشركاء ── -->
+    <ng-container *ngIf="activeTab === 'chalet' && isPartner">
+      <app-chalet></app-chalet>
+    </ng-container>
+
+    <!-- ── Tab: العملاء ── -->
+    <ng-container *ngIf="activeTab === 'addons'">
+      <app-extras-component></app-extras-component>
+    </ng-container>
+    <!-- ── Tab: المستخدمين ── -->
+    <ng-container *ngIf="activeTab === 'Maintenance'">
+      <app-maintenance></app-maintenance>
+    </ng-container>
+
+  </main>
+</div>

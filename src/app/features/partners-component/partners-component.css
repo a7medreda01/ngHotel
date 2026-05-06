@@ -1,0 +1,194 @@
+/* ════════════════════════════
+   Partners Component — RTL Dark
+════════════════════════════ */
+.partners-wrap { padding: 0; position: relative; }
+
+/* Toast */
+.pt-toast {
+  position: fixed; top: 20px; left: 50%;
+  transform: translateX(-50%) translateY(-80px);
+  padding: 12px 24px; border-radius: 10px; font-size: 0.9rem; font-weight: 600;
+  display: flex; align-items: center; gap: 8px; z-index: 9999;
+  transition: transform 0.35s cubic-bezier(.34,1.56,.64,1);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+}
+.pt-toast.show { transform: translateX(-50%) translateY(0); }
+.pt-toast.toast-success { background: #10b981; color: #fff; }
+.pt-toast.toast-error   { background: #ef4444; color: #fff; }
+
+/* Header */
+.pt-header {
+  display: flex; align-items: center;
+  justify-content: space-between; margin-bottom: 16px;
+  flex-wrap: wrap; gap: 12px;
+}
+.pt-title { display: flex; align-items: center; gap: 12px; }
+.pt-title i { font-size: 1.6rem; color: #8b5cf6; }
+.pt-title h2 { font-size: 1.1rem; font-weight: 700; color: #f1f5f9; margin: 0; }
+.pt-title p  { font-size: 0.78rem; color: #94a3b8; margin: 2px 0 0; }
+
+/* View toggle */
+.pt-view-toggle {
+  display: flex; gap: 4px;
+  background: #1e293b; border-radius: 10px; padding: 4px;
+}
+.pt-view-toggle button {
+  display: flex; align-items: center; gap: 5px;
+  padding: 7px 14px; border: none; border-radius: 8px;
+  font-size: 0.82rem; font-weight: 600; cursor: pointer;
+  background: none; color: #64748b; transition: all 0.2s;
+}
+.pt-view-toggle button.active {
+  background: #8b5cf6; color: #fff;
+  box-shadow: 0 2px 8px rgba(139,92,246,0.35);
+}
+.pt-view-toggle button:not(.active):hover { color: #cbd5e1; }
+
+/* Stats bar */
+.pt-stats-bar {
+  display: flex; align-items: center; gap: 0;
+  background: #1e293b; border: 1px solid #2d3f55;
+  border-radius: 12px; padding: 14px 20px;
+  margin-bottom: 16px;
+}
+.pt-stat {
+  flex: 1; display: flex; flex-direction: column;
+  align-items: center; gap: 2px;
+}
+.pt-stat-val { font-size: 1.4rem; font-weight: 800; color: #8b5cf6; }
+.pt-stat-lbl { font-size: 0.75rem; color: #64748b; }
+.pt-stat-divider {
+  width: 1px; height: 36px; background: #2d3f55; flex-shrink: 0;
+}
+
+/* Loading */
+.pt-loading { text-align: center; padding: 40px; color: #64748b; }
+
+/* Lists */
+.pt-list { display: flex; flex-direction: column; gap: 10px; }
+
+/* Partner Card */
+.pt-partner-card, .pt-chalet-card {
+  background: #1e293b;
+  border: 1px solid #2d3f55;
+  border-radius: 14px;
+  overflow: hidden;
+  transition: border-color 0.2s;
+}
+.pt-partner-card:hover, .pt-chalet-card:hover {
+  border-color: #8b5cf644;
+}
+
+/* Card Header (clickable) */
+.pt-card-head {
+  display: flex; align-items: center; gap: 14px;
+  padding: 14px 16px; cursor: pointer;
+  transition: background 0.15s;
+}
+.pt-card-head:hover { background: #0f172a33; }
+
+/* Avatars */
+.pt-avatar {
+  width: 44px; height: 44px; border-radius: 50%;
+  background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 800; font-size: 1.1rem; color: #fff;
+  flex-shrink: 0;
+}
+.pt-avatar.avatar-manager {
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+}
+.pt-avatar.sm { width: 34px; height: 34px; font-size: 0.9rem; }
+
+.pt-chalet-avatar {
+  width: 44px; height: 44px; border-radius: 12px;
+  background: rgba(59,130,246,0.12);
+  display: flex; align-items: center; justify-content: center;
+  color: #60a5fa; font-size: 1.2rem; flex-shrink: 0;
+}
+
+/* Card Info */
+.pt-card-info { flex: 1; display: flex; flex-direction: column; gap: 5px; min-width: 0; }
+.pt-card-name { font-weight: 700; font-size: 0.92rem; color: #f1f5f9; }
+.pt-card-meta {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 8px;
+}
+.pt-card-chaletscount, .pt-card-avgshare {
+  display: flex; align-items: center; gap: 4px;
+  font-size: 0.75rem; color: #64748b;
+}
+.pt-card-chaletscount i, .pt-card-avgshare i { font-size: 0.7rem; }
+
+/* Role badges */
+.pt-role-badge {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 2px 9px; border-radius: 20px; font-size: 0.72rem; font-weight: 700;
+}
+.pt-role-badge.sm { font-size: 0.68rem; padding: 2px 7px; }
+.role-manager { background: rgba(245,158,11,0.15); color: #fbbf24; border: 1px solid rgba(245,158,11,0.25); }
+.role-partner { background: rgba(139,92,246,0.15); color: #a78bfa; border: 1px solid rgba(139,92,246,0.25); }
+
+/* Chevron */
+.pt-chevron { font-size: 1rem; color: #475569; transition: all 0.2s; flex-shrink: 0; }
+
+/* Expanded chalet rows */
+.pt-chalets-list {
+  border-top: 1px solid #1e293b;
+  display: flex; flex-direction: column; gap: 0;
+  animation: fadeIn 0.2s ease;
+}
+@keyframes fadeIn { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
+
+.pt-chalet-row {
+  display: flex; align-items: center; gap: 12px;
+  padding: 11px 16px 11px 20px;
+  border-bottom: 1px solid #1e293b;
+  transition: background 0.15s;
+}
+.pt-chalet-row:last-child { border-bottom: none; }
+.pt-chalet-row:hover { background: #0f172a44; }
+
+.pt-chalet-icon {
+  width: 30px; height: 30px; border-radius: 8px;
+  background: rgba(59,130,246,0.1);
+  display: flex; align-items: center; justify-content: center;
+  color: #60a5fa; font-size: 0.85rem; flex-shrink: 0;
+}
+.pt-chalet-name {
+  flex: 1; font-size: 0.85rem; color: #cbd5e1; font-weight: 600;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+
+.pt-partner-inline-info {
+  flex: 1; display: flex; flex-direction: column; gap: 3px; min-width: 0;
+}
+.pt-partner-inline-info .pt-chalet-name { font-size: 0.82rem; }
+
+/* Share bar */
+.pt-share-bar-wrap {
+  display: flex; align-items: center; gap: 8px; flex-shrink: 0;
+}
+.pt-share-bar {
+  width: 80px; height: 6px; background: #1e293b;
+  border-radius: 3px; overflow: hidden; border: 1px solid #2d3f55;
+}
+.pt-share-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #8b5cf6, #a78bfa);
+  border-radius: 3px;
+  transition: width 0.6s ease;
+}
+.pt-share-pct {
+  font-size: 0.8rem; font-weight: 700; color: #a78bfa;
+  min-width: 36px; text-align: left;
+}
+
+.spin { animation: spin 1s linear infinite; display: inline-block; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+@media (max-width: 500px) {
+  .pt-share-bar { width: 50px; }
+  .pt-card-avgshare { display: none; }
+  .pt-view-toggle button span { display: none; }
+  .pt-view-toggle button { padding: 7px 10px; }
+}

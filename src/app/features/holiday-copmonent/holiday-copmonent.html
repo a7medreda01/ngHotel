@@ -1,0 +1,109 @@
+<div class="holiday-wrap" dir="rtl">
+
+  <!-- Toast -->
+  <div class="hol-toast" [class.show]="showToast"
+       [class.toast-success]="toastType==='success'"
+       [class.toast-error]="toastType==='error'">
+    <i class="bi" [class.bi-check-circle-fill]="toastType==='success'"
+                  [class.bi-x-circle-fill]="toastType==='error'"></i>
+    {{ toast }}
+  </div>
+
+  <!-- Header -->
+  <div class="hol-header">
+    <div class="hol-title">
+      <i class="bi bi-calendar-heart-fill"></i>
+      <div>
+        <h2>إدارة أيام الإجازة</h2>
+        <p>الأعياد والعطلات الرسمية</p>
+      </div>
+    </div>
+    <button class="hol-btn-add" (click)="openAdd()">
+      <i class="bi bi-plus-lg"></i> إضافة إجازة
+    </button>
+  </div>
+
+  <!-- Loading -->
+  <div class="hol-loading" *ngIf="loading">
+    <i class="bi bi-hourglass-split spin"></i> جاري التحميل...
+  </div>
+
+  <!-- Empty -->
+  <div class="hol-empty" *ngIf="!loading && holidays.length === 0">
+    <i class="bi bi-calendar-x"></i>
+    <p>لا توجد إجازات مسجلة</p>
+    <button class="hol-btn-add" (click)="openAdd()">إضافة أول إجازة</button>
+  </div>
+
+  <!-- List -->
+  <div class="hol-list" *ngIf="!loading && holidays.length > 0">
+    <div class="hol-item" *ngFor="let h of holidays" [class.hol-past]="isPast(h.date)">
+      <div class="hol-item-icon">
+        <i class="bi bi-calendar-event-fill"></i>
+      </div>
+      <div class="hol-item-body">
+        <span class="hol-name">{{ h.name }}</span>
+        <span class="hol-date">{{ formatDate(h.date) }}</span>
+        <span class="hol-past-badge" *ngIf="isPast(h.date)">منتهية</span>
+      </div>
+      <div class="hol-item-actions">
+        <button class="hol-act-btn edit" (click)="openEdit(h)" title="تعديل">
+          <i class="bi bi-pencil-fill"></i>
+        </button>
+        <button class="hol-act-btn delete" (click)="confirmDelete(h)" title="حذف">
+          <i class="bi bi-trash-fill"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add/Edit Modal -->
+  <div class="hol-overlay" *ngIf="showModal" (click)="closeModal()">
+    <div class="hol-modal" (click)="$event.stopPropagation()">
+      <div class="hol-modal-header">
+        <i class="bi" [class.bi-plus-circle-fill]="!isEdit" [class.bi-pencil-fill]="isEdit"></i>
+        <h3>{{ isEdit ? 'تعديل الإجازة' : 'إضافة إجازة جديدة' }}</h3>
+        <button class="hol-modal-close" (click)="closeModal()"><i class="bi bi-x-lg"></i></button>
+      </div>
+      <div class="hol-modal-body">
+        <div class="hol-form-group">
+          <label>اسم الإجازة *</label>
+          <input type="text" [(ngModel)]="form.name" placeholder="مثال: عيد الأضحى" class="hol-input" />
+        </div>
+        <div class="hol-form-group">
+          <label>التاريخ *</label>
+          <input type="date" [(ngModel)]="form.date" class="hol-input" />
+        </div>
+      </div>
+      <div class="hol-modal-footer">
+        <button class="hol-btn-ghost" (click)="closeModal()">إلغاء</button>
+        <button class="hol-btn-primary" (click)="submit()" [disabled]="submitting">
+          <i class="bi" [class.bi-check-lg]="!submitting" [class.bi-hourglass-split]="submitting"></i>
+          {{ submitting ? 'جاري الحفظ...' : (isEdit ? 'حفظ التعديل' : 'إضافة') }}
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Delete Confirm -->
+  <div class="hol-overlay" *ngIf="showDeleteModal" (click)="cancelDelete()">
+    <div class="hol-modal hol-modal-sm" (click)="$event.stopPropagation()">
+      <div class="hol-modal-header danger">
+        <i class="bi bi-exclamation-triangle-fill"></i>
+        <h3>تأكيد الحذف</h3>
+      </div>
+      <div class="hol-modal-body">
+        <p class="hol-danger-text">
+          هل تريد حذف إجازة <strong>{{ deleteTarget?.name }}</strong>؟ لا يمكن التراجع.
+        </p>
+      </div>
+      <div class="hol-modal-footer">
+        <button class="hol-btn-ghost" (click)="cancelDelete()">تراجع</button>
+        <button class="hol-btn-danger" (click)="doDelete()">
+          <i class="bi bi-trash-fill"></i> حذف
+        </button>
+      </div>
+    </div>
+  </div>
+
+</div>

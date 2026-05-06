@@ -1,0 +1,276 @@
+<div class="extras-page" dir="rtl">
+
+  <!-- Toast Notification -->
+  <div class="toast-wrapper" [class.show]="showToast">
+    <div class="toast-box" [class.toast-success]="toastType === 'success'" [class.toast-error]="toastType === 'error'">
+      <i class="bi" [class.bi-check-circle-fill]="toastType === 'success'" [class.bi-x-circle-fill]="toastType === 'error'"></i>
+      <span>{{ toastMessage }}</span>
+    </div>
+  </div>
+
+  <!-- Page Header -->
+  <div class="page-header">
+    <div class="header-title">
+      <i class="bi bi-stars"></i>
+      <div>
+        <h1>الإضافات والخدمات</h1>
+        <p>إدارة الخدمات الإضافية المتاحة للحجوزات</p>
+      </div>
+    </div>
+    <button class="btn-add" (click)="openAddModal()">
+      <i class="bi bi-plus-lg"></i>
+      إضافة خدمة
+    </button>
+  </div>
+
+  <!-- Stats Cards -->
+  <div class="stats-row">
+    <div class="stat-card stat-active">
+      <div class="stat-icon">
+        <i class="bi bi-check-square-fill"></i>
+      </div>
+      <div class="stat-info">
+        <span class="stat-value">{{ activeCount }}</span>
+        <span class="stat-label">خدمات فعّالة</span>
+      </div>
+    </div>
+    <div class="stat-card stat-inactive">
+      <div class="stat-icon">
+        <i class="bi bi-x-square-fill"></i>
+      </div>
+      <div class="stat-info">
+        <span class="stat-value">{{ inactiveCount }}</span>
+        <span class="stat-label">خدمات متوقفة</span>
+      </div>
+    </div>
+    <div class="stat-card stat-total">
+      <div class="stat-icon">
+        <i class="bi bi-grid-fill"></i>
+      </div>
+      <div class="stat-info">
+        <span class="stat-value">{{ extras.length }}</span>
+        <span class="stat-label">إجمالي الخدمات</span>
+      </div>
+    </div>
+    <div class="stat-card stat-price">
+      <div class="stat-icon">
+        <i class="bi bi-cash-stack"></i>
+      </div>
+      <div class="stat-info">
+        <span class="stat-value">{{ totalPrice }}</span>
+        <span class="stat-label">مجموع الأسعار (د.أ)</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Search Bar -->
+  <div class="search-bar">
+    <i class="bi bi-search search-icon"></i>
+    <input
+      type="text"
+      placeholder="بحث باسم الخدمة..."
+      [(ngModel)]="searchTerm"
+      (input)="applyFilter()"
+      class="search-input"
+    />
+    <span class="results-count">{{ filteredExtras.length }} سجل</span>
+  </div>
+
+  <!-- Loading State -->
+  <div class="loading-state" *ngIf="loading">
+    <div class="spinner"></div>
+    <p>جاري التحميل...</p>
+  </div>
+
+  <!-- Empty State -->
+  <div class="empty-state" *ngIf="!loading && filteredExtras.length === 0">
+    <i class="bi bi-inbox"></i>
+    <p>لا توجد خدمات مضافة حتى الآن</p>
+    <button class="btn-add" (click)="openAddModal()">
+      <i class="bi bi-plus-lg"></i> أضف خدمة الآن
+    </button>
+  </div>
+
+  <!-- Services Table (Desktop) -->
+  <div class="table-wrapper" *ngIf="!loading && filteredExtras.length > 0">
+    <table class="extras-table d-none d-md-table">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>اسم الخدمة</th>
+          <th>السعر (د.أ)</th>
+          <th>الحالة</th>
+          <th>الإجراءات</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let extra of filteredExtras; let i = index">
+          <td class="row-num">{{ i + 1 }}</td>
+          <td class="service-name">
+            <span class="name-badge">
+              <i class="bi bi-stars"></i>
+              {{ extra.name }}
+            </span>
+          </td>
+          <td class="price-cell">
+            <span class="price-tag">{{ extra.price | number }} د.أ</span>
+          </td>
+          <td>
+            <span class="status-badge" [class.active]="extra.isActive" [class.inactive]="!extra.isActive">
+              <i class="bi" [class.bi-check-circle-fill]="extra.isActive" [class.bi-x-circle-fill]="!extra.isActive"></i>
+              {{ extra.isActive ? 'فعّال' : 'متوقف' }}
+            </span>
+          </td>
+          <td class="actions-cell">
+            <button class="action-btn toggle-btn"
+              [title]="extra.isActive ? 'إيقاف الخدمة' : 'تفعيل الخدمة'"
+              (click)="toggleActive(extra)">
+              <i class="bi" [class.bi-toggle-on]="extra.isActive" [class.bi-toggle-off]="!extra.isActive"></i>
+            </button>
+            <button class="action-btn edit-btn" title="تعديل" (click)="openEditModal(extra)">
+              <i class="bi bi-pencil-square"></i>
+            </button>
+            <button class="action-btn delete-btn" title="حذف" (click)="confirmDelete(extra)">
+              <i class="bi bi-trash3"></i>
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- Mobile Cards -->
+    <div class="mobile-cards d-md-none">
+      <div class="service-card" *ngFor="let extra of filteredExtras; let i = index">
+        <div class="card-header-row">
+          <div class="card-name">
+            <span class="card-num">{{ i + 1 }}</span>
+            <i class="bi bi-stars"></i>
+            <span>{{ extra.name }}</span>
+          </div>
+          <span class="status-badge" [class.active]="extra.isActive" [class.inactive]="!extra.isActive">
+            <i class="bi" [class.bi-check-circle-fill]="extra.isActive" [class.bi-x-circle-fill]="!extra.isActive"></i>
+            {{ extra.isActive ? 'فعّال' : 'متوقف' }}
+          </span>
+        </div>
+        <div class="card-price">
+          <i class="bi bi-cash-stack"></i>
+          <span>السعر: <strong>{{ extra.price | number }} د.أ</strong></span>
+        </div>
+        <div class="card-actions">
+          <button class="action-btn toggle-btn" (click)="toggleActive(extra)">
+            <i class="bi" [class.bi-toggle-on]="extra.isActive" [class.bi-toggle-off]="!extra.isActive"></i>
+            {{ extra.isActive ? 'إيقاف' : 'تفعيل' }}
+          </button>
+          <button class="action-btn edit-btn" (click)="openEditModal(extra)">
+            <i class="bi bi-pencil-square"></i> تعديل
+          </button>
+          <button class="action-btn delete-btn" (click)="confirmDelete(extra)">
+            <i class="bi bi-trash3"></i> حذف
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add / Edit Modal -->
+  <div class="modal-overlay" *ngIf="showModal" (click)="closeModal()">
+    <div class="modal-box" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <div class="modal-title">
+          <i class="bi" [class.bi-plus-circle]="!isEditMode" [class.bi-pencil-square]="isEditMode"></i>
+          <span>{{ isEditMode ? 'تعديل الخدمة' : 'إضافة خدمة جديدة' }}</span>
+        </div>
+        <button class="modal-close" (click)="closeModal()">
+          <i class="bi bi-x-lg"></i>
+        </button>
+      </div>
+
+      <div class="modal-body">
+        <div class="form-group">
+          <label>اسم الخدمة <span class="required">*</span></label>
+          <div class="input-wrap">
+            <i class="bi bi-stars input-icon"></i>
+            <input
+              type="text"
+              [(ngModel)]="form.name"
+              placeholder="مثال: زينة، فطار، مشروبات..."
+              [class.error]="formErrors.name"
+            />
+          </div>
+          <span class="error-msg" *ngIf="formErrors.name">{{ formErrors.name }}</span>
+        </div>
+
+        <div class="form-group">
+          <label>السعر (د.أ) <span class="required">*</span></label>
+          <div class="input-wrap">
+            <i class="bi bi-cash-stack input-icon"></i>
+            <input
+              type="number"
+              [(ngModel)]="form.price"
+              placeholder="0"
+              min="0"
+              [class.error]="formErrors.price"
+            />
+          </div>
+          <span class="error-msg" *ngIf="formErrors.price">{{ formErrors.price }}</span>
+        </div>
+
+        <div class="form-group" *ngIf="isEditMode">
+          <label>الحالة</label>
+          <div class="toggle-row">
+            <button
+              class="status-option"
+              [class.selected-active]="form.isActive"
+              (click)="form.isActive = true">
+              <i class="bi bi-check-circle-fill"></i> فعّال
+            </button>
+            <button
+              class="status-option"
+              [class.selected-inactive]="!form.isActive"
+              (click)="form.isActive = false">
+              <i class="bi bi-x-circle-fill"></i> متوقف
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn-save" (click)="saveExtra()" [disabled]="saving">
+          <span *ngIf="!saving"><i class="bi bi-check-lg"></i> {{ isEditMode ? 'حفظ التغييرات' : 'إضافة الخدمة' }}</span>
+          <span *ngIf="saving"><i class="bi bi-arrow-repeat spin"></i> جاري الحفظ...</span>
+        </button>
+        <button class="btn-cancel" (click)="closeModal()">إلغاء</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Delete Confirm Modal -->
+  <div class="modal-overlay" *ngIf="showDeleteModal" (click)="cancelDelete()">
+    <div class="modal-box modal-sm" (click)="$event.stopPropagation()">
+      <div class="modal-header delete-header">
+        <div class="modal-title">
+          <i class="bi bi-exclamation-triangle-fill text-danger"></i>
+          <span>تأكيد الحذف</span>
+        </div>
+        <button class="modal-close" (click)="cancelDelete()">
+          <i class="bi bi-x-lg"></i>
+        </button>
+      </div>
+      <div class="modal-body text-center">
+        <div class="delete-icon">
+          <i class="bi bi-trash3-fill"></i>
+        </div>
+        <p class="delete-msg">هل أنت متأكد من حذف خدمة <strong>{{ selectedExtra?.name }}</strong>؟</p>
+        <p class="delete-sub">لا يمكن التراجع عن هذا الإجراء</p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-delete" (click)="deleteExtra()" [disabled]="deleting">
+          <span *ngIf="!deleting"><i class="bi bi-trash3"></i> نعم، احذف</span>
+          <span *ngIf="deleting"><i class="bi bi-arrow-repeat spin"></i> جاري الحذف...</span>
+        </button>
+        <button class="btn-cancel" (click)="cancelDelete()">إلغاء</button>
+      </div>
+    </div>
+  </div>
+
+</div>

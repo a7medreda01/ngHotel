@@ -1,0 +1,263 @@
+<!-- maintenance.component.html -->
+<div class="maintenance-wrapper" dir="rtl">
+
+  <!-- Header -->
+  <div class="page-header">
+    <div class="header-content">
+      <div class="header-title">
+        <div class="header-icon">
+          <i class="bi bi-wrench-adjustable-circle-fill"></i>
+        </div>
+        <div>
+          <h1>إدارة الصيانة</h1>
+          <p>نظام متكامل لإدارة طلبات صيانة الشاليهات</p>
+        </div>
+      </div>
+      <button class="btn-add" (click)="openAddModal()">
+        <i class="bi bi-plus-lg"></i>
+        طلب صيانة جديد
+      </button>
+    </div>
+  </div>
+
+  <!-- Stats Cards -->
+  <div class="stats-grid">
+    <div class="stat-card stat-total">
+      <div class="stat-icon"><i class="bi bi-clipboard2-pulse-fill"></i></div>
+      <div class="stat-info">
+        <span class="stat-value">{{ totalCount }}</span>
+        <span class="stat-label">إجمالي الطلبات</span>
+      </div>
+      <div class="stat-bar total-bar"></div>
+    </div>
+    <div class="stat-card stat-open">
+      <div class="stat-icon"><i class="bi bi-exclamation-circle-fill"></i></div>
+      <div class="stat-info">
+        <span class="stat-value">{{ openCount }}</span>
+        <span class="stat-label">مفتوح</span>
+      </div>
+      <div class="stat-bar open-bar"></div>
+    </div>
+    <div class="stat-card stat-inprogress">
+      <div class="stat-icon"><i class="bi bi-hourglass-split"></i></div>
+      <div class="stat-info">
+        <span class="stat-value">{{ inProgressCount }}</span>
+        <span class="stat-label">قيد التنفيذ</span>
+      </div>
+      <div class="stat-bar inprogress-bar"></div>
+    </div>
+    <div class="stat-card stat-closed">
+      <div class="stat-icon"><i class="bi bi-check-circle-fill"></i></div>
+      <div class="stat-info">
+        <span class="stat-value">{{ closedCount }}</span>
+        <span class="stat-label">مغلق</span>
+      </div>
+      <div class="stat-bar closed-bar"></div>
+    </div>
+  </div>
+
+  <!-- Filters -->
+  <div class="filters-bar">
+    <div class="search-box">
+      <i class="bi bi-search"></i>
+      <input
+        type="text"
+        [(ngModel)]="searchText"
+        (input)="onSearch()"
+        placeholder="بحث بالوصف أو اسم الشاليه..."
+      />
+    </div>
+    <div class="filter-tabs">
+      <button class="filter-tab" [class.active]="selectedStatus === 'all'" (click)="selectedStatus='all'; onStatusFilter()">الكل</button>
+      <button class="filter-tab open-tab" [class.active]="selectedStatus === 'Open'" (click)="selectedStatus='Open'; onStatusFilter()">مفتوح</button>
+      <button class="filter-tab inprogress-tab" [class.active]="selectedStatus === 'InProgress'" (click)="selectedStatus='InProgress'; onStatusFilter()">قيد التنفيذ</button>
+      <button class="filter-tab closed-tab" [class.active]="selectedStatus === 'Closed'" (click)="selectedStatus='Closed'; onStatusFilter()">مغلق</button>
+    </div>
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="isLoading" class="loading-state">
+    <div class="spinner"></div>
+    <span>جاري التحميل...</span>
+  </div>
+
+  <!-- Table (Desktop) -->
+  <div class="table-container" *ngIf="!isLoading">
+    <div class="table-header-row">
+      <span class="results-count"><i class="bi bi-list-ul"></i> {{ filteredRequests.length }} طلب</span>
+    </div>
+
+    <!-- Desktop Table -->
+    <table class="requests-table d-none d-md-table">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>الشاليه</th>
+          <th>الوصف</th>
+          <th>الحالة</th>
+          <th>تاريخ الإنشاء</th>
+          <th>إجراءات</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let req of filteredRequests" class="table-row">
+          <td class="id-cell">{{ req.id }}</td>
+          <td>
+            <div class="chalet-cell">
+              <span class="chalet-icon"><i class="bi bi-house-fill"></i></span>
+              <span>{{ req.chaletName || 'كوخ ' + req.chaletId }}</span>
+            </div>
+          </td>
+          <td class="desc-cell">{{ req.description }}</td>
+          <td>
+            <span class="status-badge" [ngClass]="getStatusClass(req.status)">
+              <i class="bi" [ngClass]="getStatusIcon(req.status)"></i>
+              {{ getStatusLabel(req.status) }}
+            </span>
+          </td>
+          <td class="date-cell">
+            <i class="bi bi-calendar3"></i>
+            {{ req.createdAt || '—' }}
+          </td>
+          <td>
+            <div class="action-btns">
+              <button class="btn-edit" (click)="openEditModal(req)" title="تعديل">
+                <i class="bi bi-pencil-fill"></i>
+              </button>
+              <button class="btn-delete" (click)="openDeleteConfirm(req)" title="حذف">
+                <i class="bi bi-trash3-fill"></i>
+              </button>
+            </div>
+          </td>
+        </tr>
+        <tr *ngIf="filteredRequests.length === 0">
+          <td colspan="6" class="empty-state">
+            <i class="bi bi-inbox"></i>
+            <p>لا توجد طلبات صيانة</p>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- Mobile Cards -->
+    <div class="mobile-cards d-md-none">
+      <div *ngFor="let req of filteredRequests" class="mobile-card">
+        <div class="mobile-card-header">
+          <div class="mobile-card-title">
+            <span class="mobile-id">#{{ req.id }}</span>
+            <span class="chalet-name"><i class="bi bi-house-fill"></i> {{ req.chaletName || 'كوخ ' + req.chaletId }}</span>
+          </div>
+          <span class="status-badge" [ngClass]="getStatusClass(req.status)">
+            <i class="bi" [ngClass]="getStatusIcon(req.status)"></i>
+            {{ getStatusLabel(req.status) }}
+          </span>
+        </div>
+        <p class="mobile-desc">{{ req.description }}</p>
+        <div class="mobile-card-footer">
+          <span class="mobile-date"><i class="bi bi-calendar3"></i> {{ req.createdAt || '—' }}</span>
+          <div class="action-btns">
+            <button class="btn-edit" (click)="openEditModal(req)"><i class="bi bi-pencil-fill"></i></button>
+            <button class="btn-delete" (click)="openDeleteConfirm(req)"><i class="bi bi-trash3-fill"></i></button>
+          </div>
+        </div>
+      </div>
+      <div *ngIf="filteredRequests.length === 0" class="empty-state">
+        <i class="bi bi-inbox"></i>
+        <p>لا توجد طلبات صيانة</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add Modal -->
+  <div class="modal-overlay" *ngIf="showAddModal" (click)="closeAddModal()">
+    <div class="modal-box" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3><i class="bi bi-plus-circle-fill"></i> إضافة طلب صيانة</h3>
+        <button class="modal-close" (click)="closeAddModal()"><i class="bi bi-x-lg"></i></button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label><i class="bi bi-house"></i> الشاليه</label>
+          <div class="select-wrapper">
+            <select [(ngModel)]="newRequest.chaletId" [disabled]="chaletsLoading">
+              <option [ngValue]="0" disabled>
+                {{ chaletsLoading ? 'جاري التحميل...' : 'اختر الشاليه...' }}
+              </option>
+              <option *ngFor="let ch of chalets" [ngValue]="ch.id">
+                {{ ch.name }}
+                <span *ngIf="ch.type === 'Royal'"> ★</span>
+              </option>
+            </select>
+            <i class="bi bi-chevron-down select-arrow"></i>
+          </div>
+        </div>
+        <div class="form-group">
+          <label><i class="bi bi-card-text"></i> وصف المشكلة</label>
+          <textarea [(ngModel)]="newRequest.description" rows="4" placeholder="اكتب وصفاً تفصيلياً للمشكلة..."></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-cancel" (click)="closeAddModal()" [disabled]="isSubmitting">إلغاء</button>
+        <button class="btn-submit text-black border border-1 border-info" (click)="submitAdd()" [disabled]="!newRequest.chaletId || !newRequest.description || isSubmitting">
+          <span *ngIf="isSubmitting" class="btn-spinner"></span>
+          <i *ngIf="!isSubmitting" class="bi bi-check-lg"></i>
+          {{ isSubmitting ? 'جاري الحفظ...' : 'حفظ' }}
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Edit Modal -->
+  <div class="modal-overlay" *ngIf="showEditModal" (click)="closeEditModal()">
+    <div class="modal-box" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3><i class="bi bi-pencil-square"></i> تعديل طلب الصيانة</h3>
+        <button class="modal-close" (click)="closeEditModal()"><i class="bi bi-x-lg"></i></button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label><i class="bi bi-card-text"></i> وصف المشكلة</label>
+          <textarea [(ngModel)]="editForm.description" rows="4" placeholder="وصف المشكلة..."></textarea>
+        </div>
+        <div class="form-group">
+          <label><i class="bi bi-toggles"></i> الحالة</label>
+          <div class="status-selector">
+            <button
+              *ngFor="let opt of statusOptions"
+              class="status-opt"
+              [class.selected]="editForm.status === opt.value"
+              (click)="editForm.status = opt.value"
+            >{{ opt.label }}</button>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-cancel" (click)="closeEditModal()">إلغاء</button>
+        <button class="btn-submit  text-black border border-1 border-info" (click)="submitEdit()" [disabled]="!editForm.description">
+          <i class="bi bi-check-lg"></i> تحديث
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Delete Confirm Modal -->
+  <div class="modal-overlay" *ngIf="showDeleteConfirm" (click)="closeDeleteConfirm()">
+    <div class="modal-box modal-sm" (click)="$event.stopPropagation()">
+      <div class="modal-header danger-header">
+        <h3><i class="bi bi-exclamation-triangle-fill"></i> تأكيد الحذف</h3>
+        <button class="modal-close" (click)="closeDeleteConfirm()"><i class="bi bi-x-lg"></i></button>
+      </div>
+      <div class="modal-body text-center">
+        <p>هل أنت متأكد من حذف طلب الصيانة؟</p>
+        <p class="delete-target">{{ selectedRequest?.description }}</p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-cancel" (click)="closeDeleteConfirm()">إلغاء</button>
+        <button class="btn-danger" (click)="confirmDelete()">
+          <i class="bi bi-trash3-fill"></i> حذف
+        </button>
+      </div>
+    </div>
+  </div>
+
+</div>

@@ -1,1 +1,34 @@
-/* You can add global styles to this file, and also import other style files */
+:root {
+  --primary-color: #0d6efd;
+  --sidebar-bg: #111827;
+  --text-light: #ffffff;
+}
+
+/* Global */
+body {
+  font-family: 'Cairo', sans-serif;
+  direction: rtl;
+  background: #f5f6fa;
+}
+
+/* Primary override */
+.text-primary {
+  color: var(--primary-color) !important;
+}
+
+.btn-primary {
+  background-color: var(--primary-color);
+  border-color: var(--primary-color);
+}
+
+/* //over lay  */
+.app-backdrop {
+  background: rgba(10, 25, 47, 0.65);
+  backdrop-filter: blur(5px);
+}
+
+.app-panel {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}

@@ -1,0 +1,324 @@
+<div class="chalet-page" dir="rtl">
+
+  <!-- Header -->
+  <div class="page-header">
+    <div class="header-content">
+      <div class="header-title">
+        <div class="header-icon"><i class="bi bi-house-heart-fill"></i></div>
+        <div>
+          <h1>إدارة الشاليهات</h1>
+          <p>عرض وإدارة جميع الشاليهات المتاحة</p>
+        </div>
+      </div>
+      <button class="btn-add" (click)="openAddModal()">
+        <i class="bi bi-plus-lg"></i> إضافة شاليه
+      </button>
+    </div>
+  </div>
+
+  <!-- Alerts -->
+  <div class="alert-success" *ngIf="successMsg">
+    <i class="bi bi-check-circle-fill"></i> {{ successMsg }}
+  </div>
+  <div class="alert-error" *ngIf="error && !showModal">
+    <i class="bi bi-exclamation-triangle-fill"></i> {{ error }}
+  </div>
+
+  <!-- Loading -->
+  <div class="loading-wrap" *ngIf="loading">
+    <div class="spinner"></div>
+    <span>جاري التحميل...</span>
+  </div>
+
+  <!-- Stats Bar -->
+  <div class="stats-bar" *ngIf="!loading && chalets.length">
+    <div class="stat-item">
+      <i class="bi bi-grid-3x3-gap-fill"></i>
+      <span>{{ chalets.length }} شاليه</span>
+    </div>
+    <div class="stat-item available">
+      <i class="bi bi-check-circle"></i>
+      <span>{{ chalets | statCount:'Available' }} متاح</span>
+    </div>
+    <div class="stat-item booked">
+      <i class="bi bi-calendar-check"></i>
+      <span>{{ chalets | statCount:'Booked' }} محجوز</span>
+    </div>
+    <div class="stat-item maintenance">
+      <i class="bi bi-tools"></i>
+      <span>{{ chalets | statCount:'Maintenance' }} صيانة</span>
+    </div>
+  </div>
+
+  <!-- Chalets Grid -->
+  <div class="chalets-grid" *ngIf="!loading">
+    <div class="chalet-card" *ngFor="let c of chalets">
+
+      <!-- Image -->
+      <div class="card-img-wrap">
+        <img *ngIf="c.images && c.images[0]" [src]="c.images[0]" [alt]="c.name" class="card-img"
+          (error)="$any($event.target).src='assets/no-image.png'" />
+        <div class="no-img" *ngIf="!c.images || !c.images[0]">
+          <i class="bi bi-image"></i>
+          <span>لا توجد صورة</span>
+        </div>
+        <span class="img-count" *ngIf="c.images && c.images.length > 1">
+          <i class="bi bi-images"></i> {{ c.images.length }}
+        </span>
+        <span class="type-badge" [class.royal]="c.type === 'Royal'">
+          <i class="bi" [class.bi-star-fill]="c.type === 'Royal'" [class.bi-house]="c.type !== 'Royal'"></i>
+          {{ getTypeLabel(c.type) }}
+        </span>
+      </div>
+
+      <!-- Body -->
+      <div class="card-body">
+        <div class="card-title-row">
+          <h3 class="card-name">{{ c.name }}</h3>
+          <span class="status-badge" [ngClass]="getStatusClass(c.status)">
+            {{ getStatusLabel(c.status) }}
+          </span>
+        </div>
+        <p class="card-id">كود: #{{ c.id }}</p>
+
+        <!-- Periods Display -->
+        <!-- <div class="card-periods">
+          <i class="bi bi-clock-fill period-icon"></i>
+          <span class="period-label">{{ getPeriodsLabel(c) }}</span>
+        </div> -->
+
+        <!-- Period Pills -->
+        <div class="period-pills period-label">
+          <span class="period-pill morning" *ngIf="c.hasMorning">🌅 صباحي</span>
+          <span class="period-pill evening" *ngIf="c.hasEvening">🌇 مسائي</span>
+          <span class="period-pill full" *ngIf="c.hasFullDay">🌞 كامل</span>
+          <span class="period-pill all" *ngIf="!c.hasMorning && !c.hasEvening && !c.hasFullDay">
+            كل الفترات
+          </span>
+        </div>
+
+        <!-- Actions -->
+        <div class="card-actions">
+          <button class="btn-edit" (click)="openEditModal(c)">
+            <i class="bi bi-pencil-square"></i> تعديل
+          </button>
+          <button class="btn-delete" (click)="confirmDelete(c)">
+            <i class="bi bi-trash3"></i> حذف
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Empty State -->
+  <div class="empty-state" *ngIf="!loading && chalets.length === 0">
+    <i class="bi bi-house-slash"></i>
+    <p>لا توجد شاليهات مضافة حتى الآن</p>
+    <button class="btn-add" (click)="openAddModal()">
+      <i class="bi bi-plus-lg"></i> أضف أول شاليه
+    </button>
+  </div>
+
+</div>
+
+<!-- ══════════════════════ ADD / EDIT MODAL ══════════════════════ -->
+<div class="modal-overlay" *ngIf="showModal" (click)="closeModal()">
+  <div class="modal-box" (click)="$event.stopPropagation()" dir="rtl">
+
+    <div class="modal-header">
+      <div class="modal-title-group">
+        <div class="modal-icon" [class.edit-icon]="isEditMode">
+          <i class="bi" [class.bi-plus-circle-fill]="!isEditMode" [class.bi-pencil-fill]="isEditMode"></i>
+        </div>
+        <div>
+          <h2>{{ isEditMode ? 'تعديل الشاليه' : 'إضافة شاليه جديد' }}</h2>
+          <p class="modal-sub" *ngIf="isEditMode">{{ form.name }}</p>
+        </div>
+      </div>
+      <button class="modal-close" (click)="closeModal()"><i class="bi bi-x-lg"></i></button>
+    </div>
+
+    <div class="modal-body">
+
+      <!-- Error -->
+      <div class="alert-error" *ngIf="error">
+        <i class="bi bi-exclamation-triangle-fill"></i> {{ error }}
+      </div>
+
+      <!-- Name -->
+      <div class="form-group">
+        <label><i class="bi bi-card-text"></i> اسم الشاليه *</label>
+        <input type="text" [(ngModel)]="form.name" placeholder="مثال: كوخ رويال 1" class="form-input" />
+      </div>
+
+      <!-- Type (add only) -->
+      <div class="form-group" *ngIf="!isEditMode">
+        <label><i class="bi bi-tag"></i> النوع</label>
+        <div class="type-selector">
+          <div class="type-option" [class.selected]="form.type === 0" (click)="form.type = 0">
+            <span class="type-emoji">🏠</span>
+            <span>عادي</span>
+            <i class="bi bi-check-circle-fill type-check" *ngIf="form.type === 0"></i>
+          </div>
+          <div class="type-option" [class.selected]="form.type === 1" (click)="form.type = 1">
+            <span class="type-emoji">👑</span>
+            <span>رويال</span>
+            <i class="bi bi-check-circle-fill type-check" *ngIf="form.type === 1"></i>
+          </div>
+        </div>
+      </div>
+
+      <!-- Status -->
+      <div class="form-group">
+        <label><i class="bi bi-toggle-on"></i> الحالة</label>
+        <div class="status-selector">
+          <div class="status-option available-opt" [class.selected]="form.status === 0" (click)="form.status = 0">
+            <i class="bi bi-check-circle"></i> متاح
+          </div>
+          <div class="status-option booked-opt" [class.selected]="form.status === 1" (click)="form.status = 1">
+            <i class="bi bi-calendar-check"></i> محجوز
+          </div>
+          <div class="status-option maintenance-opt" [class.selected]="form.status === 2" (click)="form.status = 2">
+            <i class="bi bi-tools"></i> صيانة
+          </div>
+        </div>
+      </div>
+
+      <!-- ════ PERIODS — Checkboxes ════ -->
+      <div class="form-group">
+        <label><i class="bi bi-clock-fill"></i> الفترات المتاحة للحجز *</label>
+
+        <div class="periods-selector">
+
+          <!-- صباحي -->
+          <label class="period-check-item" [class.checked]="form.hasMorning">
+            <input type="checkbox" [(ngModel)]="form.hasMorning" />
+            <span class="period-emoji">🌅</span>
+            <span>صباحي</span>
+            <i class="bi bi-check-lg period-tick" *ngIf="form.hasMorning"></i>
+          </label>
+
+          <!-- مسائي -->
+          <label class="period-check-item" [class.checked]="form.hasEvening">
+            <input type="checkbox" [(ngModel)]="form.hasEvening" />
+            <span class="period-emoji">🌇</span>
+            <span>مسائي</span>
+            <i class="bi bi-check-lg period-tick" *ngIf="form.hasEvening"></i>
+          </label>
+
+          <!-- يوم كامل -->
+          <label class="period-check-item" [class.checked]="form.hasFullDay">
+            <input type="checkbox" [(ngModel)]="form.hasFullDay" />
+            <span class="period-emoji">🌞</span>
+            <span>يوم كامل</span>
+            <i class="bi bi-check-lg period-tick" *ngIf="form.hasFullDay"></i>
+          </label>
+
+        </div>
+
+        <!-- Summary -->
+        <div class="periods-summary" *ngIf="atLeastOnePeriod">
+          <i class="bi bi-info-circle"></i>
+          سيُحجز في:
+          <strong>
+            <span *ngIf="form.hasMorning">صباحي </span>
+            <span *ngIf="form.hasEvening">مسائي </span>
+            <span *ngIf="form.hasFullDay">يوم كامل</span>
+          </strong>
+        </div>
+        <div class="periods-warning" *ngIf="!atLeastOnePeriod">
+          <i class="bi bi-exclamation-triangle-fill"></i>
+          يجب اختيار فترة واحدة على الأقل
+        </div>
+      </div>
+
+      <!-- Partner (add only) -->
+      <div class="form-group" *ngIf="!isEditMode">
+        <label><i class="bi bi-person-badge"></i> معرف الشريك (اختياري)</label>
+        <input type="number" [(ngModel)]="form.partnerId" placeholder="0" class="form-input" />
+      </div>
+
+      <!-- Current Images (edit) -->
+      <div class="form-group" *ngIf="isEditMode && currentImageItems.length > 0">
+        <label><i class="bi bi-images"></i> الصور الحالية</label>
+        <div class="img-preview-grid">
+          <div class="preview-item" *ngFor="let img of currentImageItems; let i = index">
+            <img [src]="img.url" alt="صورة" />
+            <button class="remove-img" (click)="removeCurrentImage(i)" title="حذف">
+              <i class="bi bi-x-circle-fill"></i>
+            </button>
+          </div>
+        </div>
+        <small class="hint-text" *ngIf="removedImageIds.length > 0">
+          <i class="bi bi-trash"></i>
+          سيتم حذف {{ removedImageIds.length }} صورة عند الحفظ
+        </small>
+      </div>
+
+      <!-- Upload Images -->
+      <div class="form-group">
+        <label>
+          <i class="bi bi-cloud-arrow-up"></i>
+          {{ isEditMode ? 'إضافة صور جديدة' : 'رفع الصور' }}
+        </label>
+        <label class="file-upload-label">
+          <i class="bi bi-upload"></i>
+          اختر صور
+          <input type="file" multiple accept="image/*" (change)="onFilesSelected($event)" hidden />
+        </label>
+        <div class="img-preview-grid" *ngIf="previewUrls.length > 0">
+          <div class="preview-item" *ngFor="let url of previewUrls">
+            <img [src]="url" alt="معاينة" />
+            <span class="new-badge">جديد</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn-cancel" (click)="closeModal()" [disabled]="submitting">إلغاء</button>
+      <button class="btn-submit" (click)="submitForm()" [disabled]="submitting || !atLeastOnePeriod">
+        <i class="bi bi-arrow-repeat spin" *ngIf="submitting"></i>
+        <i class="bi bi-check-lg" *ngIf="!submitting"></i>
+        {{ submitting ? 'جاري الحفظ...' : (isEditMode ? 'حفظ التعديلات' : 'إضافة الشاليه') }}
+      </button>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══════════════════════ DELETE MODAL ══════════════════════ -->
+<div class="modal-overlay" *ngIf="showDeleteModal" (click)="cancelDelete()">
+  <div class="modal-box modal-sm" (click)="$event.stopPropagation()" dir="rtl">
+
+    <div class="modal-header danger">
+      <div class="modal-title-group">
+        <div class="modal-icon danger-icon">
+          <i class="bi bi-trash3-fill"></i>
+        </div>
+        <h2>تأكيد الحذف</h2>
+      </div>
+      <button class="modal-close" (click)="cancelDelete()"><i class="bi bi-x-lg"></i></button>
+    </div>
+
+    <div class="modal-body center">
+      <div class="delete-icon-wrap">
+        <i class="bi bi-exclamation-triangle-fill"></i>
+      </div>
+      <p class="delete-msg">
+        هل أنت متأكد من حذف<br>
+        <strong>« {{ chaletToDelete?.name }} »</strong> ؟
+      </p>
+      <p class="delete-note">لا يمكن التراجع عن هذا الإجراء</p>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn-cancel" (click)="cancelDelete()">تراجع</button>
+      <button class="btn-danger" (click)="doDelete()">
+        <i class="bi bi-trash3"></i> حذف نهائي
+      </button>
+    </div>
+
+  </div>
+</div>

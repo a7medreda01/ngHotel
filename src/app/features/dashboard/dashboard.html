@@ -1,0 +1,254 @@
+<div class="dashboard" dir="rtl" *ngIf="!loading; else loadingTpl">
+
+  <!-- ── HEADER ── -->
+  <header class="page-header">
+    <div class="header-text">
+      <h1>لوحة التحكم</h1>
+      <p>نظرة شاملة على أداء الفندق</p>
+    </div>
+    <div class="header-actions">
+      <div class="filter-pills">
+        <button *ngFor="let f of filters"
+                class="pill"
+                [class.active]="activeFilter === f.value"
+                (click)="setFilter(f.value)">
+          {{ f.label }}
+        </button>
+      </div>
+      <button class="secondary-btn" (click)="openReportModal()">
+  <svg viewBox="0 0 16 16" fill="none" width="14" height="14">
+    <path d="M3 2h7l3 3v9H3V2z" stroke="currentColor" stroke-width="1.5"/>
+    <path d="M10 2v3h3M6 9l2 2 2-2M8 7v4" stroke="currentColor"
+          stroke-width="1.4" stroke-linecap="round"/>
+  </svg>
+  تنزيل تقرير
+</button>
+      <button class="primary-btn" routerLink="/booking/new">
+        <svg viewBox="0 0 16 16" fill="none" width="14" height="14">
+          <path d="M8 2v12M2 8h12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+        حجز جديد
+      </button>
+    </div>
+  </header>
+
+  <!-- ── STATS GRID ── -->
+  <section class="stats-grid">
+    <div class="stat-card" *ngFor="let stat of statsCards; let i = index" [style.--i]="i">
+      <div class="stat-top">
+        <div class="stat-icon" [style.--color]="stat.color">
+          <span [innerHTML]="stat.icon"></span>
+        </div>
+        <div class="stat-trend" [class.up]="stat.trendUp" [class.down]="!stat.trendUp">
+          <svg viewBox="0 0 12 12" fill="none" width="10" height="10">
+            <path *ngIf="stat.trendUp" d="M6 9V3M3 6l3-3 3 3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+            <path *ngIf="!stat.trendUp" d="M6 3v6M3 6l3 3 3-3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+          </svg>
+          {{ stat.changePercent }}%
+        </div>
+      </div>
+      <div class="stat-value">
+        {{ stat.value | number:'1.0-0' }}
+        <span class="stat-unit" *ngIf="stat.unit">{{ stat.unit }}</span>
+      </div>
+      <div class="stat-label">{{ stat.label }}</div>
+      <div class="stat-sub">{{ stat.changeText }}</div>
+      <div class="stat-bar">
+        <div class="stat-bar-fill" [style.width.%]="stat.fillPct" [style.--color]="stat.color"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── COMPARISON BANNER ── -->
+  <section class="comparison-row">
+    <div class="comparison-card" *ngFor="let c of comparisons; let i = index" [style.--i]="i">
+      <div class="cmp-period">{{ c.period }}</div>
+      <div class="cmp-vals">
+        <div>
+          <div class="cmp-num">{{ c.current | number:'1.0-0' }} <span class="cmp-unit">{{ c.unit }}</span></div>
+          <div class="cmp-desc">الفترة الحالية</div>
+        </div>
+        <div class="cmp-arrow" [class.better]="c.better">
+          <svg viewBox="0 0 24 24" fill="none" width="20" height="20">
+            <path *ngIf="c.better" d="M12 19V5M5 12l7-7 7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            <path *ngIf="!c.better" d="M12 5v14M5 12l7 7 7-7" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+          {{ c.diffPct | number:'1.0-1' }}%
+        </div>
+        <div>
+          <div class="cmp-num cmp-prev">{{ c.previous | number:'1.0-0' }} <span class="cmp-unit">{{ c.unit }}</span></div>
+          <div class="cmp-desc">الفترة السابقة</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── MAIN CONTENT GRID ── -->
+  <div class="content-grid">
+
+    <!-- Bookings by Status Breakdown -->
+    <section class="card status-breakdown">
+      <div class="card-header">
+        <h2>توزيع الحجوزات</h2>
+        <span class="badge-total">{{ totalBookings }} حجز</span>
+      </div>
+      <div class="status-list">
+        <div class="status-row" *ngFor="let s of statusBreakdown">
+          <div class="status-dot" [style.background]="s.color"></div>
+          <span class="status-name">{{ s.label }}</span>
+          <div class="status-bar-wrap">
+            <div class="status-bar-inner" [style.width.%]="s.pct" [style.background]="s.color"></div>
+          </div>
+          <span class="status-count">{{ s.count }}</span>
+          <span class="status-pct">{{ s.pct | number:'1.0-0' }}%</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Revenue Breakdown — Manager only -->
+    <section class="card revenue-card" *ngIf="isManager || isPartner">
+      <div class="card-header">
+        <h2>تفاصيل الإيرادات</h2>
+      </div>
+      <div class="revenue-rows">
+        <div class="rev-row" *ngFor="let r of revenueBreakdown">
+          <div class="rev-icon" [style.background]="r.bg">
+            <span [innerHTML]="r.icon"></span>
+          </div>
+          <div class="rev-info">
+            <span class="rev-label">{{ r.label }}</span>
+            <span class="rev-pct">{{ r.pct | number:'1.0-0' }}% من الإجمالي</span>
+          </div>
+          <span class="rev-amount">{{ r.amount | number:'1.0-0' }} <small>د.أ</small></span>
+        </div>
+      </div>
+      <div class="rev-total">
+        <span>الإجمالي</span>
+        <strong>{{ totalRevenue | number:'1.0-0' }} د.أ</strong>
+      </div>
+    </section>
+
+    <!-- Chalets Status -->
+    <section class="card chalets-card">
+      <div class="card-header">
+        <h2>حالة الشاليهات</h2>
+        <span class="badge-total">{{ totalChalets }} شاليه</span>
+      </div>
+      <div class="chalets-grid">
+        <div class="chalet-item" *ngFor="let ch of chaletStatusList">
+          <div class="chalet-dot" [class]="ch.statusClass"></div>
+          <span class="chalet-name">{{ ch.name }}</span>
+          <span class="chalet-status-label" [class]="ch.statusClass">{{ ch.statusLabel }}</span>
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+  <!-- ── RECENT BOOKINGS TABLE ── -->
+  <section class="card bookings-table-card">
+    <div class="card-header">
+      <h2>أحدث الحجوزات</h2>
+      <div class="table-actions">
+        <div class="search-wrap">
+          <svg viewBox="0 0 18 18" fill="none" width="15" height="15">
+            <circle cx="7.5" cy="7.5" r="5" stroke="currentColor" stroke-width="1.4"/>
+            <path d="M11.5 11.5L16 16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+          <input type="text" placeholder="بحث..." [(ngModel)]="searchTerm" (input)="filterBookings()" />
+        </div>
+        <button class="link-btn" routerLink="/booking">عرض الكل ←</button>
+      </div>
+    </div>
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>اسم النزيل</th>
+            <th>الشاليه</th>
+            <th>تاريخ الدخول</th>
+            <!-- عمود الإجمالي بس للمدير -->
+            <th *ngIf="isManager">الإجمالي</th>
+            <th>الفترة</th>
+            <th>الحالة</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let b of filteredBookings | slice:0:8; let i = index" [style.--i]="i">
+            <td class="td-id">#{{ b.id }}</td>
+            <td>
+              <div class="guest-cell">
+                <div class="avatar">{{ b.customerName.charAt(0) }}</div>
+                <div>
+                  <div class="guest-name">{{ b.customerName }}</div>
+                  <div class="guest-phone">{{ b.phone }}</div>
+                </div>
+              </div>
+            </td>
+            <td>{{ b.chaletName || '—' }}</td>
+            <td>{{ b.date | date:'d MMM yyyy' }}</td>
+            <!-- خلية الإجمالي بس للمدير -->
+            <td class="td-amount" *ngIf="isManager">{{ b.totalPrice | number:'1.0-0' }} د.أ</td>
+            <td>{{ getPeriodLabel(b.period) }}</td>
+            <td>
+              <span class="status-badge" [ngClass]="getStatusClass(b.status)">
+                {{ getStatusLabel(b.status) }}
+              </span>
+            </td>
+          </tr>
+          <tr *ngIf="filteredBookings.length === 0">
+            <td [attr.colspan]="isManager ? 7 : 6" class="empty-row">لا توجد نتائج</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+<!-- ── REPORT MODAL ── -->
+<div class="modal-backdrop" *ngIf="showReportModal" (click)="closeReportModal()">
+  <div class="modal-box" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3>تنزيل تقرير شهري</h3>
+      <button class="modal-close" (click)="closeReportModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="field-group">
+        <label>الشهر</label>
+        <select [(ngModel)]="reportMonth">
+          <option *ngFor="let m of monthNames; let i = index" [value]="i + 1">
+            {{ m }}
+          </option>
+        </select>
+      </div>
+      <div class="field-group">
+        <label>السنة</label>
+        <select [(ngModel)]="reportYear">
+          <option *ngFor="let y of availableYears" [value]="y">{{ y }}</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="primary-btn" (click)="downloadMonthlyReport()">
+        <svg viewBox="0 0 16 16" fill="none" width="14" height="14">
+          <path d="M8 2v8M5 7l3 3 3-3M3 13h10"
+                stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+        </svg>
+        تنزيل Excel
+      </button>
+      <button class="ghost-btn" (click)="closeReportModal()">إلغاء</button>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- Loading template -->
+<ng-template #loadingTpl>
+  <div class="loading-wrap" dir="rtl">
+    <div class="skeleton-header"></div>
+    <div class="skeleton-grid">
+      <div class="skeleton-card" *ngFor="let i of [1,2,3,4]"></div>
+    </div>
+    <div class="skeleton-table"></div>
+  </div>
+</ng-template>

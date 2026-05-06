@@ -1,0 +1,415 @@
+<div class="wl-page" dir="rtl">
+
+  <!-- ══════════════ HEADER ══════════════ -->
+  <div class="wl-header">
+    <div class="header-title">
+      <span class="header-icon"><i class="bi bi-hourglass-split"></i></span>
+      <div>
+        <h1>قائمة الانتظار</h1>
+        <p class="header-sub">إدارة الحجوزات المعلّقة وتحويلها</p>
+      </div>
+    </div>
+    <button class="btn-refresh" (click)="loadData()" [disabled]="isLoadingData" title="تحديث">
+      <i class="bi bi-arrow-clockwise" [class.spinning]="isLoadingData"></i>
+      {{ isLoadingData ? 'جاري التحميل...' : 'تحديث' }}
+    </button>
+  </div>
+
+  <!-- ══════════════ STATS CARDS ══════════════ -->
+  <div class="stats-grid">
+    <div class="stat-card stat-pending">
+      <div class="stat-icon"><i class="bi bi-hourglass-split"></i></div>
+      <div class="stat-info">
+        <span class="stat-number">{{ pendingCount }}</span>
+        <span class="stat-label">قيد الانتظار</span>
+      </div>
+    </div>
+    <div class="stat-card stat-contacted">
+      <div class="stat-icon"><i class="bi bi-telephone-fill"></i></div>
+      <div class="stat-info">
+        <span class="stat-number">{{ contactedCount }}</span>
+        <span class="stat-label">تم التواصل</span>
+      </div>
+    </div>
+    <div class="stat-card stat-booked">
+      <div class="stat-icon"><i class="bi bi-check-circle-fill"></i></div>
+      <div class="stat-info">
+        <span class="stat-number">{{ bookedCount }}</span>
+        <span class="stat-label">محجوز</span>
+      </div>
+    </div>
+    <div class="stat-card stat-cancelled">
+      <div class="stat-icon"><i class="bi bi-x-circle-fill"></i></div>
+      <div class="stat-info">
+        <span class="stat-number">{{ cancelledCount }}</span>
+        <span class="stat-label">ملغي</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════ SEARCH & FILTER ══════════════ -->
+  <div class="toolbar">
+    <div class="search-wrap">
+      <i class="bi bi-search search-icon"></i>
+      <input class="search-input" type="text" placeholder="بحث بالاسم، الهاتف، أو الشاليه..."
+        [(ngModel)]="searchQuery" (ngModelChange)="onSearchChange()" />
+    </div>
+    <div class="filter-wrap">
+      <select class="filter-select" [(ngModel)]="selectedStatusFilter" (ngModelChange)="onFilterChange()">
+        <option *ngFor="let opt of filterOptions" [value]="opt.value">{{ opt.label }}</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- ══════════════ LOADING ══════════════ -->
+  <div *ngIf="isLoadingData" class="state-box">
+    <div class="spinner"></div>
+    <p>جاري التحميل...</p>
+  </div>
+
+  <!-- ══════════════ ERROR ══════════════ -->
+  <div *ngIf="!isLoadingData && errorMsg" class="state-box error-box">
+    <i class="bi bi-exclamation-triangle-fill error-icon"></i>
+    <p>{{ errorMsg }}</p>
+    <button class="btn-primary" (click)="loadData()">إعادة المحاولة</button>
+  </div>
+
+  <!-- ══════════════ TABLE CONTAINER ══════════════ -->
+  <div *ngIf="!isLoadingData && !errorMsg" class="table-container">
+    <div class="table-header-row">
+      <span class="table-count">
+        <i class="bi bi-list-ul"></i> {{ filteredItems.length }} سجل
+      </span>
+    </div>
+
+    <!-- Desktop Table -->
+    <div class="table-wrapper">
+      <table class="wl-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>اسم العميل</th>
+            <th>الهاتف</th>
+            <th>الشاليه</th>
+            <th>التاريخ</th>
+            <th>الفترة</th>
+            <th>منذ</th>
+            <th>الحالة</th>
+            <th>الإجراءات</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let item of paginatedItems; let i = index"
+              class="table-row" (click)="openDetails(item)">
+            <td class="td-num">{{ (currentPage - 1) * pageSize + i + 1 }}</td>
+
+            <td class="td-name">
+              <div class="avatar-cell">
+                <div class="avatar">{{ item.customerName.charAt(0) }}</div>
+                <span>{{ item.customerName }}</span>
+              </div>
+            </td>
+
+            <td class="td-phone">
+              <a href="tel:{{ item.phone }}" (click)="$event.stopPropagation()" class="phone-link">
+                <i class="bi bi-telephone-fill"></i> {{ item.phone }}
+              </a>
+            </td>
+
+            <td>
+              <span class="chalet-cell">
+                <i class="bi bi-house-fill"></i> {{ item.chaletName }}
+              </span>
+            </td>
+
+            <td>
+              <span class="date-cell">
+                <i class="bi bi-calendar3"></i> {{ formatDate(item.date) }}
+              </span>
+            </td>
+
+            <td>
+              <span class="period-badge">{{ periodArabic(item.period) }}</span>
+            </td>
+
+            <!-- ✅ عمود "منذ" بناءً على createdAt -->
+            <td>
+              <span class="time-ago-badge" [ngClass]="getTimeAgoClass(item.createdAt)" [title]="formatDateTime(item.createdAt)">
+                <i class="bi bi-clock"></i>
+                {{ timeAgo(item.createdAt) }}
+              </span>
+            </td>
+
+            <td>
+              <span class="badge" [ngClass]="statusClass(item.status)">
+                {{ WaitingStatusArabic[item.status] }}
+              </span>
+            </td>
+
+            <td (click)="$event.stopPropagation()">
+              <div class="action-btns">
+                <button class="btn-icon btn-edit" (click)="openDetails(item)" title="تعديل الحالة">
+                  <i class="bi bi-pencil-fill"></i>
+                </button>
+                <button class="btn-icon btn-whatsapp" (click)="openWhatsApp(item.phone)" title="تواصل واتساب">
+                  <i class="bi bi-whatsapp"></i>
+                </button>
+                <button class="btn-icon btn-convert" (click)="openConvert(item, $event)" title="تحويل إلى حجز">
+                  <i class="bi bi-arrow-right-circle-fill"></i>
+                </button>
+              </div>
+            </td>
+          </tr>
+
+          <tr *ngIf="paginatedItems.length === 0">
+            <td colspan="9" class="empty-row">
+              <div class="empty-state">
+                <i class="bi bi-search empty-icon"></i>
+                <p>لا توجد نتائج مطابقة</p>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Mobile Cards -->
+    <div class="mobile-cards">
+      <div *ngFor="let item of paginatedItems; let i = index"
+           class="mobile-card" (click)="openDetails(item)">
+        <div class="mc-top">
+          <div class="avatar-cell">
+            <div class="avatar">{{ item.customerName.charAt(0) }}</div>
+            <div>
+              <div class="mc-name">{{ item.customerName }}</div>
+              <a href="tel:{{ item.phone }}" (click)="$event.stopPropagation()" class="phone-link mc-phone">
+                <i class="bi bi-telephone-fill"></i> {{ item.phone }}
+              </a>
+            </div>
+          </div>
+          <span class="badge" [ngClass]="statusClass(item.status)">
+            {{ WaitingStatusArabic[item.status] }}
+          </span>
+        </div>
+
+        <div class="mc-details">
+          <div class="mc-detail-item">
+            <i class="bi bi-house-fill mc-detail-icon"></i>
+            <span>{{ item.chaletName }}</span>
+          </div>
+          <div class="mc-detail-item">
+            <i class="bi bi-calendar3 mc-detail-icon"></i>
+            <span>{{ formatDate(item.date) }}</span>
+          </div>
+          <div class="mc-detail-item">
+            <i class="bi bi-clock mc-detail-icon"></i>
+            <span>{{ periodArabic(item.period) }}</span>
+          </div>
+          <!-- ✅ وقت الإنشاء على الموبايل -->
+          <div class="mc-detail-item">
+            <i class="bi bi-hourglass mc-detail-icon"></i>
+            <span class="time-ago-badge" [ngClass]="getTimeAgoClass(item.createdAt)">
+              {{ timeAgo(item.createdAt) }}
+            </span>
+          </div>
+        </div>
+
+        <div class="mc-notes" *ngIf="item.notes && item.notes !== 'لا يوجد ملاحظات'">
+          <i class="bi bi-chat-left-text"></i> {{ item.notes }}
+        </div>
+
+        <div class="mc-actions" (click)="$event.stopPropagation()">
+          <button class="btn-secondary" (click)="openDetails(item)">
+            <i class="bi bi-pencil-fill"></i> تعديل الحالة
+          </button>
+          <button class="btn-whatsapp-full" (click)="openWhatsApp(item.phone)">
+            <i class="bi bi-whatsapp"></i> واتساب
+          </button>
+          <button class="btn-primary" (click)="openConvert(item, $event)">
+            <i class="bi bi-arrow-right-circle-fill"></i> تحويل إلى حجز
+          </button>
+        </div>
+      </div>
+
+      <div *ngIf="paginatedItems.length === 0" class="empty-state">
+        <i class="bi bi-search empty-icon"></i>
+        <p>لا توجد نتائج مطابقة</p>
+      </div>
+    </div>
+
+    <!-- Pagination -->
+    <div class="pagination" *ngIf="totalPages > 1">
+      <button class="page-btn" (click)="goToPage(currentPage - 1)" [disabled]="currentPage === 1">
+        <i class="bi bi-chevron-right"></i>
+      </button>
+      <button class="page-btn" *ngFor="let p of pageNumbers"
+              [class.active]="p === currentPage" (click)="goToPage(p)">{{ p }}</button>
+      <button class="page-btn" (click)="goToPage(currentPage + 1)" [disabled]="currentPage === totalPages">
+        <i class="bi bi-chevron-left"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- ══════════════ DETAILS / STATUS MODAL ══════════════ -->
+  <div class="modal-overlay" *ngIf="showDetailsModal" (click)="closeDetailsModal()">
+    <div class="custom-modal" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <div class="modal-title-wrap">
+          <div class="modal-icon-wrap">
+            <i class="bi bi-pencil-fill"></i>
+          </div>
+          <div>
+            <h2 class="modal-title">تفاصيل الحجز</h2>
+            <p class="modal-sub">{{ selectedItem?.customerName }} — حجز #{{ selectedItem?.id }}</p>
+          </div>
+        </div>
+        <button class="modal-close" (click)="closeDetailsModal()">
+          <i class="bi bi-x-lg"></i>
+        </button>
+      </div>
+
+      <div class="modal-body" *ngIf="selectedItem">
+        <div class="info-grid">
+          <div class="info-item">
+            <span class="info-label"><i class="bi bi-person-fill"></i> اسم العميل</span>
+            <span class="info-value">{{ selectedItem.customerName }}</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label"><i class="bi bi-telephone-fill"></i> الهاتف</span>
+            <span class="info-value">{{ selectedItem.phone }}</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label"><i class="bi bi-house-fill"></i> الشاليه</span>
+            <span class="info-value">{{ selectedItem.chaletName }}</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label"><i class="bi bi-calendar3"></i> التاريخ</span>
+            <span class="info-value">{{ formatDate(selectedItem.date) }}</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label"><i class="bi bi-clock-fill"></i> الفترة</span>
+            <span class="info-value">{{ periodArabic(selectedItem.period) }}</span>
+          </div>
+          <!-- ✅ وقت الإنشاء في المودال -->
+          <div class="info-item">
+            <span class="info-label"><i class="bi bi-hourglass-split"></i> وقت الإنشاء</span>
+            <span class="info-value">
+              <span class="time-ago-badge" [ngClass]="getTimeAgoClass(selectedItem.createdAt)">
+                {{ timeAgo(selectedItem.createdAt) }}
+              </span>
+              <small class="datetime-hint">{{ formatDateTime(selectedItem.createdAt) }}</small>
+            </span>
+          </div>
+          <div class="info-item">
+            <span class="info-label"><i class="bi bi-tag-fill"></i> الحالة الحالية</span>
+            <span class="info-value">
+              <span class="badge" [ngClass]="statusClass(selectedItem.status)">
+                {{ WaitingStatusArabic[selectedItem.status] }}
+              </span>
+            </span>
+          </div>
+        </div>
+
+        <div class="info-item full-width" *ngIf="selectedItem.notes">
+          <span class="info-label"><i class="bi bi-chat-left-text-fill"></i> الملاحظات</span>
+          <span class="info-value notes-text">{{ selectedItem.notes }}</span>
+        </div>
+
+        <div class="status-update-section">
+          <label class="field-label">تغيير الحالة إلى *</label>
+          <div class="status-radio-group">
+            <label *ngFor="let opt of statusOptions" class="status-radio"
+                   [class.selected]="newStatusIndex === opt.value">
+              <input type="radio" name="status" [value]="opt.value" [(ngModel)]="newStatusIndex" />
+              {{ opt.label }}
+            </label>
+          </div>
+          <div class="info-note">
+            <i class="bi bi-info-circle-fill"></i>
+            سيتم حفظ الحالة وإغلاق النافذة فوراً
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn-secondary" (click)="closeDetailsModal()">
+          <i class="bi bi-x-lg"></i> إلغاء
+        </button>
+        <button class="btn-whatsapp-outline" (click)="openWhatsApp(selectedItem!.phone)">
+          <i class="bi bi-whatsapp"></i> واتساب
+        </button>
+        <button class="btn-primary" (click)="saveStatus()">
+          <i class="bi bi-check-lg"></i> حفظ التغييرات
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════ CONVERT MODAL ══════════════ -->
+  <div class="modal-overlay" *ngIf="showConvertModal" (click)="closeConvertModal()">
+    <div class="custom-modal modal-sm" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <div class="modal-title-wrap">
+          <div class="modal-icon-wrap modal-icon-green">
+            <i class="bi bi-arrow-right-circle-fill"></i>
+          </div>
+          <div>
+            <h2 class="modal-title">تأكيد التحويل</h2>
+            <p class="modal-sub">{{ convertItem?.customerName }} — حجز #{{ convertItem?.id }}</p>
+          </div>
+        </div>
+        <button class="modal-close" (click)="closeConvertModal()">
+          <i class="bi bi-x-lg"></i>
+        </button>
+      </div>
+
+      <div class="modal-body" *ngIf="convertItem">
+        <div class="convert-summary">
+          <div class="convert-row">
+            <span><i class="bi bi-house-fill"></i> الشاليه</span>
+            <strong>{{ convertItem.chaletName }}</strong>
+          </div>
+          <div class="convert-row">
+            <span><i class="bi bi-calendar3"></i> التاريخ</span>
+            <strong>{{ formatDate(convertItem.date) }}</strong>
+          </div>
+          <div class="convert-row">
+            <span><i class="bi bi-clock-fill"></i> الفترة</span>
+            <strong>{{ periodArabic(convertItem.period) }}</strong>
+          </div>
+          <div class="convert-row">
+            <span><i class="bi bi-hourglass-split"></i> منذ</span>
+            <strong>
+              <span class="time-ago-badge" [ngClass]="getTimeAgoClass(convertItem.createdAt)">
+                {{ timeAgo(convertItem.createdAt) }}
+              </span>
+            </strong>
+          </div>
+        </div>
+        <div class="convert-notice">
+          <i class="bi bi-info-circle-fill"></i>
+          سيتم تحويل الحجز إلى <strong>مؤكد</strong>. ستظهر رسالة الـ API مباشرةً بعد التنفيذ.
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn-secondary" (click)="closeConvertModal()">
+          <i class="bi bi-x-lg"></i> إلغاء
+        </button>
+        <button class="btn-primary btn-green" (click)="confirmConvert()">
+          <i class="bi bi-check-lg"></i> تأكيد التحويل
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════ TOAST ══════════════ -->
+  <div class="toast"
+       [class.show]="toast.show"
+       [class.toast-success]="toast.success"
+       [class.toast-error]="!toast.success">
+    <i class="bi" [class.bi-check-circle-fill]="toast.success" [class.bi-x-circle-fill]="!toast.success"></i>
+    <span>{{ toast.message }}</span>
+  </div>
+
+</div>
