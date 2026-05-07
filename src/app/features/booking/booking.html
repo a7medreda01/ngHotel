@@ -189,7 +189,7 @@
                   <span class="no-val" *ngIf="!b.chaletName">غير محدد</span>
                 </div>
               </td>
-              <td>{{ formatDateTime(b.createdAt  | jordanDate ) }}</td>
+              <td>{{ formatDateTime(b.createdAt | jordanDate ) }}</td>
               <td>{{ formatDate(b.date) }}</td>
               <td><span class="period-badge">{{ getPeriodLabel(b.period) }}</span></td>
               <td><span class="status-badge" [ngClass]="getStatusClass(b.status)">{{ getStatusLabel(b.status) }}</span>
@@ -561,26 +561,27 @@
             <span class="detail-label">الفترة</span>
             <span class="detail-val">{{ getPeriodLabel(selectedBooking.period) }}</span>
           </div>
-                    <div class="detail-row">
+          <div class="detail-row">
             <i class="bi bi-clock detail-icon"></i>
             <span class="detail-label">لحظة الحجز</span>
-            <span class="detail-val">{{ formatDateTime(selectedBooking.createdAt  | jordanDate ) }}</span>
+            <span class="detail-val">{{ formatDateTime(selectedBooking.createdAt | jordanDate ) }}</span>
           </div>
           <div class="d-flex flex-row gap-2">
-                      <button class="whatsapp-btn" (click)="openWhatsApp(selectedBooking.phone)">
-            <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
-              <path
-                d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
-            </svg>
-           1 تواصل واتساب
-          </button>
-             <button *ngIf="selectedBooking.additionalPhone?.trim()" class="whatsapp-btn" (click)="openWhatsApp(selectedBooking.additionalPhone!)">
-            <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
-              <path
-                d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
-            </svg>
-           2 تواصل واتساب
-          </button>
+            <button class="whatsapp-btn" (click)="openWhatsApp(selectedBooking.phone)">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+                <path
+                  d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
+              </svg>
+              1 تواصل واتساب
+            </button>
+            <button *ngIf="selectedBooking.additionalPhone?.trim()" class="whatsapp-btn"
+              (click)="openWhatsApp(selectedBooking.additionalPhone!)">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+                <path
+                  d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
+              </svg>
+              2 تواصل واتساب
+            </button>
           </div>
         </div>
 
@@ -894,8 +895,8 @@
                   <select [(ngModel)]="selectedCountryCode" class="country-select">
                     <option *ngFor="let c of countryCodes" [value]="c.value">{{ c.label }}</option>
                   </select>
-                  <input type="text" [(ngModel)]="newBooking.phone" placeholder="xxxxxxxx"
-                    class="form-input phone-input" />
+                  <input type="tel" inputmode="numeric" pattern="[0-9]*" [(ngModel)]="newBooking.phone"
+                    placeholder="xxxxxxxx" class="form-input phone-input" />
                 </div>
               </div>
               <div class="form-group">
@@ -904,20 +905,15 @@
                   <select [(ngModel)]="selectedCountryCode" class="country-select">
                     <option *ngFor="let c of countryCodes" [value]="c.value">{{ c.label }}</option>
                   </select>
-                  <input type="text" [(ngModel)]="newBooking.additionalPhone" placeholder="اختياري"
-                    class="form-input phone-input" />
+                  <input type="tel" inputmode="numeric" pattern="[0-9]*" [(ngModel)]="newBooking.additionalPhone"
+                    placeholder="اختياري" class="form-input phone-input" />
                 </div>
               </div>
               <div class="form-group">
                 <label>خصم (د.أ)</label>
-<input
-  type="number"
-  [(ngModel)]="newBooking.discountAmount"
-  (ngModelChange)="validateDiscountNewBooking()"
-  min="0"
-  [max]="auth.hasRole('Manager') ? 999999 : 10"
-  class="form-input"
-/>
+                <input type="number" [(ngModel)]="newBooking.discountAmount"
+                  (ngModelChange)="validateDiscountNewBooking()" min="0" [max]="auth.hasRole('Manager') ? 999999 : 10"
+                  class="form-input" />
               </div>
               <div class="form-group">
                 <label>عدد الزوار</label>
@@ -925,10 +921,10 @@
               </div>
             </div>
           </div>
-              <div class="form-group">
-                <label>ملاحظة</label>
-                <input type="text" [(ngModel)]="newBooking.note" placeholder="ملاحظات الحجز" class="form-input" />
-              </div>
+          <div class="form-group">
+            <label>ملاحظة</label>
+            <input type="text" [(ngModel)]="newBooking.note" placeholder="ملاحظات الحجز" class="form-input" />
+          </div>
           <div class="form-section">
             <div class="section-label"><i class="bi bi-bag-plus-fill"></i> الإضافات (اختياري)</div>
             <div class="extra-add-row">
@@ -1059,7 +1055,8 @@
                 <select [(ngModel)]="editCountryCode" class="country-select">
                   <option *ngFor="let c of countryCodes" [value]="c.value">{{ c.label }}</option>
                 </select>
-                <input type="text" [(ngModel)]="editForm.phone" class="form-input phone-input" />
+                <input type="tel" inputmode="numeric" pattern="[0-9]*" [(ngModel)]="editForm.phone"
+                  class="form-input phone-input" />
               </div>
             </div>
           </div>
@@ -1074,21 +1071,15 @@
                 <select [(ngModel)]="editCountryCode" class="country-select">
                   <option *ngFor="let c of countryCodes" [value]="c.value">{{ c.label }}</option>
                 </select>
-                <input type="text" [(ngModel)]="editForm.additionalPhone" class="form-input phone-input"
-                  placeholder="اختياري" />
+                <input type="tel" inputmode="numeric" pattern="[0-9]*" [(ngModel)]="editForm.additionalPhone"
+                  class="form-input phone-input" placeholder="اختياري" />
               </div>
             </div>
             <div class="form-group">
               <label>خصم (د.أ)</label>
 
-              <input
-  type="number"
-  [(ngModel)]="editForm.discountAmount"
-  (ngModelChange)="validateDiscount()"
-  min="0"
-  [max]="auth.hasRole('Manager') ? 999999 : 10"
-  class="form-input"
-/>
+              <input type="number" [(ngModel)]="editForm.discountAmount" (ngModelChange)="validateDiscount()" min="0"
+                [max]="auth.hasRole('Manager') ? 999999 : 10" class="form-input" />
             </div>
           </div>
         </div>
@@ -1400,7 +1391,7 @@
               </span>
               <div class="payment-item-meta">
                 <span class="payment-method"><i class="bi bi-cash-stack"></i> {{ p.method }}</span>
-                <span class="payment-date">{{ formatDateTime(p.createdAt  | jordanDate ) }}</span>
+                <span class="payment-date">{{ formatDateTime(p.createdAt | jordanDate ) }}</span>
               </div>
             </div>
             <strong class="payment-amount">{{ p.amount }} د.أ</strong>
@@ -1423,10 +1414,10 @@
   <div class="inv-modal" (click)="$event.stopPropagation()" *ngIf="invoiceBooking">
 
     <div class="inv-modal-header no-print">
-<span class="inv-modal-title">
-  <i class="bi bi-file-earmark-text-fill"></i>
-  {{ invoiceBooking.chaletType === 1 ? 'R' : 'G' }}2026-{{ invoiceBooking.id }}
-</span>
+      <span class="inv-modal-title">
+        <i class="bi bi-file-earmark-text-fill"></i>
+        {{ invoiceBooking.chaletType === 1 ? 'R' : 'G' }}2026-{{ invoiceBooking.id }}
+      </span>
       <div class="inv-modal-actions">
         <button class="inv-action-btn inv-share" (click)="shareInvoice()" [disabled]="!shareBtn" title="مشاركة">
           <i class="bi" [class.bi-share-fill]="shareBtn" [class.bi-hourglass-split]="!shareBtn"></i>
@@ -1473,9 +1464,9 @@
           </div>
           <div class="inv-meta-block">
             <div class="inv-num" style="direction:ltr; text-align:right;">
-  {{ invoiceBooking.chaletType === 1 ? 'R' : 'G' }}2026-{{ invoiceBooking.id }}
-</div>
-            <div class="inv-date">{{ formatDateTime(invoiceBooking.createdAt  | jordanDate ) }}</div>
+              {{ invoiceBooking.chaletType === 1 ? 'R' : 'G' }}2026-{{ invoiceBooking.id }}
+            </div>
+            <div class="inv-date">{{ formatDateTime(invoiceBooking.createdAt | jordanDate ) }}</div>
             <div class="inv-status-chip" [ngClass]="getStatusClass(invoiceBooking.status)">
               {{ getStatusLabel(invoiceBooking.status) }}
             </div>
@@ -1652,7 +1643,8 @@
             invoiceBooking.status === 'Pending' ? '⏳ قيد الانتظار' : getStatusLabel(invoiceBooking.status) }}
           </div>
           <p class="inv-footer-note">شكراً لاختياركم — نتمنى لكم إقامة طيبة 🏕️</p>
-          <p class="inv-footer-generated">تم إنشاء هذه الفاتورة تلقائياً | {{ formatDateTime(invoiceBooking.createdAt  | jordanDate )
+          <p class="inv-footer-generated">تم إنشاء هذه الفاتورة تلقائياً | {{ formatDateTime(invoiceBooking.createdAt |
+            jordanDate )
             }}</p>
         </div>
 
@@ -1695,7 +1687,7 @@
             <span class="chat-user">
               <i class="bi bi-person-circle"></i> {{ n.userName }}
             </span>
-            <span class="chat-time">{{ formatDateTime(n.createdAt  | jordanDate ) }}</span>
+            <span class="chat-time">{{ formatDateTime(n.createdAt | jordanDate ) }}</span>
           </div>
           <div class="chat-msg-body">{{ n.note }}</div>
         </div>
