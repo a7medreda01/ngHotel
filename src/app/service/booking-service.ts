@@ -49,6 +49,7 @@ export interface CreateBookingDto {
   period:          number;
   chaletType:      number;
   numOfGuests:     number;
+  note: string;
   extras:          { extraId: number; quantity: number }[];
 }
 

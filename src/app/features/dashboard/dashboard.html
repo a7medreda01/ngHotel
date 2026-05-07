@@ -7,14 +7,35 @@
       <p>نظرة شاملة على أداء الفندق</p>
     </div>
     <div class="header-actions">
-      <div class="filter-pills">
-        <button *ngFor="let f of filters"
-                class="pill"
-                [class.active]="activeFilter === f.value"
-                (click)="setFilter(f.value)">
-          {{ f.label }}
-        </button>
-      </div>
+<div class="filter-pills-wrap">
+  <div class="filter-pills">
+    <button *ngFor="let f of filters"
+            class="pill"
+            [class.active]="activeFilter === f.value"
+            (click)="setFilter(f.value)">
+      {{ f.label }}
+    </button>
+  </div>
+
+  <!-- Date picker — يظهر بس لما activeFilter === 'custom' -->
+  <div class="date-range-picker" *ngIf="showDatePicker">
+    <div class="date-field">
+      <label>من</label>
+      <input type="date"
+             [(ngModel)]="customDateFrom"
+             [max]="customDateTo || ''"
+             (change)="applyCustomRange()" />
+    </div>
+    <span class="date-sep">←</span>
+    <div class="date-field">
+      <label>إلى</label>
+      <input type="date"
+             [(ngModel)]="customDateTo"
+             [min]="customDateFrom || ''"
+             (change)="applyCustomRange()" />
+    </div>
+  </div>
+</div>
       <button class="secondary-btn" (click)="openReportModal()">
   <svg viewBox="0 0 16 16" fill="none" width="14" height="14">
     <path d="M3 2h7l3 3v9H3V2z" stroke="currentColor" stroke-width="1.5"/>

@@ -17,13 +17,14 @@ import { MatInputModule } from '@angular/material/input';
 import { AuthService } from '../../service/Auth-service';
 import { Router, ActivatedRoute } from '@angular/router';
 import html2canvas from 'html2canvas';
+import { JordanDatePipe } from '../../shared/pipes/jordan-date-pipe';
 
 @Component({
   selector: 'app-booking',
   standalone: true,
   imports: [
     FormsModule, CommonModule,
-    MatDatepickerModule, MatFormFieldModule, MatInputModule, MatNativeDateModule
+    MatDatepickerModule, MatFormFieldModule, MatInputModule, MatNativeDateModule,JordanDatePipe
   ],
   templateUrl: './booking.html',
   styleUrl: './booking.css',
@@ -73,7 +74,7 @@ export class Booking implements OnInit {
   addStep = 1;
   newBooking: CreateBookingDto = {
     customerName: '', phone: '', date: '',
-    period: -1, chaletType: 0, numOfGuests: 1, extras: []
+    period: -1, chaletType: 0, numOfGuests: 1, extras: [],note:''
   };
   selectedCountryCode = '+962';
   countryCodes = [
@@ -121,7 +122,7 @@ export class Booking implements OnInit {
   editExtraAdding = false;
 
   // ─── Deposit ────────────────────────────────────────────────────────────
-  depositAmount = 0;
+  depositAmount: number | null = null;
   depositSaving = false;
 
   // ─── Cancel ─────────────────────────────────────────────────────────────
@@ -132,7 +133,7 @@ export class Booking implements OnInit {
   // ─── Done ───────────────────────────────────────────────────────────────
   doneTargetId: number | null = null;
   doneSaving = false;
-  donePayAmount = 0;
+  donePayAmount : number | null = null;
   doneSelectedChaletId = 0;
   availableChaletsForDone: AvailableChalet[] = [];
   loadingAvailableChalets = false;
@@ -445,7 +446,7 @@ export class Booking implements OnInit {
     this.addStep = 1;
     this.newBooking = {
       customerName: '', phone: '', additionalPhone: '', discountAmount: 0,
-      date: '', period: -1, chaletType: 0, numOfGuests: 1, extras: []
+      date: '', period: -1, chaletType: 0, numOfGuests: 1, extras: [],note:''
     };
     this.addExtrasList = [];
     this.basePrice = 0;
@@ -682,6 +683,7 @@ export class Booking implements OnInit {
       numOfGuests: this.newBooking.numOfGuests,
       additionalPhone: this.newBooking.additionalPhone?.trim(),
       discountAmount: this.newBooking.discountAmount ?? 0,
+      note:this.newBooking.note,
       extras: this.addExtrasList.map(e => ({ extraId: e.extraId, quantity: e.quantity })),
     };
 
@@ -818,7 +820,7 @@ export class Booking implements OnInit {
 
   openDepositModal(booking: Bookings, fromPanel = false): void {
     this.selectedBooking = booking;
-    this.depositAmount = booking.deposit ?? 0;
+    this.depositAmount = booking.deposit ?? null;
     this.depositSaving = false;
     if (!fromPanel) { this.showDetailSheet = false; this.showDetailPanel = false; }
     this.showDepositModal = true;
@@ -908,7 +910,7 @@ export class Booking implements OnInit {
     }
     this.doneTargetId = id;
     this.doneSaving = false;
-    this.donePayAmount = 0;
+    this.donePayAmount = null;
     this.doneSelectedChaletId = 0;
     this.availableChaletsForDone = [];
     this.loadingAvailableChalets = true;
@@ -1352,20 +1354,67 @@ export class Booking implements OnInit {
     setTimeout(() => { win.print(); win.close(); }, 500);
   }
 
+
+shareBtn = false;
+shareBlob: Blob | null = null;
+
+private async captureFixedWidthCanvas(sourceEl: HTMLElement): Promise<HTMLCanvasElement> {
+  const clone = sourceEl.cloneNode(true) as HTMLElement;
+
+  const container = document.createElement('div');
+  container.style.cssText = `
+    position: fixed;
+    top: -9999px;
+    left: -9999px;
+    width: 800px;
+    direction: rtl;
+    font-family: 'Cairo', sans-serif;
+    background: #ffffff;
+    z-index: -1;
+  `;
+
+  clone.style.width = '800px';
+  clone.style.maxWidth = '800px';
+  clone.style.margin = '0';
+
+  container.appendChild(clone);
+  document.body.appendChild(container);
+
+  // ✅ انتظر تحميل الفونت قبل الـ screenshot
+  await document.fonts.ready;
+  await new Promise(r => setTimeout(r, 200));
+
+  const canvas = await html2canvas(clone, {
+    scale: 2,
+    useCORS: true,
+    allowTaint: true,
+    backgroundColor: '#ffffff',
+    width: 800,
+    windowWidth: 1200,
+    onclone: (clonedDoc) => {
+      // ✅ تأكد إن كل العناصر فيها direction صح
+      const allEls = clonedDoc.querySelectorAll('*');
+      allEls.forEach((el: any) => {
+        if (el.style) {
+          const computed = window.getComputedStyle(el);
+          if (!el.style.fontFamily) {
+            el.style.fontFamily = "'Cairo', sans-serif";
+          }
+        }
+      });
+    }
+  });
+
+  document.body.removeChild(container);
+  return canvas;
+}
 async shareInvoice(): Promise<void> {
   if (!this.invoiceBooking) return;
-
   const el = document.getElementById('invoice-print-area');
   if (!el) return;
 
   try {
-    const canvas = await html2canvas(el, {
-      scale: 2,
-      useCORS: true,
-      backgroundColor: '#ffffff',
-      scrollX: 0,
-      scrollY: -window.scrollY,
-    });
+    const canvas = await this.captureFixedWidthCanvas(el);
 
     await new Promise<void>((resolve, reject) => {
       canvas.toBlob(async (blob) => {
@@ -1379,7 +1428,6 @@ async shareInvoice(): Promise<void> {
           if (navigator.share && navigator.canShare({ files: [file] })) {
             await navigator.share({ files: [file] });
           } else {
-            // fallback ديسكتوب
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
@@ -1389,9 +1437,7 @@ async shareInvoice(): Promise<void> {
             this.showNotification('تم تنزيل الفاتورة ✓', 'success');
           }
           resolve();
-        } catch (e) {
-          reject(e);
-        }
+        } catch (e) { reject(e); }
       }, 'image/png');
     });
 
@@ -1401,13 +1447,11 @@ async shareInvoice(): Promise<void> {
     }
   }
 }
-shareBtn = false;
-shareBlob: Blob | null = null;
+
 async prepareShareImage(): Promise<void> {
   const el = document.getElementById('invoice-print-area');
   if (!el) return;
 
-  // ✅ حوّل كل صور الـ background لـ base64 قبل الـ canvas
   const heroBanner = el.querySelector('.inv-hero-banner') as HTMLElement;
   if (heroBanner && this.invoiceBooking?.chaletImageUrl) {
     const base64 = await this.toBase64Image(this.invoiceBooking.chaletImageUrl);
@@ -1416,12 +1460,7 @@ async prepareShareImage(): Promise<void> {
     }
   }
 
-  const canvas = await html2canvas(el, {
-    scale: 2,
-    useCORS: true,
-    allowTaint: true,
-    backgroundColor: '#ffffff',
-  });
+  const canvas = await this.captureFixedWidthCanvas(el);
 
   canvas.toBlob((blob) => {
     this.shareBlob = blob;
@@ -1429,6 +1468,7 @@ async prepareShareImage(): Promise<void> {
     this.cdr.detectChanges();
   }, 'image/png');
 }
+
 private async toBase64Image(url: string): Promise<string> {
   try {
     const response = await fetch(url, { mode: 'cors' });
@@ -1440,7 +1480,23 @@ private async toBase64Image(url: string): Promise<string> {
       reader.readAsDataURL(blob);
     });
   } catch {
-    return ''; // لو فشل رجّع فاضي
+    return '';
+  }
+}
+validateDiscount() {
+  if (
+    !this.auth.hasRole('Manager') &&
+    (this.editForm.discountAmount ?? 0) > 10
+  ) {
+    this.editForm.discountAmount = 10;
+  }
+}
+validateDiscountNewBooking() {
+  if (
+    !this.auth.hasRole('Manager') &&
+    (this.newBooking.discountAmount ?? 0) > 10
+  ) {
+    this.newBooking.discountAmount = 10;
   }
 }
 }

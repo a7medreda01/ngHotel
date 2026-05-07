@@ -11,7 +11,7 @@ import * as XLSX from 'xlsx';
 import { ChaletOwnerService, ChaletWithPartners } from '../../service/ChaletOwner-service';
 
 // ── Types ──────────────────────────────────────
-type FilterPeriod = '7' | '30' | '90' | '365' | 'month';
+type FilterPeriod = '7' | '30' | '90' | '365' | 'month' | 'custom';
 
 interface StatCard {
   label: string;
@@ -69,12 +69,16 @@ export class Dashboard implements OnInit, OnDestroy {
   searchTerm = '';
 
   activeFilter: FilterPeriod = '30';
+  customDateFrom = '';
+  customDateTo = '';
+  showDatePicker = false;
   filters = [
     { label: 'الشهر الحالي', value: 'month' as FilterPeriod },
-    { label: 'آخر أسبوع',    value: '7'     as FilterPeriod },
-    { label: 'آخر شهر',      value: '30'    as FilterPeriod },
-    { label: 'آخر 90 يوم',   value: '90'    as FilterPeriod },
-    { label: 'آخر سنة',      value: '365'   as FilterPeriod },
+    { label: 'آخر أسبوع', value: '7' as FilterPeriod },
+    { label: 'آخر شهر', value: '30' as FilterPeriod },
+    { label: 'آخر 90 يوم', value: '90' as FilterPeriod },
+    { label: 'آخر سنة', value: '365' as FilterPeriod },
+    { label: 'تاريخ محدد', value: 'custom' as FilterPeriod },
   ];
 
   statsCards: StatCard[] = [];
@@ -93,7 +97,7 @@ export class Dashboard implements OnInit, OnDestroy {
 
   // ── Period helpers ───────────────────────────
   private getPeriodMs(days: number) { return days * 24 * 60 * 60 * 1000; }
-  private getDaysAgo(days: number)  { return new Date(Date.now() - this.getPeriodMs(days)); }
+  private getDaysAgo(days: number) { return new Date(Date.now() - this.getPeriodMs(days)); }
 
   private getStartOfCurrentMonth(): Date {
     const now = new Date();
@@ -111,34 +115,34 @@ export class Dashboard implements OnInit, OnDestroy {
     private chaletOwnerService: ChaletOwnerService,
     private cdr: ChangeDetectorRef,
     private authService: AuthService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     // نجيب الحجوزات + الشاليهات + بيانات الرويالة دفعة واحدة
     forkJoin({
-      bookings:            this.bookingService.getAllBookings(),
-      chalets:             this.chaletService.getAll(),
+      bookings: this.bookingService.getAllBookings(),
+      chalets: this.chaletService.getAll(),
       chaletsWithPartners: this.chaletOwnerService.getChaletsWithPartners(),
     })
-    .pipe(takeUntil(this.destroy$))
-    .subscribe({
-      next: ({ bookings, chalets, chaletsWithPartners }) => {
-        this.allBookings            = bookings;
-        this.allChalets             = chalets;
-        this.chaletsWithPartners    = chaletsWithPartners;
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: ({ bookings, chalets, chaletsWithPartners }) => {
+          this.allBookings = bookings;
+          this.allChalets = chalets;
+          this.chaletsWithPartners = chaletsWithPartners;
 
-        // نحسب الأكواخ المملوكة للشريك الحالي (مرة واحدة بعد التحميل)
-        this.partnerOwnedChaletNames = this.resolvePartnerChaletNames();
+          // نحسب الأكواخ المملوكة للشريك الحالي (مرة واحدة بعد التحميل)
+          this.partnerOwnedChaletNames = this.resolvePartnerChaletNames();
 
-        this.loading = false;
-        this.compute();
-        this.cdr.detectChanges();
-      },
-      error: () => {
-        this.loading = false;
-        this.cdr.detectChanges();
-      }
-    });
+          this.loading = false;
+          this.compute();
+          this.cdr.detectChanges();
+        },
+        error: () => {
+          this.loading = false;
+          this.cdr.detectChanges();
+        }
+      });
   }
 
   ngOnDestroy(): void {
@@ -184,23 +188,38 @@ export class Dashboard implements OnInit, OnDestroy {
   setFilter(val: FilterPeriod): void {
     this.activeFilter = val;
     this.searchTerm = '';
-    this.compute();
+    if (val !== 'custom') {
+      this.showDatePicker = false;
+      this.compute();
+    } else {
+      this.showDatePicker = true;
+    }
+  }
+  applyCustomRange(): void {
+    if (this.customDateFrom && this.customDateTo) {
+      this.compute();
+    }
   }
 
   // ── Core compute ────────────────────────────
   private compute(): void {
     const now = new Date();
-
-    let cutCur:  Date;
+    let cutCur: Date;
     let cutPrev: Date;
 
-    if (this.activeFilter === 'month') {
-      cutCur  = this.getStartOfCurrentMonth();
+    if (this.activeFilter === 'custom') {
+      if (!this.customDateFrom || !this.customDateTo) return;
+      cutCur = new Date(this.customDateFrom);
+      // الفترة السابقة بنفس طول الفترة المختارة
+      const diffMs = new Date(this.customDateTo).getTime() - cutCur.getTime();
+      cutPrev = new Date(cutCur.getTime() - diffMs - 1);
+    } else if (this.activeFilter === 'month') {
+      cutCur = this.getStartOfCurrentMonth();
       cutPrev = this.getStartOfPreviousMonth();
     } else {
-      const days    = parseInt(this.activeFilter);
+      const days = parseInt(this.activeFilter);
       const prevDays = days * 2;
-      cutCur  = this.getDaysAgo(days);
+      cutCur = this.getDaysAgo(days);
       cutPrev = this.getDaysAgo(prevDays);
     }
 
@@ -212,17 +231,19 @@ export class Dashboard implements OnInit, OnDestroy {
     // ── تطبيق فلتر الرويالة قبل أي حساب ────────
     const visibleBookings = this.applyOwnershipFilter(this.allBookings);
 
-    const currentPeriod  = visibleBookings.filter(b => inRange(b, cutCur, now));
+    const currentPeriod = visibleBookings.filter(b =>
+      inRange(b, cutCur, this.activeFilter === 'custom' ? new Date(this.customDateTo) : now)
+    );
     const previousPeriod = visibleBookings.filter(b => inRange(b, cutPrev, cutCur));
 
     const rev = (arr: Bookings[]) =>
       arr.filter(b => b.status === 'Confirmed' || b.status === 'Done')
-         .reduce((s, b) => s + (b.totalPrice ?? 0), 0);
+        .reduce((s, b) => s + (b.totalPrice ?? 0), 0);
 
     const count = (arr: Bookings[], status: string) =>
       arr.filter(b => b.status === status).length;
 
-    const curRev  = rev(currentPeriod);
+    const curRev = rev(currentPeriod);
     const prevRev = rev(previousPeriod);
     const pctDiff = (cur: number, prev: number) =>
       prev === 0 ? 100 : +((cur - prev) / prev * 100).toFixed(1);
@@ -294,10 +315,10 @@ export class Dashboard implements OnInit, OnDestroy {
 
     // ── Status breakdown ─────────────────────────
     const statuses: { key: string; label: string; color: string }[] = [
-      { key: 'Confirmed', label: 'مؤكدة',        color: '#22c55e' },
-      { key: 'Done',      label: 'منجزة',        color: '#8b5cf6' },
-      { key: 'Pending',   label: 'قيد الانتظار', color: '#f59e0b' },
-      { key: 'Cancelled', label: 'ملغية',        color: '#ef4444' },
+      { key: 'Confirmed', label: 'مؤكدة', color: '#22c55e' },
+      { key: 'Done', label: 'منجزة', color: '#8b5cf6' },
+      { key: 'Pending', label: 'قيد الانتظار', color: '#f59e0b' },
+      { key: 'Cancelled', label: 'ملغية', color: '#ef4444' },
     ];
     const total = currentPeriod.length || 1;
     this.totalBookings = currentPeriod.length;
@@ -305,7 +326,7 @@ export class Dashboard implements OnInit, OnDestroy {
     this.statusBreakdown = statuses.map(s => ({
       label: s.label,
       count: count(currentPeriod, s.key),
-      pct:   count(currentPeriod, s.key) / total * 100,
+      pct: count(currentPeriod, s.key) / total * 100,
       color: s.color,
     }));
 
@@ -400,18 +421,18 @@ export class Dashboard implements OnInit, OnDestroy {
     const term = this.searchTerm.toLowerCase().trim();
     this.filteredBookings = term
       ? this.baseBookings.filter(b =>
-          b.customerName.toLowerCase().includes(term) ||
-          b.phone.includes(term) ||
-          (b.chaletName ?? '').toLowerCase().includes(term)
-        )
+        b.customerName.toLowerCase().includes(term) ||
+        b.phone.includes(term) ||
+        (b.chaletName ?? '').toLowerCase().includes(term)
+      )
       : [...this.baseBookings];
   }
 
   getStatusClass(status: string): string {
     const map: Record<string, string> = {
       Confirmed: 'badge-confirmed',
-      Done:      'badge-done',
-      Pending:   'badge-pending',
+      Done: 'badge-done',
+      Pending: 'badge-pending',
       Cancelled: 'badge-cancelled',
     };
     return map[status] ?? 'badge-pending';
@@ -420,8 +441,8 @@ export class Dashboard implements OnInit, OnDestroy {
   getStatusLabel(status: string): string {
     const map: Record<string, string> = {
       Confirmed: 'مؤكدة',
-      Done:      'منجزة',
-      Pending:   'قيد الانتظار',
+      Done: 'منجزة',
+      Pending: 'قيد الانتظار',
       Cancelled: 'ملغية',
     };
     return map[status] ?? status;
@@ -434,8 +455,8 @@ export class Dashboard implements OnInit, OnDestroy {
 
   private getChaletStatusClass(s: string): string {
     const m: Record<string, string> = {
-      Available:   'dot-available',
-      Booked:      'dot-booked',
+      Available: 'dot-available',
+      Booked: 'dot-booked',
       Maintenance: 'dot-maintenance',
     };
     return m[s] ?? 'dot-available';
@@ -443,8 +464,8 @@ export class Dashboard implements OnInit, OnDestroy {
 
   private getChaletStatusLabel(s: string): string {
     const m: Record<string, string> = {
-      Available:   'متاح',
-      Booked:      'محجوز',
+      Available: 'متاح',
+      Booked: 'محجوز',
       Maintenance: 'صيانة',
     };
     return m[s] ?? s;
@@ -452,12 +473,12 @@ export class Dashboard implements OnInit, OnDestroy {
 
   // ── Report Modal ─────────────────────────────
   showReportModal = false;
-  reportYear  = new Date().getFullYear();
+  reportYear = new Date().getFullYear();
   reportMonth = new Date().getMonth() + 1;
 
   readonly monthNames = [
-    'يناير','فبراير','مارس','أبريل','مايو','يونيو',
-    'يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'
+    'يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو',
+    'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'
   ];
 
   get availableYears(): number[] {
@@ -465,105 +486,242 @@ export class Dashboard implements OnInit, OnDestroy {
     return [cur - 2, cur - 1, cur];
   }
 
-  openReportModal(): void  { this.showReportModal = true;  }
+  openReportModal(): void { this.showReportModal = true; }
   closeReportModal(): void { this.showReportModal = false; }
 
-  downloadMonthlyReport(): void {
-    const year  = this.reportYear;
-    const month = this.reportMonth;
+downloadMonthlyReport(): void {
+  const year  = this.reportYear;
+  const month = this.reportMonth;
 
-    const from = new Date(year, month - 1, 1);
-    const to   = new Date(year, month, 0, 23, 59, 59);
+  const from = new Date(year, month - 1, 1);
+  const to   = new Date(year, month, 0, 23, 59, 59);
 
-    // ── الشريك يصدّر تقرير أكواخه فقط ──────────
-    const sourceBookings = this.applyOwnershipFilter(this.allBookings);
+  const sourceBookings = this.applyOwnershipFilter(this.allBookings);
 
-    const monthBookings = sourceBookings.filter(b => {
-      const d = new Date(b.date);
-      return d >= from && d <= to;
+  const monthBookings = sourceBookings.filter(b => {
+    const d = new Date(b.date);
+    return d >= from && d <= to;
+  });
+
+  const periodMap: Record<number, string> = { 0: 'صباحي', 1: 'مسائي', 2: 'كامل' };
+  const statusMap: Record<string, string> = {
+    Confirmed: 'مؤكدة', Done: 'منجزة',
+    Pending: 'قيد الانتظار', Cancelled: 'ملغية'
+  };
+
+  const wb = XLSX.utils.book_new();
+
+  // ════════════════════════════════════════════════
+  // SHEET 1 — الملخص العام
+  // ════════════════════════════════════════════════
+  const confirmedDone = monthBookings.filter(
+    b => b.status === 'Confirmed' || b.status === 'Done'
+  );
+  const totalRev   = confirmedDone.reduce((s, b) => s + (b.totalPrice  ?? 0), 0);
+  const chaletRev  = confirmedDone.reduce((s, b) => s + (b.chaletPrice ?? 0), 0);
+  const extrasRev  = confirmedDone.reduce((s, b) => s + (b.extrasTotal ?? 0), 0);
+  const depositSum = monthBookings
+    .filter(b => b.deposit != null)
+    .reduce((s, b) => s + (b.deposit ?? 0), 0);
+  const discountSum = monthBookings
+    .reduce((s, b) => s + (b.discountAmount ?? 0), 0);
+
+  const countByStatus = (st: string) =>
+    monthBookings.filter(b => b.status === st).length;
+
+  const summaryRows = [
+    { 'البيان': 'إجمالي الحجوزات',            'القيمة': monthBookings.length,       'الوحدة': 'حجز'  },
+    { 'البيان': 'حجوزات مؤكدة',               'القيمة': countByStatus('Confirmed'),  'الوحدة': 'حجز'  },
+    { 'البيان': 'حجوزات منجزة',               'القيمة': countByStatus('Done'),       'الوحدة': 'حجز'  },
+    { 'البيان': 'قيد الانتظار',               'القيمة': countByStatus('Pending'),    'الوحدة': 'حجز'  },
+    { 'البيان': 'ملغية',                       'القيمة': countByStatus('Cancelled'),  'الوحدة': 'حجز'  },
+    { 'البيان': '───────────',                 'القيمة': '',                          'الوحدة': ''     },
+    { 'البيان': 'إيرادات الشاليهات',           'القيمة': chaletRev,                   'الوحدة': 'د.أ'  },
+    { 'البيان': 'إيرادات الإضافات',            'القيمة': extrasRev,                   'الوحدة': 'د.أ'  },
+    { 'البيان': 'إجمالي الخصومات',             'القيمة': discountSum,                 'الوحدة': 'د.أ'  },
+    { 'البيان': 'إجمالي الإيرادات (بعد الخصم)','القيمة': totalRev,                    'الوحدة': 'د.أ'  },
+    { 'البيان': 'إجمالي العربونات المستلمة',   'القيمة': depositSum,                  'الوحدة': 'د.أ'  },
+  ];
+
+  // ════════════════════════════════════════════════
+  // SHEET 2 — تفاصيل الحجوزات الكاملة
+  // ════════════════════════════════════════════════
+  const bookingRows = monthBookings.map((b, idx) => ({
+    '#':                  idx + 1,
+    'رقم الحجز':          b.id,
+    'اسم النزيل':         b.customerName,
+    'الهاتف':             b.phone,
+    'هاتف إضافي':         b.additionalPhone ?? '—',
+    'الشاليه':            b.chaletName ?? '—',
+    'تاريخ الدخول':       new Date(b.date).toLocaleDateString('ar-EG'),
+    'تاريخ الإنشاء':      new Date(b.createdAt).toLocaleDateString('ar-EG'),
+    'الفترة':             periodMap[b.period ?? 2] ?? '—',
+    'عدد الضيوف':         b.numOfGuests ?? '—',
+    'أنشئ بواسطة':        b.createdBy ?? '—',
+    'سعر الشاليه':        b.chaletPrice ?? 0,
+    'إجمالي الإضافات':    b.extrasTotal ?? 0,
+    'الخصم':              b.discountAmount ?? 0,
+    'السعر قبل الخصم':    b.price ?? 0,
+    'الإجمالي':           b.totalPrice ?? 0,
+    'العربون':            b.deposit ?? 0,
+    'المتبقي':            (b.totalPrice ?? 0) - (b.deposit ?? 0),
+    'الحالة':             statusMap[b.status] ?? b.status,
+    'الإضافات (تفصيل)':   (b.extras ?? [])
+                            .map(e => `${e.extraName ?? '—'} × ${e.quantity} = ${e.total} د.أ`)
+                            .join(' | ') || '—',
+    'الملاحظات':          (b.notes ?? [])
+                            .map(n => `[${n.userName}]: ${n.note}`)
+                            .join(' | ') || '—',
+  }));
+
+  // ════════════════════════════════════════════════
+  // SHEET 3 — الإضافات التفصيلية (سطر لكل إضافة)
+  // ════════════════════════════════════════════════
+  const extrasRows: object[] = [];
+  monthBookings.forEach(b => {
+    (b.extras ?? []).forEach(e => {
+      extrasRows.push({
+        'رقم الحجز':    b.id,
+        'اسم النزيل':   b.customerName,
+        'الشاليه':      b.chaletName ?? '—',
+        'تاريخ الحجز':  new Date(b.date).toLocaleDateString('ar-EG'),
+        'أنشئ بواسطة':  b.createdBy ?? '—',
+        'اسم الإضافة':  e.extraName ?? '—',
+        'الكمية':        e.quantity,
+        'سعر الوحدة':   e.price,
+        'الإجمالي':      e.total,
+        'حالة الحجز':   statusMap[b.status] ?? b.status,
+      });
+    });
+  });
+
+  // ════════════════════════════════════════════════
+  // SHEET 4 — إحصائيات كل كوخ
+  // ════════════════════════════════════════════════
+  const visibleChalets = this.isPartner
+    ? this.allChalets.filter(c => this.partnerOwnedChaletNames.includes(c.name))
+    : this.allChalets;
+
+  const chaletRows = visibleChalets.map(c => {
+    const cb = monthBookings.filter(b => b.chaletName === c.name);
+    const cbDone = cb.filter(b => b.status === 'Confirmed' || b.status === 'Done');
+
+    // إجمالي كل نوع إضافة لهذا الكوخ
+    const extrasSummary: Record<string, { qty: number; total: number }> = {};
+    cb.forEach(b => {
+      (b.extras ?? []).forEach(e => {
+        const key = e.extraName ?? '—';
+        if (!extrasSummary[key]) extrasSummary[key] = { qty: 0, total: 0 };
+        extrasSummary[key].qty   += e.quantity;
+        extrasSummary[key].total += e.total;
+      });
     });
 
-    const periodMap: Record<number, string> = { 0: 'صباحي', 1: 'مسائي', 2: 'كامل' };
-    const statusMap: Record<string, string> = {
-      Confirmed: 'مؤكدة', Done: 'منجزة',
-      Pending: 'قيد الانتظار', Cancelled: 'ملغية'
-    };
+    const extrasSummaryText = Object.entries(extrasSummary)
+      .map(([name, v]) => `${name}: ${v.qty} وحدة = ${v.total} د.أ`)
+      .join(' | ') || '—';
 
-    // Sheet 1: تفاصيل الحجوزات
-    const bookingRows = monthBookings.map((b, idx) => ({
-      '#':             idx + 1,
-      'رقم الحجز':    b.id,
-      'اسم النزيل':   b.customerName,
-      'الهاتف':       b.phone,
-      'الشاليه':      b.chaletName ?? '—',
-      'تاريخ الدخول': new Date(b.date).toLocaleDateString('ar-EG'),
-      'الفترة':        periodMap[b.period ?? 2] ?? '—',
-      'سعر الشاليه':  b.chaletPrice ?? 0,
-      'الإضافات':     b.extrasTotal ?? 0,
-      'العربون':       b.deposit ?? 0,
-      'الإجمالي':     b.totalPrice ?? 0,
-      'الحالة':        statusMap[b.status] ?? b.status,
+    return {
+      'اسم الكوخ':             c.name,
+      'النوع':                  c.type === 'Royal' ? 'رويال' : 'عادي',
+      'الحالة الحالية':         this.getChaletStatusLabel(c.status),
+      'إجمالي الحجوزات':        cb.length,
+      'مؤكدة':                  cb.filter(b => b.status === 'Confirmed').length,
+      'منجزة':                  cb.filter(b => b.status === 'Done').length,
+      'قيد الانتظار':           cb.filter(b => b.status === 'Pending').length,
+      'ملغية':                  cb.filter(b => b.status === 'Cancelled').length,
+      'إيرادات الشاليه':        cbDone.reduce((s, b) => s + (b.chaletPrice ?? 0), 0),
+      'إيرادات الإضافات':       cbDone.reduce((s, b) => s + (b.extrasTotal ?? 0), 0),
+      'إجمالي الإيرادات':       cbDone.reduce((s, b) => s + (b.totalPrice  ?? 0), 0),
+      'إجمالي الخصومات':        cb.reduce((s, b) => s + (b.discountAmount ?? 0), 0),
+      'تفصيل الإضافات':         extrasSummaryText,
+    };
+  });
+
+  // ════════════════════════════════════════════════
+  // SHEET 5 — إحصائيات كل موظف
+  // ════════════════════════════════════════════════
+  const employeeMap: Record<string, {
+    total: number; confirmed: number; done: number;
+    cancelled: number; revenue: number; discount: number;
+  }> = {};
+
+  monthBookings.forEach(b => {
+    const emp = b.createdBy ?? 'غير محدد';
+    if (!employeeMap[emp]) {
+      employeeMap[emp] = {
+        total: 0, confirmed: 0, done: 0,
+        cancelled: 0, revenue: 0, discount: 0
+      };
+    }
+    employeeMap[emp].total++;
+    if (b.status === 'Confirmed') employeeMap[emp].confirmed++;
+    if (b.status === 'Done')      employeeMap[emp].done++;
+    if (b.status === 'Cancelled') employeeMap[emp].cancelled++;
+    if (b.status === 'Confirmed' || b.status === 'Done')
+      employeeMap[emp].revenue += b.totalPrice ?? 0;
+    employeeMap[emp].discount += b.discountAmount ?? 0;
+  });
+
+  const employeeRows = Object.entries(employeeMap).map(([name, v]) => ({
+    'اسم الموظف':          name,
+    'إجمالي الحجوزات':     v.total,
+    'مؤكدة':               v.confirmed,
+    'منجزة':               v.done,
+    'ملغية':               v.cancelled,
+    'الإيرادات المحققة':   v.revenue,
+    'إجمالي الخصومات':     v.discount,
+  }));
+
+  // ════════════════════════════════════════════════
+  // SHEET 6 — ملخص الإضافات (كل نوع إضافة في الشهر)
+  // ════════════════════════════════════════════════
+  const allExtrasMap: Record<string, { qty: number; revenue: number; bookings: number }> = {};
+
+  monthBookings.forEach(b => {
+    (b.extras ?? []).forEach(e => {
+      const key = e.extraName ?? '—';
+      if (!allExtrasMap[key]) allExtrasMap[key] = { qty: 0, revenue: 0, bookings: 0 };
+      allExtrasMap[key].qty      += e.quantity;
+      allExtrasMap[key].revenue  += e.total;
+      allExtrasMap[key].bookings += 1;
+    });
+  });
+
+  const extrasStatsRows = Object.entries(allExtrasMap)
+    .sort((a, b) => b[1].revenue - a[1].revenue)
+    .map(([name, v]) => ({
+      'اسم الإضافة':        name,
+      'إجمالي الكميات':     v.qty,
+      'عدد مرات الطلب':     v.bookings,
+      'إجمالي الإيرادات':   v.revenue,
     }));
 
-    // Sheet 2: ملخص
-    const confirmedDone = monthBookings.filter(
-      b => b.status === 'Confirmed' || b.status === 'Done'
-    );
-    const totalRev   = confirmedDone.reduce((s, b) => s + (b.totalPrice  ?? 0), 0);
-    const chaletRev  = confirmedDone.reduce((s, b) => s + (b.chaletPrice ?? 0), 0);
-    const extrasRev  = confirmedDone.reduce((s, b) => s + (b.extrasTotal ?? 0), 0);
-    const depositSum = monthBookings.filter(b => b.deposit != null)
-                                    .reduce((s, b) => s + (b.deposit ?? 0), 0);
+  // ════════════════════════════════════════════════
+  // بناء الـ Workbook
+  // ════════════════════════════════════════════════
+  const addSheet = (data: object[], sheetName: string) => {
+    if (data.length === 0) {
+      data = [{ 'ملاحظة': 'لا توجد بيانات لهذه الفترة' }];
+    }
+    const ws = XLSX.utils.json_to_sheet(data, { skipHeader: false });
+    ws['!dir'] = 'RTL';
+    // عرض الأعمدة تلقائي
+    const cols = Object.keys(data[0] ?? {});
+    ws['!cols'] = cols.map(() => ({ wch: 20 }));
+    XLSX.utils.book_append_sheet(wb, ws, sheetName);
+  };
 
-    const countByStatus = (st: string) =>
-      monthBookings.filter(b => b.status === st).length;
+  addSheet(summaryRows,     'الملخص العام');
+  addSheet(bookingRows,     'تفاصيل الحجوزات');
+  addSheet(extrasRows,      'الإضافات التفصيلية');
+  addSheet(chaletRows,      'إحصائيات الأكواخ');
+  addSheet(employeeRows,    'إحصائيات الموظفين');
+  addSheet(extrasStatsRows, 'ملخص الإضافات');
 
-    const summaryRows = [
-      { 'البيان': 'إجمالي الحجوزات',          'القيمة': monthBookings.length,       'الوحدة': 'حجز'  },
-      { 'البيان': 'حجوزات مؤكدة',             'القيمة': countByStatus('Confirmed'),  'الوحدة': 'حجز'  },
-      { 'البيان': 'حجوزات منجزة',             'القيمة': countByStatus('Done'),       'الوحدة': 'حجز'  },
-      { 'البيان': 'قيد الانتظار',             'القيمة': countByStatus('Pending'),    'الوحدة': 'حجز'  },
-      { 'البيان': 'ملغية',                     'القيمة': countByStatus('Cancelled'),  'الوحدة': 'حجز'  },
-      { 'البيان': '─────────────',             'القيمة': '',                          'الوحدة': ''     },
-      { 'البيان': 'إيرادات الشاليهات',        'القيمة': chaletRev,                   'الوحدة': 'د.أ'  },
-      { 'البيان': 'إيرادات الإضافات',         'القيمة': extrasRev,                   'الوحدة': 'د.أ'  },
-      { 'البيان': 'إجمالي الإيرادات',         'القيمة': totalRev,                    'الوحدة': 'د.أ'  },
-      { 'البيان': 'إجمالي العربونات المستلمة', 'القيمة': depositSum,                  'الوحدة': 'د.أ'  },
-    ];
+  const fileName = `تقرير_${this.monthNames[month - 1]}_${year}.xlsx`;
+  XLSX.writeFile(wb, fileName);
 
-    // Sheet 3: الشاليهات (مع فلتر الرويالة)
-    const visibleChalets = this.isPartner
-      ? this.allChalets.filter(c => this.partnerOwnedChaletNames.includes(c.name))
-      : this.allChalets;
-
-    const chaletRows = visibleChalets.map(c => ({
-      'اسم الشاليه': c.name,
-      'الحالة':       this.getChaletStatusLabel(c.status),
-      'عدد حجوزاته هذا الشهر':
-        monthBookings.filter(b => b.chaletName === c.name).length,
-      'إيراداته':
-        monthBookings
-          .filter(b => b.chaletName === c.name &&
-                       (b.status === 'Confirmed' || b.status === 'Done'))
-          .reduce((s, b) => s + (b.totalPrice ?? 0), 0),
-    }));
-
-    // Build workbook
-    const wb = XLSX.utils.book_new();
-
-    const addSheet = (data: object[], sheetName: string) => {
-      const ws = XLSX.utils.json_to_sheet(data, { skipHeader: false });
-      ws['!dir'] = 'RTL';
-      XLSX.utils.book_append_sheet(wb, ws, sheetName);
-    };
-
-    addSheet(summaryRows, 'الملخص');
-    addSheet(bookingRows, 'تفاصيل الحجوزات');
-    addSheet(chaletRows,  'الشاليهات');
-
-    const fileName = `تقرير_${this.monthNames[month - 1]}_${year}.xlsx`;
-    XLSX.writeFile(wb, fileName);
-
-    this.closeReportModal();
-  }
+  this.closeReportModal();
+}
 }

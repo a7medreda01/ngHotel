@@ -566,3 +566,60 @@
   background: none; border: 1px solid var(--border, #e2e8f0);
   color: var(--text-2, #64748b); font-size: 13px; cursor: pointer;
 }
+/* ── Date Range Picker ── */
+.filter-pills-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: flex-end;
+}
+
+.date-range-picker {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--card-bg, #1e1e2e);
+  border: 1px solid var(--border, rgba(255,255,255,0.08));
+  border-radius: 10px;
+  padding: 6px 12px;
+  animation: fadeIn .2s ease;
+}
+
+.date-field {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.date-field label {
+  font-size: 12px;
+  color: var(--text-muted, #888);
+  white-space: nowrap;
+}
+
+.date-field input[type="date"] {
+  background: transparent;
+  border: 1px solid var(--border, rgba(255,255,255,0.1));
+  border-radius: 6px;
+  padding: 4px 8px;
+  color: var(--text, #fff);
+  font-size: 13px;
+  font-family: inherit;
+  cursor: pointer;
+  direction: ltr;   /* الأرقام والتاريخ من اليسار لليمين */
+}
+
+.date-field input[type="date"]:focus {
+  outline: none;
+  border-color: #e8834a;
+}
+
+.date-sep {
+  color: var(--text-muted, #888);
+  font-size: 14px;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
