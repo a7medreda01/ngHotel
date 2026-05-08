@@ -1573,7 +1573,7 @@ dp-btn-invoice {
 .brand-icon {
   margin-top: 10px;
   width: 68px; height: 68px;
-  background: gray;
+  /* background: gray; */
   border-radius: 18px;
   display: inline-flex;
   align-items: center;

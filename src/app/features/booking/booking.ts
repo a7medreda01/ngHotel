@@ -1398,12 +1398,18 @@ private async captureFixedWidthCanvas(sourceEl: HTMLElement): Promise<HTMLCanvas
       heroBanner.style.background = 'linear-gradient(135deg, #1a1a2e 0%, #2d3748 100%)';
     }
   }
-   const logoImgs = container.querySelectorAll<HTMLImageElement>('img[src="favicon.ico"], img[src*="favicon"]');
-  for (const img of Array.from(logoImgs)) {
-    const base64 = await this.toBase64Image(window.location.origin + '/favicon.ico');
+const logoImgs = container.querySelectorAll<HTMLImageElement>('img');
+
+for (const img of Array.from(logoImgs)) {
+  if (!img.src) continue;
+
+  try {
+    const base64 = await this.toBase64Image(img.src);
     if (base64) img.src = base64;
-    else img.style.display = 'none';
+  } catch {
+    img.style.display = 'none';
   }
+}
   const allImgs = container.querySelectorAll<HTMLImageElement>('img:not([src^="data:"])');
   await Promise.all(Array.from(allImgs).map(async (img) => {
     if (!img.src) return;
@@ -1411,7 +1417,17 @@ private async captureFixedWidthCanvas(sourceEl: HTMLElement): Promise<HTMLCanvas
     if (base64) img.src = base64;
   }));
 
+const images = container.querySelectorAll('img');
 
+await Promise.all(
+  Array.from(images).map(img => {
+    if (img.complete) return Promise.resolve();
+
+    return new Promise(res => {
+      img.onload = img.onerror = () => res(true);
+    });
+  })
+);
  await new Promise(r => setTimeout(r, 400));
 
   const canvas = await html2canvas(clone, {

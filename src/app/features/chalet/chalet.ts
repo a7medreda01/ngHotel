@@ -166,6 +166,7 @@ export class Chalet implements OnInit {
     this.previewUrls     = [];
     this.error           = '';
     this.showModal       = true;
+    
   }
 
   closeModal(): void {
@@ -218,10 +219,9 @@ export class Chalet implements OnInit {
     this.selectedFiles.forEach(file => fd.append('NewImages', file));
 
     if (this.removedImageIds.length > 0) {
+      console.log(this.removedImageIds)
       this.removedImageIds.forEach(id => fd.append('RemovedImageIds', id.toString()));
-    } else {
-      fd.append('RemovedImageIds', '0');
-    }
+    } 
 
     return fd;
   }

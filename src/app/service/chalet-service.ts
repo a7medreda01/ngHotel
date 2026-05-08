@@ -144,6 +144,7 @@ export class ChaletService {
    * Fields: Id, Name, Status, HasMorning, HasEvening, HasFullDay, NewImages, RemovedImageIds
    */
   update(formData: FormData): Observable<any> {
+    // console.log(formData);
     return this.http.put(this.apiUrl, formData);
   }
 
