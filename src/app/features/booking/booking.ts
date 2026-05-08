@@ -1221,6 +1221,8 @@ export class Booking implements OnInit {
     ...booking,
     chaletImageUrl: chalet?.images?.[0] ?? undefined
   };
+    console.log(chalet?.images?.[0]);
+
     this.showInvoiceModal = true;
       this.shareBlob = null;
   this.shareBtn = false;
@@ -1380,29 +1382,47 @@ private async captureFixedWidthCanvas(sourceEl: HTMLElement): Promise<HTMLCanvas
   container.appendChild(clone);
   document.body.appendChild(container);
 
-  // ✅ انتظر تحميل الفونت قبل الـ screenshot
   await document.fonts.ready;
   await new Promise(r => setTimeout(r, 200));
 
-  const canvas = await html2canvas(clone, {
-    scale: 2,
-    useCORS: true,
-    allowTaint: true,
-    backgroundColor: '#ffffff',
-    width: 800,
-    windowWidth: 1200,
-    onclone: (clonedDoc) => {
-      // ✅ تأكد إن كل العناصر فيها direction صح
-      const allEls = clonedDoc.querySelectorAll('*');
-      allEls.forEach((el: any) => {
-        if (el.style) {
-          const computed = window.getComputedStyle(el);
-          if (!el.style.fontFamily) {
-            el.style.fontFamily = "'Cairo', sans-serif";
-          }
-        }
-      });
+  // ✅ حوّل الـ hero banner لـ img بدل background-image
+ const heroBanner = container.querySelector('.inv-hero-banner') as HTMLElement | null;
+  if (heroBanner && this.invoiceBooking?.chaletImageUrl) {
+    const base64 = await this.toBase64Image(this.invoiceBooking.chaletImageUrl);
+    if (base64) {
+      heroBanner.style.backgroundImage    = `url(${base64})`;
+      heroBanner.style.backgroundSize     = 'cover';
+      heroBanner.style.backgroundPosition = 'center';
+    } else {
+      // لو فشلت الصورة، خلّي الخلفية لون بدل ما يبقى فاضي
+      heroBanner.style.background = 'linear-gradient(135deg, #1a1a2e 0%, #2d3748 100%)';
     }
+  }
+   const logoImgs = container.querySelectorAll<HTMLImageElement>('img[src="favicon.ico"], img[src*="favicon"]');
+  for (const img of Array.from(logoImgs)) {
+    const base64 = await this.toBase64Image(window.location.origin + '/favicon.ico');
+    if (base64) img.src = base64;
+    else img.style.display = 'none';
+  }
+  const allImgs = container.querySelectorAll<HTMLImageElement>('img:not([src^="data:"])');
+  await Promise.all(Array.from(allImgs).map(async (img) => {
+    if (!img.src) return;
+    const base64 = await this.toBase64Image(img.src);
+    if (base64) img.src = base64;
+  }));
+
+
+ await new Promise(r => setTimeout(r, 400));
+
+  const canvas = await html2canvas(clone, {
+    scale          : 2,
+    useCORS        : true,
+    allowTaint     : false,
+    backgroundColor: '#ffffff',
+    width          : 800,
+    windowWidth    : 1200,
+    imageTimeout   : 20000,
+    logging        : false,
   });
 
   document.body.removeChild(container);
@@ -1410,37 +1430,31 @@ private async captureFixedWidthCanvas(sourceEl: HTMLElement): Promise<HTMLCanvas
 }
 async shareInvoice(): Promise<void> {
   if (!this.invoiceBooking) return;
-  const el = document.getElementById('invoice-print-area');
-  if (!el) return;
+
+  // ✅ استخدم الـ blob الجاهز من prepareShareImage بدل ما تعمل capture جديد
+  const blob = this.shareBlob;
+  if (!blob) {
+    this.showNotification('الفاتورة لم تجهز بعد، انتظر لحظة', 'error');
+    return;
+  }
+
+  const file = new File([blob], `فاتورة-${this.invoiceBooking.id}.png`, {
+    type: 'image/png'
+  });
 
   try {
-    const canvas = await this.captureFixedWidthCanvas(el);
-
-    await new Promise<void>((resolve, reject) => {
-      canvas.toBlob(async (blob) => {
-        if (!blob) { reject('no blob'); return; }
-
-        const file = new File([blob], `فاتورة-${this.invoiceBooking!.id}.png`, {
-          type: 'image/png'
-        });
-
-        try {
-          if (navigator.share && navigator.canShare({ files: [file] })) {
-            await navigator.share({ files: [file] });
-          } else {
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `فاتورة-${this.invoiceBooking!.id}.png`;
-            a.click();
-            URL.revokeObjectURL(url);
-            this.showNotification('تم تنزيل الفاتورة ✓', 'success');
-          }
-          resolve();
-        } catch (e) { reject(e); }
-      }, 'image/png');
-    });
-
+    if (navigator.share && navigator.canShare({ files: [file] })) {
+      await navigator.share({ files: [file] });
+    } else {
+      // fallback: تنزيل مباشر
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `فاتورة-${this.invoiceBooking.id}.png`;
+      a.click();
+      URL.revokeObjectURL(url);
+      this.showNotification('تم تنزيل الفاتورة ✓', 'success');
+    }
   } catch (err: any) {
     if (err?.name !== 'AbortError') {
       this.showNotification('فشل المشاركة', 'error');
@@ -1452,14 +1466,7 @@ async prepareShareImage(): Promise<void> {
   const el = document.getElementById('invoice-print-area');
   if (!el) return;
 
-  const heroBanner = el.querySelector('.inv-hero-banner') as HTMLElement;
-  if (heroBanner && this.invoiceBooking?.chaletImageUrl) {
-    const base64 = await this.toBase64Image(this.invoiceBooking.chaletImageUrl);
-    if (base64) {
-      heroBanner.style.backgroundImage = `url(${base64})`;
-    }
-  }
-
+  // ✅ مش محتاج تعمل base64 هنا — captureFixedWidthCanvas بتعملها
   const canvas = await this.captureFixedWidthCanvas(el);
 
   canvas.toBlob((blob) => {
@@ -1471,15 +1478,25 @@ async prepareShareImage(): Promise<void> {
 
 private async toBase64Image(url: string): Promise<string> {
   try {
-    const response = await fetch(url, { mode: 'cors' });
+    const response = await fetch(url, {
+      mode: 'cors',
+      cache: 'no-cache'
+    });
+
     const blob = await response.blob();
-    return new Promise((resolve, reject) => {
+
+    return await new Promise((resolve) => {
       const reader = new FileReader();
-      reader.onloadend = () => resolve(reader.result as string);
-      reader.onerror = reject;
+
+      reader.onloadend = () => {
+        resolve(reader.result as string);
+      };
+
       reader.readAsDataURL(blob);
     });
-  } catch {
+
+  } catch (e) {
+    console.error('Image convert failed:', url, e);
     return '';
   }
 }
@@ -1499,4 +1516,6 @@ validateDiscountNewBooking() {
     this.newBooking.discountAmount = 10;
   }
 }
+
+
 }

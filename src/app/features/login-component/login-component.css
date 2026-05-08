@@ -280,3 +280,22 @@
 .back-link a:hover { color: rgba(255,255,255,0.75); }
 
 .text-center { text-align: center; }
+.auth-footer {
+  margin-top: 24px;
+  text-align: center;
+  font-size: 14px;
+  color: #bfc7d5;
+}
+
+.auth-footer a {
+  color: rgba(37,99,235,0.5);
+  text-decoration: none;
+  font-weight: 700;
+  margin-right: 4px;
+  transition: 0.3s;
+}
+
+.auth-footer a:hover {
+  opacity: 0.8;
+  text-decoration: underline;
+}

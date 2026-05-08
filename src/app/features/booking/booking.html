@@ -1416,7 +1416,8 @@
     <div class="inv-modal-header no-print">
       <span class="inv-modal-title">
         <i class="bi bi-file-earmark-text-fill"></i>
-        {{ invoiceBooking.chaletType === 1 ? 'R' : 'G' }}2026-{{ invoiceBooking.id }}
+        {{ invoiceBooking.chaletType === 1 ? 'R' : 'G' }}-{{ invoiceBooking.date | date:'yyyy' }}-{{ invoiceBooking.id
+        }}
       </span>
       <div class="inv-modal-actions">
         <button class="inv-action-btn inv-share" (click)="shareInvoice()" [disabled]="!shareBtn" title="مشاركة">
@@ -1464,7 +1465,8 @@
           </div>
           <div class="inv-meta-block">
             <div class="inv-num" style="direction:ltr; text-align:right;">
-              {{ invoiceBooking.chaletType === 1 ? 'R' : 'G' }}2026-{{ invoiceBooking.id }}
+              {{ invoiceBooking.chaletType === 1 ? 'R' : 'G' }}-{{ invoiceBooking.date | date:'yyyy' }}-{{
+              invoiceBooking.id }}
             </div>
             <div class="inv-date">{{ formatDateTime(invoiceBooking.createdAt | jordanDate ) }}</div>
             <div class="inv-status-chip" [ngClass]="getStatusClass(invoiceBooking.status)">
@@ -1476,7 +1478,7 @@
         <!-- بيانات العميل + تفاصيل الحجز -->
         <div class="inv-info-grid">
           <div class="inv-card">
-            <div class="inv-card-title"><i class="bi bi-person-fill"></i> بيانات العميل</div>
+            <div class=""><i class="bi bi-person-fill"></i> بيانات العميل</div>
             <div class="inv-info-row">
               <span class="inv-info-label">الاسم</span>
               <span class="inv-info-val">{{ invoiceBooking.customerName }}</span>
@@ -1497,7 +1499,7 @@
           </div>
 
           <div class="inv-card">
-            <div class="inv-card-title"><i class="bi bi-calendar3"></i> تفاصيل الحجز</div>
+            <div class=""><i class="bi bi-calendar3"></i> تفاصيل الحجز</div>
             <div class="inv-info-row">
               <span class="inv-info-label">الكوخ</span>
               <span class="inv-info-val">
@@ -1524,7 +1526,7 @@
 
         <!-- جدول البنود -->
         <div class="inv-table-wrap">
-          <div class="inv-section-title"><i class="bi bi-list-ul"></i> بنود الفاتورة</div>
+          <div class=""><i class="bi bi-list-ul"></i> بنود الفاتورة</div>
           <table class="inv-table">
             <thead>
               <tr>
@@ -1637,7 +1639,7 @@
 
         <!-- تذييل الفاتورة -->
         <div class="inv-footer">
-          <div class="inv-footer-stamp">
+          <div class="">
             {{ invoiceBooking.status === 'Done' ? '✔ تم الاستلام' :
             invoiceBooking.status === 'Confirmed' ? '✔ مؤكد' :
             invoiceBooking.status === 'Pending' ? '⏳ قيد الانتظار' : getStatusLabel(invoiceBooking.status) }}

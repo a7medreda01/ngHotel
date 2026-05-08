@@ -36,7 +36,7 @@
     </div>
   </div>
 </div>
-      <button class="secondary-btn" (click)="openReportModal()">
+      <button class="secondary-btn" (click)="openReportModal()" *ngIf="isManager || isPartner">
   <svg viewBox="0 0 16 16" fill="none" width="14" height="14">
     <path d="M3 2h7l3 3v9H3V2z" stroke="currentColor" stroke-width="1.5"/>
     <path d="M10 2v3h3M6 9l2 2 2-2M8 7v4" stroke="currentColor"
