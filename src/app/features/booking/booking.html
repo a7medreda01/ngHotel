@@ -1,6 +1,3 @@
-
-
-
 <div class="bookings-page" dir="rtl">
 
   <!-- Toast -->
@@ -476,12 +473,8 @@
         </div>
 
         <div class="dp-actions">
-          <button class="dp-btn dp-btn-invoice" (click)="openInvoice(selectedBooking!)">
-            <i class="bi bi-receipt-cutoff"></i> فاتورة
-          </button>
-          <button class="dp-btn dp-btn-payments" (click)="openPaymentsModal(selectedBooking)">
-            <i class="bi bi-receipt"></i> الدفعات
-          </button>
+
+
           <button class="dp-btn dp-btn-edit" (click)="openEditModal(selectedBooking, true)"
             *ngIf="selectedBooking.status !== 'Cancelled'">
             <i class="bi bi-pencil-fill"></i> تعديل
@@ -494,6 +487,12 @@
           <button class="dp-btn dp-btn-done" *ngIf="selectedBooking.status === 'Confirmed'"
             (click)="promptDone(selectedBooking.id, true)">
             <i class="bi bi-check2-all"></i> استلام
+          </button>
+          <button class="dp-btn dp-btn-payments" (click)="openPaymentsModal(selectedBooking)">
+            <i class="bi bi-receipt"></i> الدفعات
+          </button>
+          <button class="dp-btn dp-btn-invoice" (click)="openInvoice(selectedBooking!)">
+            <i class="bi bi-receipt-cutoff"></i> فاتورة
           </button>
           <button class="dp-btn dp-btn-notes" (click)="openNotesModal(selectedBooking!)">
             <i class="bi bi-chat-dots-fill"></i> ملاحظات
@@ -513,23 +512,23 @@
   <!-- ═══ MOBILE CARDS ═══ -->
   <div class="mobile-only">
     <!-- SKELETON LOADING — MOBILE -->
-<div class="mobile-only" *ngIf="isLoading">
-  <div class="booking-card" *ngFor="let i of [1,2,3,4]">
-    <div class="card-row-top">
-      <div class="skeleton-box" style="width:38px;height:38px;border-radius:50%;flex-shrink:0;"></div>
-      <div class="card-main">
-        <div class="skeleton-box" style="width:55%;height:13px;margin-bottom:6px;"></div>
-        <div class="skeleton-box" style="width:38%;height:11px;"></div>
+    <div class="mobile-only" *ngIf="isLoading">
+      <div class="booking-card" *ngFor="let i of [1,2,3,4]">
+        <div class="card-row-top">
+          <div class="skeleton-box" style="width:38px;height:38px;border-radius:50%;flex-shrink:0;"></div>
+          <div class="card-main">
+            <div class="skeleton-box" style="width:55%;height:13px;margin-bottom:6px;"></div>
+            <div class="skeleton-box" style="width:38%;height:11px;"></div>
+          </div>
+          <div class="skeleton-box" style="width:52px;height:22px;border-radius:20px;"></div>
+        </div>
+        <div class="card-row-bottom">
+          <div class="skeleton-box" style="width:80px;height:11px;"></div>
+          <div class="skeleton-box" style="width:50px;height:11px;"></div>
+          <div class="skeleton-box" style="width:55px;height:11px;"></div>
+        </div>
       </div>
-      <div class="skeleton-box" style="width:52px;height:22px;border-radius:20px;"></div>
     </div>
-    <div class="card-row-bottom">
-      <div class="skeleton-box" style="width:80px;height:11px;"></div>
-      <div class="skeleton-box" style="width:50px;height:11px;"></div>
-      <div class="skeleton-box" style="width:55px;height:11px;"></div>
-    </div>
-  </div>
-</div>
     <div class="mobile-list-header">
       <span class="results-count">{{ filteredBookings.length }} حجز</span>
     </div>
@@ -694,39 +693,49 @@
             <span class="chip-total">{{ ex.total }} د.أ</span>
           </div>
         </div>
+<div class="sheet-actions">
 
-        <div class="sheet-actions">
-          <button class="sheet-btn btn-invoice-sheet" (click)="openInvoice(selectedBooking!)">
-            <i class="bi bi-receipt-cutoff"></i> فاتورة
-          </button>
-          <button class="sheet-btn btn-payments-sheet" (click)="openPaymentsModal(selectedBooking)">
-            <i class="bi bi-receipt"></i> الدفعات
-          </button>
-          <button class="sheet-btn btn-edit-sheet" (click)="openEditModal(selectedBooking)"
-            *ngIf="selectedBooking.status !== 'Cancelled'">
-            <i class="bi bi-pencil-fill"></i> تعديل
-          </button>
-          <button class="sheet-btn btn-deposit-sheet"
-            *ngIf="auth.hasRole('Manager') && (selectedBooking.status === 'Pending' || selectedBooking.status === 'WaitingList')"
-            (click)="openDepositModal(selectedBooking)">
-            <i class="bi bi-credit-card-fill"></i> ديبوزت
-          </button>
-          <button class="sheet-btn btn-done-sheet"
-            *ngIf="selectedBooking.status === 'Confirmed' && !isFutureDate(selectedBooking.date)"
-            (click)="promptDone(selectedBooking.id)">
-            <i class="bi bi-check2-all"></i> استلام
-          </button>
-          <button class="sheet-btn btn-notes-sheet" (click)="openNotesModal(selectedBooking!)">
-            <i class="bi bi-chat-dots-fill"></i> ملاحظات
-            <span class="notes-badge-lg" *ngIf="getNotesCount(selectedBooking)">{{ getNotesCount(selectedBooking)
-              }}</span>
-          </button>
-          <button class="sheet-btn btn-cancel-sheet"
-            *ngIf="selectedBooking.status !== 'Cancelled' && selectedBooking.status !== 'Done'"
-            (click)="promptCancel(selectedBooking.id)">
-            <i class="bi bi-x-circle-fill"></i> إلغاء
-          </button>
-        </div>
+
+  <button class="sheet-btn btn-deposit-sheet"
+    *ngIf="auth.hasRole('Manager') && (selectedBooking.status === 'Pending' || selectedBooking.status === 'WaitingList')"
+    (click)="openDepositModal(selectedBooking)">
+    <i class="ti ti-credit-card"></i> ديبوزت
+  </button>
+
+  <button class="sheet-btn btn-done-sheet"
+    *ngIf="selectedBooking.status === 'Confirmed' && !isFutureDate(selectedBooking.date)"
+    (click)="promptDone(selectedBooking.id)">
+    <i class="ti ti-check"></i> استلام
+  </button>
+  <button class="sheet-btn btn-edit-sheet"
+    (click)="openEditModal(selectedBooking)"
+    *ngIf="selectedBooking.status !== 'Cancelled'">
+    <i class="ti ti-pencil"></i> تعديل
+  </button>
+  <button class="sheet-btn btn-payments-sheet"
+    (click)="openPaymentsModal(selectedBooking)">
+    <i class="ti ti-receipt"></i> الدفعات
+  </button>
+
+  <button class="sheet-btn btn-notes-sheet"
+    (click)="openNotesModal(selectedBooking!)">
+    <i class="ti ti-message-dots"></i> ملاحظات
+    <span class="notes-badge-lg" *ngIf="getNotesCount(selectedBooking)">
+      {{ getNotesCount(selectedBooking) }}
+    </span>
+  </button>
+
+  <button class="sheet-btn btn-invoice-sheet"
+    (click)="openInvoice(selectedBooking!)">
+    <i class="ti ti-receipt-2"></i> فاتورة
+  </button>
+
+  <button class="sheet-btn btn-cancel-sheet"
+    *ngIf="selectedBooking.status !== 'Cancelled' && selectedBooking.status !== 'Done'"
+    (click)="promptCancel(selectedBooking.id)">
+    <i class="ti ti-x"></i> إلغاء
+  </button>
+</div>
       </div>
     </div>
   </div>
@@ -1133,7 +1142,7 @@
               <label>خصم (د.أ)</label>
 
               <input type="number" [(ngModel)]="editForm.discountAmount" (ngModelChange)="validateDiscount()" min="0"
-                [max]="auth.hasRole('Manager') ? 999999 : 10" class="form-input" placeholder="ادخل الخصم"  />
+                [max]="auth.hasRole('Manager') ? 999999 : 10" class="form-input" placeholder="ادخل الخصم" />
             </div>
           </div>
         </div>

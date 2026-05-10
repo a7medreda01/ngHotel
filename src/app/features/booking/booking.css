@@ -1893,3 +1893,56 @@ dp-btn-invoice {
   border-radius: 6px;
   display: inline-block;
 }
+.sheet-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  direction: rtl;
+}
+
+.sheet-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 0.5px solid #ddd;
+  background: #f5f5f5;
+  color: #333;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  position: relative;
+  transition: opacity 0.15s;
+}
+
+.sheet-btn:active { opacity: 0.75; }
+
+.btn-notes-sheet { color: #185FA5; border-color: #B5D4F4; background: #E6F1FB; }
+.btn-invoice-sheet { background: #2C2C2A; color: #fff; border-color: #2C2C2A; }
+.btn-cancel-sheet {
+  grid-column: span 2;
+  background: #FCEBEB;
+  color: #A32D2D;
+  border-color: #F7C1C1;
+}
+
+.notes-badge-lg {
+  position: absolute;
+  top: 6px;
+  left: 8px;
+  background: #185FA5;
+  color: #fff;
+  font-size: 10px;
+  font-weight: 600;
+  border-radius: 50%;
+  width: 16px;
+  height: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.btn-deposit-sheet { grid-column: span 2; }
+.btn-done-sheet    { grid-column: span 2; }
+.btn-cancel-sheet  { grid-column: span 2; }

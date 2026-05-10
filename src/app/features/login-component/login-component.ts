@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { ChangeDetectorRef, Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
@@ -18,7 +18,7 @@ export class LoginComponent {
   isLoading = false;
   errorMessage = '';
 
-  constructor(private auth: AuthService, private router: Router) {
+  constructor(private auth: AuthService, private router: Router,private cdr: ChangeDetectorRef) {
     // Redirect if already logged in
     if (this.auth.isLoggedIn()) {
       this.router.navigate(['/dashboard']);
@@ -49,5 +49,7 @@ export class LoginComponent {
     'حدث خطأ، يرجى المحاولة مرة أخرى';
       }
     });
+      this.cdr.detectChanges(); // ✅ تحديث UI فورًا
+
   }
 }

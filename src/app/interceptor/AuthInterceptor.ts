@@ -16,21 +16,34 @@ export class AuthInterceptor implements HttpInterceptor {
 
   constructor(private auth: AuthService) {}
 
-  intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
-    const token = this.auth.getToken();
-    const authReq = token ? this.addToken(req, token) : req;
+ intercept(
+  req: HttpRequest<any>,
+  next: HttpHandler
+): Observable<HttpEvent<any>> {
 
-    return next.handle(authReq).pipe(
-      catchError((err: HttpErrorResponse) => {
-        // لو 401 ومش طلب refresh نفسه
-        if (err.status === 401 && !req.url.includes('refresh-token')) {
-          return this.handle401(req, next);
-        }
-        return throwError(() => err);
-      })
-    );
-  }
+  const token = this.auth.getToken();
+  const authReq =
+    token ? this.addToken(req, token) : req;
 
+  return next.handle(authReq).pipe(
+    catchError((err: HttpErrorResponse) => {
+
+      // تجاهل auth endpoints
+      const isAuthRequest =
+        req.url.includes('/login') ||
+        req.url.includes('/refresh-token');
+
+      if (
+        err.status === 401 &&
+        !isAuthRequest
+      ) {
+        return this.handle401(req, next);
+      }
+
+      return throwError(() => err);
+    })
+  );
+}
   private addToken(req: HttpRequest<any>, token: string) {
     return req.clone({
       setHeaders: { Authorization: `Bearer ${token}` }

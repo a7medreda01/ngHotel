@@ -502,10 +502,22 @@ requestNewBooking(chaletType: number, period: number): void {
   trackByDate(i: number, cell: DayCell): string { return cell.dateStr; }
   trackBySlot(i: number, sl: SlotSummary): string { return `${sl.chaletType}_${sl.period}`; }
 
-  getMonthStat(type: 'confirmed' | 'pending' | 'available'): number {
-    const cells = this.weeks.flat().filter(c => c.isCurrentMonth);
-    if (type === 'confirmed') return cells.reduce((s, c) => s + c.totalConfirmed, 0);
-    if (type === 'pending')   return cells.reduce((s, c) => s + c.totalPending, 0);
-    return cells.reduce((s, c) => s + c.totalAvailable, 0);
-  }
+getMonthStat(type: 'confirmed' | 'pending' | 'available'): number {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const cells = this.weeks
+    .flat()
+    .filter(c => {
+      const cellDate = new Date(c.date);
+      cellDate.setHours(0, 0, 0, 0);
+
+      return c.isCurrentMonth && cellDate >= today;
+    });
+
+  if (type === 'confirmed') return cells.reduce((s, c) => s + c.totalConfirmed, 0);
+  if (type === 'pending')   return cells.reduce((s, c) => s + c.totalPending, 0);
+
+  return cells.reduce((s, c) => s + c.totalAvailable, 0);
+}
 }

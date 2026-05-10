@@ -78,7 +78,7 @@ export class ProfileComponent implements OnInit {
   }
 
   /** الـ tabs المتاحة حسب الصلاحية */
-  get tabs(): { id: Tab; label: string; icon: string; managerOnly?: boolean }[] {
+  get tabs(): { id: Tab; label: string; icon: string; managerOnly?: boolean, partnerOnly?: boolean }[] {
     const all = [
       { id: 'profile'   as Tab, label: 'الحساب',   icon: 'bi-person-circle' },
       { id: 'pricing'   as Tab, label: 'الأسعار',  icon: 'bi-currency-dollar', managerOnly: true },
@@ -86,11 +86,11 @@ export class ProfileComponent implements OnInit {
       { id: 'partners'  as Tab, label: 'الشركاء',  icon: 'bi-briefcase-fill',  managerOnly: true },
       { id: 'customers' as Tab, label: 'العملاء',  icon: 'bi-people-fill',     managerOnly: true },
       { id: 'users' as Tab, label: 'المستخدمين',  icon: 'bi-people',     managerOnly: true },
-      { id: 'chalet' as Tab, label: 'الكوخ',  icon: 'bi-house',      },
+      { id: 'chalet' as Tab, label: 'الكوخ',  icon: 'bi-house',   managerOnly: true ,partnerOnly:true },
       { id: 'addons' as Tab, label: 'الاضافات',  icon: 'bi-plus',     managerOnly: true },
       { id: 'Maintenance' as Tab, label: 'الصيانة',  icon: 'bi-hammer',     managerOnly: true },
     ];
-    return all.filter(t => !t.managerOnly || this.user?.role === 'Manager');
+    return all.filter(t => !t.managerOnly || this.user?.role === 'Manager'|| t.partnerOnly );
   }
 
   setTab(tab: Tab): void { this.activeTab = tab; }

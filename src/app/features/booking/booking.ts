@@ -62,7 +62,7 @@ export class Booking implements OnInit {
   showToast = false;
   searchQuery = '';
   filterStatus = '';
-  filterDateRange = '';
+  filterDateRange = 'today';
   filterDateFrom = '';
   filterDateTo = '';
   // Pagination
@@ -1101,36 +1101,59 @@ openEditModal(booking: Bookings, fromPanel = false): void {
   // ══════════════════════════════════════════════════════════════════════════
   // Today Stats
   // ══════════════════════════════════════════════════════════════════════════
+private getLocalDateStr(date: Date): string {
+  return date.toLocaleDateString('en-CA', { timeZone: 'Asia/Amman' });
+  // بيرجع: YYYY-MM-DD بتوقيت الأردن
+}
 
-  private getTodayStr(): string { return this.formatDateLocal(new Date()); }
-  private getYesterdayStr(): string {
-    const y = new Date(); y.setDate(y.getDate() - 1); return this.formatDateLocal(y);
-  }
+private parseUTCDate(dateStr: string): Date {
+  // الـ DB بيحفظ من غير Z، فلازم نضيفها عشان يتعامل معاه كـ UTC
+  const normalized = dateStr.replace(' ', 'T').split('.')[0] + 'Z';
+  // 2026-05-09 23:34:26.0000000  →  2026-05-09T23:34:26Z
+  return new Date(normalized);
+}
 
-  get todayBookings(): Bookings[] { return this.bookings.filter(b => this.parseDateStringAsLocal(b.date) === this.getTodayStr()); }
-  get yesterdayBookings(): Bookings[] { return this.bookings.filter(b => this.parseDateStringAsLocal(b.date) === this.getYesterdayStr()); }
+private getTodayStr(): string {
+  return this.getLocalDateStr(new Date());
+}
+
+private getYesterdayStr(): string {
+  const y = new Date();
+  y.setDate(y.getDate() - 1);
+  return this.getLocalDateStr(y);
+}
+
+get todayBookings(): Bookings[] {
+  const today = this.getTodayStr();
+  return this.bookings.filter(b => 
+    this.getLocalDateStr(this.parseUTCDate(b.createdAt)) === today
+  );
+}
+
+get yesterdayBookings(): Bookings[] {
+  const yesterday = this.getYesterdayStr();
+  return this.bookings.filter(b => 
+    this.getLocalDateStr(this.parseUTCDate(b.createdAt)) === yesterday
+  );
+}
+  // get todayBookings(): Bookings[] { return this.bookings.filter(b => this.parseDateStringAsLocal(b.createdAt) === this.getTodayStr()); }
+  // get yesterdayBookings(): Bookings[] { return this.bookings.filter(b => this.parseDateStringAsLocal(b.date) === this.getYesterdayStr()); }
 
   get todayTotal(): number { return this.todayBookings.filter(b => b.status !== 'Cancelled').length; }
   get todayPending(): number { return this.todayBookings.filter(b => b.status === 'Pending' || b.status === 'WaitingList').length; }
   get todayConfirmed(): number { return this.todayBookings.filter(b => b.status === 'Confirmed' || b.status === 'Done').length; }
 
   // ✅ الإيراد = مجموع payments من نوع paymentReson === 1 (price) لحجوزات اليوم المؤكدة/المنتهية
-  get todayRevenue(): number {
-    const today = new Date();
-
-    return this.bookings
-      .flatMap(b => b.payments ?? [])
-      .filter(p => {
-        const d = new Date(p.createdAt);
-        return (
-          d.getFullYear() === today.getFullYear() &&
-          d.getMonth() === today.getMonth() &&
-          d.getDate() === today.getDate() &&
-          p.paymentReson === 1
-        );
-      })
-      .reduce((sum, p) => sum + p.amount, 0);
-  }
+get todayRevenue(): number {
+  const today = this.getTodayStr();
+  return this.bookings
+    .flatMap(b => b.payments ?? [])
+    .filter(p => {
+      const payDate = this.getLocalDateStr(this.parseUTCDate(p.createdAt));
+      return payDate === today && p.paymentReson === 1;
+    })
+    .reduce((sum, p) => sum + p.amount, 0);
+}
 
   get yesterdayTotal(): number { return this.yesterdayBookings.filter(b => b.status !== 'Cancelled').length; }
   get yesterdayPending(): number { return this.yesterdayBookings.filter(b => b.status === 'Pending' || b.status === 'WaitingList').length; }
