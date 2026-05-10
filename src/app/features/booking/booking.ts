@@ -17,7 +17,7 @@ import { MatInputModule } from '@angular/material/input';
 import { AuthService } from '../../service/Auth-service';
 import { Router, ActivatedRoute, RouterLink } from '@angular/router';
 import html2canvas from 'html2canvas';
-import { JordanDatePipe } from '../../shared/pipes/jordan-date-pipe';
+import { JordanDatePipe } from '../../adds/pipes/jordan-date-pipe';
 import { BookingOverviewComponent, NewBookingRequest } from '../booking-overview/booking-overview';
 
 @Component({
@@ -113,7 +113,7 @@ export class Booking implements OnInit {
   waitingDateFormatted = '';
 total      = 0;
 totalPages = 0;
-isLoading  = false;
+isLoading  = true;
   // ─── Edit ───────────────────────────────────────────────────────────────
   editForm: UpdateBookingDto = {
     bookingId: 0, customerName: '', phone: '', payMoney: null, deposit: 0, removedExtraIds: []
@@ -223,7 +223,6 @@ ngOnInit(): void {
     error: () => this.showNotification('فشل تحميل البيانات', 'error'),
   });
 }
-
 // عدّل loadBookings
 loadBookings(): void {
   this.isLoading = true;

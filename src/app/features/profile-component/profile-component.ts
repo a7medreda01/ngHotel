@@ -55,6 +55,7 @@ export class ProfileComponent implements OnInit {
     return 'موظف';
   }
   get isPartner(): boolean { return this.auth.hasRole('Partner'); }
+  get isManager(): boolean { return this.auth.hasRole('Manager'); }
 
   get roleClass(): string {
     const r = this.user?.role;

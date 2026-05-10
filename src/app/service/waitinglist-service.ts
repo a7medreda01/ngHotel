@@ -30,6 +30,8 @@ export interface WaitingListItem {
   status: WaitingStatus;
   notes: string;
   createdAt:any
+    additionalPhone?: string;  // ← أضف السطر ده
+
 }
 
 export interface ConvertToBookingResponse {

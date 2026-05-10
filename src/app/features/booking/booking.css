@@ -1882,3 +1882,14 @@ dp-btn-invoice {
 .modal-overlay {
   z-index: 10000 !important; /* أعلى من 1000 بتاع overview */
 }
+@keyframes shimmer {
+  0%   { background-position: -600px 0; }
+  100% { background-position:  600px 0; }
+}
+.skeleton-box {
+  background: linear-gradient(90deg, #e8eef5 25%, #f4f7fb 50%, #e8eef5 75%);
+  background-size: 600px 100%;
+  animation: shimmer 1.4s infinite;
+  border-radius: 6px;
+  display: inline-block;
+}

@@ -111,9 +111,15 @@
             </td>
 
             <td class="td-phone">
-              <a href="tel:{{ item.phone }}" (click)="$event.stopPropagation()" class="phone-link">
-                <i class="bi bi-telephone-fill"></i> {{ item.phone }}
-              </a>
+              <div style="display:flex;flex-direction:column;gap:4px;">
+                <a href="tel:{{ item.phone }}" (click)="$event.stopPropagation()" class="phone-link">
+                  <i class="bi bi-telephone-fill"></i> {{ item.phone }}
+                </a>
+                <a *ngIf="item.additionalPhone" href="tel:{{ item.additionalPhone }}"
+                   (click)="$event.stopPropagation()" class="phone-link" style="opacity:0.75;">
+                  <i class="bi bi-telephone-plus-fill"></i> {{ item.additionalPhone }}
+                </a>
+              </div>
             </td>
 
             <td>
@@ -132,7 +138,6 @@
               <span class="period-badge">{{ periodArabic(item.period) }}</span>
             </td>
 
-            <!-- ✅ عمود "منذ" بناءً على createdAt -->
             <td>
               <span class="time-ago-badge" [ngClass]="getTimeAgoClass(item.createdAt)" [title]="formatDateTime(item.createdAt)">
                 <i class="bi bi-clock"></i>
@@ -151,8 +156,12 @@
                 <button class="btn-icon btn-edit" (click)="openDetails(item)" title="تعديل الحالة">
                   <i class="bi bi-pencil-fill"></i>
                 </button>
-                <button class="btn-icon btn-whatsapp" (click)="openWhatsApp(item.phone)" title="تواصل واتساب">
+                <button class="btn-icon btn-whatsapp" (click)="openWhatsApp(item.phone)" title="واتساب 1">
                   <i class="bi bi-whatsapp"></i>
+                </button>
+                <button *ngIf="item.additionalPhone" class="btn-icon btn-whatsapp"
+                        (click)="openWhatsApp(item.additionalPhone!)" title="واتساب 2">
+                  <i class="bi bi-telephone-plus-fill"></i>
                 </button>
                 <button class="btn-icon btn-convert" (click)="openConvert(item, $event)" title="تحويل إلى حجز">
                   <i class="bi bi-arrow-right-circle-fill"></i>
@@ -185,6 +194,10 @@
               <a href="tel:{{ item.phone }}" (click)="$event.stopPropagation()" class="phone-link mc-phone">
                 <i class="bi bi-telephone-fill"></i> {{ item.phone }}
               </a>
+              <a *ngIf="item.additionalPhone" href="tel:{{ item.additionalPhone }}"
+                 (click)="$event.stopPropagation()" class="phone-link mc-phone" style="opacity:0.75;display:block;">
+                <i class="bi bi-telephone-plus-fill"></i> {{ item.additionalPhone }}
+              </a>
             </div>
           </div>
           <span class="badge" [ngClass]="statusClass(item.status)">
@@ -205,7 +218,6 @@
             <i class="bi bi-clock mc-detail-icon"></i>
             <span>{{ periodArabic(item.period) }}</span>
           </div>
-          <!-- ✅ وقت الإنشاء على الموبايل -->
           <div class="mc-detail-item">
             <i class="bi bi-hourglass mc-detail-icon"></i>
             <span class="time-ago-badge" [ngClass]="getTimeAgoClass(item.createdAt)">
@@ -223,7 +235,11 @@
             <i class="bi bi-pencil-fill"></i> تعديل الحالة
           </button>
           <button class="btn-whatsapp-full" (click)="openWhatsApp(item.phone)">
-            <i class="bi bi-whatsapp"></i> واتساب
+            <i class="bi bi-whatsapp"></i> واتساب 1
+          </button>
+          <button *ngIf="item.additionalPhone" class="btn-whatsapp-full"
+                  (click)="openWhatsApp(item.additionalPhone!)">
+            <i class="bi bi-whatsapp"></i> واتساب 2
           </button>
           <button class="btn-primary" (click)="openConvert(item, $event)">
             <i class="bi bi-arrow-right-circle-fill"></i> تحويل إلى حجز
@@ -278,6 +294,10 @@
             <span class="info-label"><i class="bi bi-telephone-fill"></i> الهاتف</span>
             <span class="info-value">{{ selectedItem.phone }}</span>
           </div>
+          <div class="info-item" *ngIf="selectedItem.additionalPhone">
+            <span class="info-label"><i class="bi bi-telephone-plus-fill"></i> هاتف إضافي</span>
+            <span class="info-value">{{ selectedItem.additionalPhone }}</span>
+          </div>
           <div class="info-item">
             <span class="info-label"><i class="bi bi-house-fill"></i> الشاليه</span>
             <span class="info-value">{{ selectedItem.chaletName }}</span>
@@ -290,7 +310,6 @@
             <span class="info-label"><i class="bi bi-clock-fill"></i> الفترة</span>
             <span class="info-value">{{ periodArabic(selectedItem.period) }}</span>
           </div>
-          <!-- ✅ وقت الإنشاء في المودال -->
           <div class="info-item">
             <span class="info-label"><i class="bi bi-hourglass-split"></i> وقت الإنشاء</span>
             <span class="info-value">
@@ -336,7 +355,11 @@
           <i class="bi bi-x-lg"></i> إلغاء
         </button>
         <button class="btn-whatsapp-outline" (click)="openWhatsApp(selectedItem!.phone)">
-          <i class="bi bi-whatsapp"></i> واتساب
+          <i class="bi bi-whatsapp"></i> واتساب 1
+        </button>
+        <button *ngIf="selectedItem?.additionalPhone" class="btn-whatsapp-outline"
+                (click)="openWhatsApp(selectedItem!.additionalPhone!)">
+          <i class="bi bi-whatsapp"></i> واتساب 2
         </button>
         <button class="btn-primary" (click)="saveStatus()">
           <i class="bi bi-check-lg"></i> حفظ التغييرات
@@ -378,6 +401,14 @@
             <strong>{{ periodArabic(convertItem.period) }}</strong>
           </div>
           <div class="convert-row">
+            <span><i class="bi bi-telephone-fill"></i> الهاتف</span>
+            <strong>{{ convertItem.phone }}</strong>
+          </div>
+          <div class="convert-row" *ngIf="convertItem.additionalPhone">
+            <span><i class="bi bi-telephone-plus-fill"></i> هاتف إضافي</span>
+            <strong>{{ convertItem.additionalPhone }}</strong>
+          </div>
+          <div class="convert-row">
             <span><i class="bi bi-hourglass-split"></i> منذ</span>
             <strong>
               <span class="time-ago-badge" [ngClass]="getTimeAgoClass(convertItem.createdAt)">
@@ -395,6 +426,14 @@
       <div class="modal-footer">
         <button class="btn-secondary" (click)="closeConvertModal()">
           <i class="bi bi-x-lg"></i> إلغاء
+        </button>
+        <button *ngIf="convertItem?.phone" class="btn-whatsapp-outline"
+                (click)="openWhatsApp(convertItem!.phone)">
+          <i class="bi bi-whatsapp"></i> واتساب 1
+        </button>
+        <button *ngIf="convertItem?.additionalPhone" class="btn-whatsapp-outline"
+                (click)="openWhatsApp(convertItem!.additionalPhone!)">
+          <i class="bi bi-whatsapp"></i> واتساب 2
         </button>
         <button class="btn-primary btn-green" (click)="confirmConvert()">
           <i class="bi bi-check-lg"></i> تأكيد التحويل

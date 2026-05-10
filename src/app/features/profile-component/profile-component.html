@@ -157,7 +157,7 @@
       <app-create-user-component></app-create-user-component>
     </ng-container>
     <!-- ── Tab: الشركاء ── -->
-    <ng-container *ngIf="activeTab === 'chalet'">
+    <ng-container *ngIf="activeTab === 'chalet' && (isPartner || isManager)">
       <app-chalet></app-chalet>
     </ng-container>
 
