@@ -286,60 +286,58 @@ export class Waitinglist implements OnInit {
 // أضف الـ functions دي في waitinglist.component.ts
 // ══════════════════════════════════════════════════════════
 
-/**
- * timeAgo — بتحول createdAt لنص عربي "منذ X دقيقة / ساعة / يوم"
- */
 timeAgo(dateStr: string | null | undefined): string {
   if (!dateStr) return '—';
-  const date = new Date(dateStr);
+
+  // ✅ normalize لـ UTC
+  const normalized = dateStr.endsWith('Z') ? dateStr : dateStr + 'Z';
+  const date = new Date(normalized);
   if (isNaN(date.getTime())) return '—';
 
-  const now     = new Date();
-  const diffMs  = now.getTime() - date.getTime();
+  const diffMs  = Date.now() - date.getTime();
   const diffMin = Math.floor(diffMs / 60_000);
   const diffHr  = Math.floor(diffMin / 60);
   const diffDay = Math.floor(diffHr / 24);
 
-  if (diffMs < 0)       return 'الآن';
-  if (diffMin < 1)      return 'الآن';
-  if (diffMin === 1)    return 'منذ دقيقة';
-  if (diffMin < 60)     return `منذ ${diffMin} دقيقة`;
-  if (diffHr === 1)     return 'منذ ساعة';
-  if (diffHr < 24)      return `منذ ${diffHr} ساعة`;
-  if (diffDay === 1)    return 'منذ يوم';
-  if (diffDay < 7)      return `منذ ${diffDay} أيام`;
-  if (diffDay < 30)     return `منذ ${Math.floor(diffDay / 7)} أسابيع`;
-  if (diffDay < 365)    return `منذ ${Math.floor(diffDay / 30)} شهر`;
+  if (diffMs  < 0)    return 'الآن';
+  if (diffMin < 1)    return 'الآن';
+  if (diffMin === 1)  return 'منذ دقيقة';
+  if (diffMin < 60)   return `منذ ${diffMin} دقيقة`;
+  if (diffHr  === 1)  return 'منذ ساعة';
+  if (diffHr  < 24)   return `منذ ${diffHr} ساعة`;
+  if (diffDay === 1)  return 'منذ يوم';
+  if (diffDay < 7)    return `منذ ${diffDay} أيام`;
+  if (diffDay < 30)   return `منذ ${Math.floor(diffDay / 7)} أسابيع`;
+  if (diffDay < 365)  return `منذ ${Math.floor(diffDay / 30)} شهر`;
   return `منذ ${Math.floor(diffDay / 365)} سنة`;
 }
 
-/**
- * getTimeAgoClass — لون الـ badge حسب الوقت:
- *  أقل من ساعة  → أخضر  (time-fresh)
- *  1-3 ساعات    → أصفر  (time-medium)
- *  3-24 ساعة    → برتقالي (time-old)
- *  أكثر من يوم  → أحمر  (time-urgent)
- */
 getTimeAgoClass(dateStr: string | null | undefined): string {
   if (!dateStr) return '';
-  const date    = new Date(dateStr);
-  if (isNaN(date.getTime())) return '';
-  const diffHr  = (new Date().getTime() - date.getTime()) / 3_600_000;
 
-  if (diffHr < 1)   return 'time-fresh';
-  if (diffHr < 3)   return 'time-medium';
-  if (diffHr < 24)  return 'time-old';
+  // ✅ normalize لـ UTC
+  const normalized = dateStr.endsWith('Z') ? dateStr : dateStr + 'Z';
+  const date = new Date(normalized);
+  if (isNaN(date.getTime())) return '';
+
+  const diffHr = (Date.now() - date.getTime()) / 3_600_000;
+
+  if (diffHr < 1)  return 'time-fresh';
+  if (diffHr < 3)  return 'time-medium';
+  if (diffHr < 24) return 'time-old';
   return 'time-urgent';
 }
 
-/**
- * formatDateTime — تاريخ + وقت كامل للـ tooltip
- */
 formatDateTime(dateStr: string | null | undefined): string {
   if (!dateStr) return '';
-  const date = new Date(dateStr);
+
+  // ✅ normalize لـ UTC
+  const normalized = dateStr.endsWith('Z') ? dateStr : dateStr + 'Z';
+  const date = new Date(normalized);
   if (isNaN(date.getTime())) return '';
+
   return new Intl.DateTimeFormat('ar-EG', {
+    timeZone: 'Asia/Amman',  // ✅ توقيت الأردن
     day:    '2-digit',
     month:  'short',
     year:   'numeric',
@@ -348,6 +346,8 @@ formatDateTime(dateStr: string | null | undefined): string {
     hour12: true,
   }).format(date);
 }
+
+
 openWhatsApp(phone: string | null | undefined): void {
   if (!phone) return;
   // شيل كل حاجة غير أرقام
