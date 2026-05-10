@@ -15,16 +15,18 @@ import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { AuthService } from '../../service/Auth-service';
-import { Router, ActivatedRoute } from '@angular/router';
+import { Router, ActivatedRoute, RouterLink } from '@angular/router';
 import html2canvas from 'html2canvas';
 import { JordanDatePipe } from '../../shared/pipes/jordan-date-pipe';
+import { BookingOverviewComponent, NewBookingRequest } from '../booking-overview/booking-overview';
 
 @Component({
   selector: 'app-booking',
   standalone: true,
   imports: [
-    FormsModule, CommonModule,
+    FormsModule, CommonModule,RouterLink,
     MatDatepickerModule, MatFormFieldModule, MatInputModule, MatNativeDateModule,JordanDatePipe
+    ,BookingOverviewComponent
   ],
   templateUrl: './booking.html',
   styleUrl: './booking.css',
@@ -74,7 +76,7 @@ export class Booking implements OnInit {
   addStep = 1;
   newBooking: CreateBookingDto = {
     customerName: '', phone: '', date: '',
-    period: -1, chaletType: 0, numOfGuests: 1, extras: [],note:''
+    period: -1, chaletType: 0, numOfGuests: 1, extras: [],note:'',additionalPhone:''
   };
   selectedCountryCode = '+962';
   countryCodes = [
@@ -109,10 +111,12 @@ export class Booking implements OnInit {
   chaletCountMap: Record<string, number> = {};
 
   waitingDateFormatted = '';
-
+total      = 0;
+totalPages = 0;
+isLoading  = false;
   // ─── Edit ───────────────────────────────────────────────────────────────
   editForm: UpdateBookingDto = {
-    bookingId: 0, customerName: '', phone: '', payMoney: 0, deposit: 0, removedExtraIds: []
+    bookingId: 0, customerName: '', phone: '', payMoney: null, deposit: 0, removedExtraIds: []
   };
   editCountryCode = '+962';
   editAddExtraId = 0;
@@ -150,7 +154,7 @@ export class Booking implements OnInit {
   notesBooking: Bookings | null = null;
   newNoteText = '';
   noteSending = false;
-  readonly periodLabels: Record<number, string> = { 0: 'صباحي', 1: 'مسائي', 2: 'كامل' };
+  readonly periodLabels: Record<number, string> = { 0: 'صباحي', 1: 'مسائي', 2: 'يوم كامل' };
   readonly statusLabels: Record<string, string> = {
     Pending: 'قيد الانتظار', Confirmed: 'مؤكد',
     Cancelled: 'ملغي', WaitingList: 'قائمة الانتظار', Done: 'تم الاستلام',
@@ -174,107 +178,120 @@ export class Booking implements OnInit {
   // Lifecycle
   // ══════════════════════════════════════════════════════════════════════════
 
-  ngOnInit(): void {
-    if (this.router.url === '/booking/new') this.showAddModal = true;
+// عدّل ngOnInit — شيل getAllBookings واستخدم getBookingsPaged
+ngOnInit(): void {
+  if (this.router.url === '/booking/new') this.showAddModal = true;
 
-    forkJoin({
-      bookings: this.bookingService.getAllBookings(),
-      chalets: this.chaletService.getAll(),
-      extras: this.extrasService.getAll(),
-      upcoming: this.bookingService.getUpcomingBookings(),
-    }).subscribe({
-      next: ({ bookings, chalets, extras, upcoming }) => {
-        this.bookings = bookings.sort((a, b) => {
-          const today = this.formatDateLocal(new Date());
-          const dateA = this.parseDateStringAsLocal(a.date);
-          const dateB = this.parseDateStringAsLocal(b.date);
+  // جيب البيانات الثابتة (chalets, extras, upcoming) مرة واحدة
+  forkJoin({
+    chalets:  this.chaletService.getAll(),
+    extras:   this.extrasService.getAll(),
+    upcoming: this.bookingService.getUpcomingBookings(),
+  }).subscribe({
+    next: ({ chalets, extras, upcoming }) => {
+      this.chalets          = chalets;
+      this.extras           = extras.filter((e: any) => e.isActive);
+      this.upcomingBookings = upcoming?.data ?? [];
+      this.upcomingLoaded   = true;
+      this.buildBookingStatusMap();
+      this.cdr.detectChanges();
 
-          // الأقرب للتاريخ الحالي (اليوم وما بعده) يجي أول
-          const diffA = new Date(dateA).getTime() - new Date(today).getTime();
-          const diffB = new Date(dateB).getTime() - new Date(today).getTime();
+      // بعد ما الثوابت تجهز، جيب الحجوزات
+      this.loadBookings();
 
-          // فصل المستقبل (>=0) عن الماضي (<0)
-          const isFutureA = diffA >= 0;
-          const isFutureB = diffB >= 0;
-
-          if (isFutureA && isFutureB) return diffA - diffB; // المستقبل: الأقرب أولاً
-          if (!isFutureA && !isFutureB) return diffB - diffA; // الماضي: الأحدث أولاً
-          return isFutureA ? -1 : 1; // المستقبل قبل الماضي دايماً
-        }); this.chalets = chalets;
-        this.extras = extras.filter((e: any) => e.isActive);
-        this.upcomingBookings = upcoming?.data ?? [];
-        this.upcomingLoaded = true;
-        this.buildBookingStatusMap();
-        // ✅ بناء الـ map من payments المضمّنة في كل booking
-        this._buildPaymentsMapFromBookings();
-        this.applyFilter();
-        this.cdr.detectChanges();
-
-        this.route.queryParams.subscribe(params => {
-          const bookingId = params['openBooking'];
-          if (bookingId) {
-            const id = +bookingId;
-            const found = this.bookings.find(b => b.id === id);
-            if (found) {
-              window.innerWidth < 768 ? this.openDetailSheet(found) : this.openDetail(found);
-            } else {
-              this.bookingService.getBookingById(id).subscribe({
-                next: full => {
-                  this.selectedBooking = full;
-                  // ✅ تحديث الـ map بالحجز الجديد
-                  this._buildPaymentsMapFromBooking(full);
-                  window.innerWidth < 768
-                    ? (this.showDetailSheet = true)
-                    : (this.showDetailPanel = true);
-                  this.cdr.detectChanges();
-                }
-              });
+      // handle query params
+      this.route.queryParams.subscribe(params => {
+        const bookingId = params['openBooking'];
+        if (bookingId) {
+          const id = +bookingId;
+          this.bookingService.getBookingById(id).subscribe({
+            next: full => {
+              this.selectedBooking = full;
+              this._buildPaymentsMapFromBooking(full);
+              window.innerWidth < 768
+                ? (this.showDetailSheet = true)
+                : (this.showDetailPanel = true);
+              this.cdr.detectChanges();
             }
-            this.router.navigate([], { relativeTo: this.route, queryParams: {}, replaceUrl: true });
-          }
-        });
-      },
-      error: () => this.showNotification('فشل تحميل البيانات', 'error'),
-    });
-  }
-
-  loadBookings(): void {
-    forkJoin({
-      bookings: this.bookingService.getAllBookings(),
-      upcoming: this.bookingService.getUpcomingBookings(),
-    }).subscribe({
-      next: ({ bookings, upcoming }) => {
-        this.bookings = bookings.sort((a, b) => {
-          const today = this.formatDateLocal(new Date());
-          const dateA = this.parseDateStringAsLocal(a.date);
-          const dateB = this.parseDateStringAsLocal(b.date);
-
-          // الأقرب للتاريخ الحالي (اليوم وما بعده) يجي أول
-          const diffA = new Date(dateA).getTime() - new Date(today).getTime();
-          const diffB = new Date(dateB).getTime() - new Date(today).getTime();
-
-          // فصل المستقبل (>=0) عن الماضي (<0)
-          const isFutureA = diffA >= 0;
-          const isFutureB = diffB >= 0;
-
-          if (isFutureA && isFutureB) return diffA - diffB; // المستقبل: الأقرب أولاً
-          if (!isFutureA && !isFutureB) return diffB - diffA; // الماضي: الأحدث أولاً
-          return isFutureA ? -1 : 1; // المستقبل قبل الماضي دايماً
-        }); this.upcomingBookings = upcoming?.data ?? [];
-        this.buildBookingStatusMap();
-        // ✅ إعادة بناء الـ map بالكامل من الـ payments الجديدة
-        this.bookingPaymentsMap = {};
-        this._buildPaymentsMapFromBookings();
-        this.applyFilter();
-        if (this.selectedBooking) {
-          const updated = this.bookings.find(b => b.id === this.selectedBooking!.id);
-          if (updated) this.selectedBooking = { ...updated };
+          });
+          this.router.navigate([], {
+            relativeTo: this.route, queryParams: {}, replaceUrl: true
+          });
         }
-        this.cdr.detectChanges();
-      },
-      error: () => this.showNotification('فشل تحميل الحجوزات', 'error'),
-    });
+      });
+    },
+    error: () => this.showNotification('فشل تحميل البيانات', 'error'),
+  });
+}
+
+// عدّل loadBookings
+loadBookings(): void {
+  this.isLoading = true;
+  this.cdr.detectChanges();
+
+  this.bookingService.getBookingsPaged({
+    page:     this.currentPage,
+    pageSize: this.pageSize,
+    search:   this.searchQuery.trim()   || undefined,
+    status:   this.filterStatus         || undefined,
+    dateFrom: this.getDateFrom()        || undefined,
+    dateTo:   this.getDateTo()          || undefined,
+  }).subscribe({
+    next: res => {
+      this.bookings          = res.data;
+      this.filteredBookings  = res.data;   // للتوافق مع باقي الكود
+      this.pagedBookings     = res.data;
+      this.total             = res.total;
+      this.totalPages        = res.totalPages;
+      this.isLoading         = false;
+
+      this._buildPaymentsMapFromBookings();
+
+      // حدّث الـ selectedBooking لو كان مفتوح
+      if (this.selectedBooking) {
+        const updated = res.data.find(b => b.id === this.selectedBooking!.id);
+        if (updated) this.selectedBooking = { ...updated };
+      }
+      this.cdr.detectChanges();
+    },
+    error: () => {
+      this.isLoading = false;
+      this.showNotification('فشل تحميل الحجوزات', 'error');
+      this.cdr.detectChanges();
+    }
+  });
+}
+
+// Helper يجيب dateFrom بناءً على filterDateRange
+private getDateFrom(): string {
+  const today    = new Date();
+  const fmt      = (d: Date) => this.formatDateLocal(d);
+
+  switch (this.filterDateRange) {
+    case 'today':      return fmt(today);
+    case 'yesterday':  { const y = new Date(today); y.setDate(y.getDate()-1); return fmt(y); }
+    case 'week':       { const w = new Date(today); w.setDate(w.getDate()-7); return fmt(w); }
+    case 'month':      { const m = new Date(today); m.setDate(m.getDate()-30); return fmt(m); }
+    case 'last_month': return fmt(new Date(today.getFullYear(), today.getMonth()-1, 1));
+    case 'custom':     return this.filterDateFrom;
+    default:           return '';
   }
+}
+
+private getDateTo(): string {
+  const today = new Date();
+  const fmt   = (d: Date) => this.formatDateLocal(d);
+
+  switch (this.filterDateRange) {
+    case 'today':      return fmt(today);
+    case 'yesterday':  { const y = new Date(today); y.setDate(y.getDate()-1); return fmt(y); }
+    case 'week':
+    case 'month':      return fmt(today);
+    case 'last_month': return fmt(new Date(today.getFullYear(), today.getMonth(), 0));
+    case 'custom':     return this.filterDateTo;
+    default:           return '';
+  }
+}
 
   // ══════════════════════════════════════════════════════════════════════════
   // ✅ Payments Map Helpers — من booking.payments مباشرة
@@ -302,89 +319,32 @@ export class Booking implements OnInit {
   // Filter & Pagination
   // ══════════════════════════════════════════════════════════════════════════
 
-  applyFilter(): void {
-    let result = [...this.bookings];
+applyFilter(): void {
+  this.currentPage = 1;
+  this.loadBookings();
+}
 
-    // فلتر البحث النصي
-    if (this.searchQuery.trim()) {
-      const q = this.searchQuery.toLowerCase();
-      result = result.filter(b =>
-        b.customerName.toLowerCase().includes(q) ||
-        b.phone.includes(q) ||
-        b.id.toString().includes(q) ||
-        (b.chaletName ?? '').toLowerCase().includes(q)
-      );
-    }
+applyPage(): void {
+  this.loadBookings();
+}
 
-    // فلتر الحالة
-    if (this.filterStatus) result = result.filter(b => b.status === this.filterStatus);
 
-    // فلتر الفترة الزمنية
-    if (this.filterDateRange) {
-      const today = new Date(); today.setHours(0, 0, 0, 0);
-      const todayStr = this.formatDateLocal(today);
+  // get totalPages(): number {
+  //   return Math.max(1, Math.ceil(this.filteredBookings.length / this.pageSize));
+  // }
 
-      const yesterday = new Date(today); yesterday.setDate(yesterday.getDate() - 1);
-      const yesterStr = this.formatDateLocal(yesterday);
-
-      const weekAgo = new Date(today); weekAgo.setDate(weekAgo.getDate() - 7);
-      const monthAgo = new Date(today); monthAgo.setDate(monthAgo.getDate() - 30);
-
-      const firstOfLastMonth = new Date(today.getFullYear(), today.getMonth() - 1, 1);
-      const lastOfLastMonth = new Date(today.getFullYear(), today.getMonth(), 0);
-
-      result = result.filter(b => {
-        const d = this.parseDateStringAsLocal(b.date);
-        switch (this.filterDateRange) {
-          case 'today':
-            return d === todayStr;
-          case 'yesterday':
-            return d === yesterStr;
-          case 'week':
-            return d >= this.formatDateLocal(weekAgo) && d <= todayStr;
-          case 'month':
-            return d >= this.formatDateLocal(monthAgo) && d <= todayStr;
-          case 'last_month':
-            return d >= this.formatDateLocal(firstOfLastMonth) && d <= this.formatDateLocal(lastOfLastMonth);
-          case 'custom':
-            if (this.filterDateFrom && this.filterDateTo)
-              return d >= this.filterDateFrom && d <= this.filterDateTo;
-            if (this.filterDateFrom) return d >= this.filterDateFrom;
-            if (this.filterDateTo) return d <= this.filterDateTo;
-            return true;
-          default:
-            return true;
-        }
-      });
-    }
-
-    this.filteredBookings = result;
-    this.currentPage = 1;
-    this.applyPage();
+get pageNumbers(): number[] {
+  const total = this.totalPages, cur = this.currentPage, pages: number[] = [];
+  if (total <= 7) { for (let i = 1; i <= total; i++) pages.push(i); }
+  else {
+    pages.push(1);
+    if (cur > 3) pages.push(-1);
+    for (let i = Math.max(2, cur-1); i <= Math.min(total-1, cur+1); i++) pages.push(i);
+    if (cur < total-2) pages.push(-1);
+    pages.push(total);
   }
-
-  applyPage(): void {
-    const start = (this.currentPage - 1) * this.pageSize;
-    this.pagedBookings = this.filteredBookings.slice(start, start + this.pageSize);
-    this.cdr.detectChanges();
-  }
-
-  get totalPages(): number {
-    return Math.max(1, Math.ceil(this.filteredBookings.length / this.pageSize));
-  }
-
-  get pageNumbers(): number[] {
-    const total = this.totalPages, cur = this.currentPage, pages: number[] = [];
-    if (total <= 7) { for (let i = 1; i <= total; i++) pages.push(i); }
-    else {
-      pages.push(1);
-      if (cur > 3) pages.push(-1);
-      for (let i = Math.max(2, cur - 1); i <= Math.min(total - 1, cur + 1); i++) pages.push(i);
-      if (cur < total - 2) pages.push(-1);
-      pages.push(total);
-    }
-    return pages;
-  }
+  return pages;
+}
 
   goToPage(p: number): void {
     if (p < 1 || p > this.totalPages) return;
@@ -681,7 +641,7 @@ export class Booking implements OnInit {
       period: +this.newBooking.period,
       chaletType: +this.newBooking.chaletType,
       numOfGuests: this.newBooking.numOfGuests,
-      additionalPhone: this.newBooking.additionalPhone?.trim(),
+      additionalPhone: this.selectedCountryCode + this.newBooking.additionalPhone?.trim(),
       discountAmount: this.newBooking.discountAmount ?? 0,
       note:this.newBooking.note,
       extras: this.addExtrasList.map(e => ({ extraId: e.extraId, quantity: e.quantity })),
@@ -702,30 +662,38 @@ export class Booking implements OnInit {
   // Edit Modal
   // ══════════════════════════════════════════════════════════════════════════
 
-  openEditModal(booking: Bookings, fromPanel = false): void {
-    this.selectedBooking = { ...booking, extras: booking.extras ? [...booking.extras] : [] };
-    this.editForm = {
-      bookingId: booking.id,
-      customerName: booking.customerName,
-      phone: booking.phone,
-      additionalPhone: booking.additionalPhone ?? '',   // ✅
-      discountAmount: booking.discountAmount ?? 0,     // ✅
-      payMoney: 0,
-      deposit: booking.deposit ?? 0,
-      removedExtraIds: [],
-    };
-    const match = this.countryCodes.find(c => booking.phone.startsWith(c.value));
-    this.editCountryCode = match ? match.value : '+962';
-    if (match) this.editForm.phone = booking.phone.slice(match.value.length);
-    this.editAddExtraId = 0;
-    this.editAddExtraQty = 1;
-    this.editMessage = '';
-    this.editSaving = false;
-    this.editExtraAdding = false;
-    if (!fromPanel) { this.showDetailSheet = false; this.showDetailPanel = false; }
-    this.showEditModal = true;
-  }
+openEditModal(booking: Bookings, fromPanel = false): void {
+  this.selectedBooking = { ...booking, extras: booking.extras ? [...booking.extras] : [] };
 
+  // ── شيل كود البلد من الهاتف الأساسي ──
+  const match = this.countryCodes.find(c => booking.phone.startsWith(c.value));
+  this.editCountryCode = match ? match.value : '+962';
+  const cleanPhone = match ? booking.phone.slice(match.value.length) : booking.phone;
+
+  // ── شيل كود البلد من الهاتف الإضافي ──
+  let cleanAdditional = booking.additionalPhone ?? '';
+  const matchAdditional = this.countryCodes.find(c => cleanAdditional.startsWith(c.value));
+  if (matchAdditional) cleanAdditional = cleanAdditional.slice(matchAdditional.value.length);
+
+  this.editForm = {
+    bookingId:       booking.id,
+    customerName:    booking.customerName,
+    phone:           cleanPhone,
+    additionalPhone: cleanAdditional,
+    discountAmount:  booking.discountAmount || null,
+    payMoney:        null,
+    deposit:         booking.deposit ?? 0,
+    removedExtraIds: [],
+  };
+
+  this.editAddExtraId  = 0;
+  this.editAddExtraQty = 1;
+  this.editMessage     = '';
+  this.editSaving      = false;
+  this.editExtraAdding = false;
+  if (!fromPanel) { this.showDetailSheet = false; this.showDetailPanel = false; }
+  this.showEditModal = true;
+}
   closeEditModal(): void { this.showEditModal = false; }
 
   toggleRemoveExtra(extraId: number): void {
@@ -746,9 +714,9 @@ export class Booking implements OnInit {
       bookingId: this.editForm.bookingId,
       customerName: this.editForm.customerName,
       phone: this.editCountryCode + this.editForm.phone,
-      payMoney: this.editForm.payMoney || 0,
+      payMoney: this.editForm.payMoney ?? 0,
       deposit: this.editForm.deposit,
-      additionalPhone: this.editForm.additionalPhone?.trim(),
+      additionalPhone: this.editCountryCode + this.editForm.additionalPhone,
       discountAmount: this.editForm.discountAmount ?? 0,
       removedExtraIds: this.editForm.removedExtraIds,
     };
@@ -1201,8 +1169,8 @@ export class Booking implements OnInit {
       .reduce((s, e) => s + e.total, 0);
   }
 
-  get startIndex(): number { return (this.currentPage - 1) * this.pageSize + 1; }
-  get endIndex(): number { return Math.min(this.currentPage * this.pageSize, this.filteredBookings.length); }
+get startIndex(): number { return (this.currentPage-1) * this.pageSize + 1; }
+get endIndex():   number { return Math.min(this.currentPage * this.pageSize, this.total); }
 
   get doneBookingRemaining(): number {
     const b = this.bookings.find(x => x.id === this.doneTargetId);
@@ -1532,6 +1500,72 @@ validateDiscountNewBooking() {
     this.newBooking.discountAmount = 10;
   }
 }
+onOverviewNewBooking(params: NewBookingRequest): void {
+  console.log('overview new booking:', params); // للتأكد إنه بيوصل
+  
+  const chaletType = +params.chaletType;
+  const period     = +params.period;
+  const date       = params.date as string;
+
+  this.addExtrasList       = [];
+  this.selectedCountryCode = '+962';
+  this.addSelectedExtraId  = 0;
+  this.addSelectedExtraQty = 1;
+  this.priceLoaded         = false;
+  this.basePrice           = 0;
+
+  this.newBooking = {
+    customerName: '', phone: '', additionalPhone: '',
+    discountAmount: 0, date, period, chaletType,
+    numOfGuests: 1, extras: [], note: ''
+  };
+
+  this.calendarDate = new Date(date + 'T00:00:00');
+
+  // جهّز chaletCountMap
+  [[chaletType, 0], [chaletType, 1], [chaletType, 2]].forEach(([t, p]) => {
+    this.bookingService.getChaletsByTypePeriod(t, p).subscribe({
+      next: list => { 
+        this.chaletCountMap[`${t}_${p}`] = list.length; 
+        this.cdr.detectChanges(); 
+      },
+      error: () => { this.chaletCountMap[`${t}_${p}`] = 0; }
+    });
+  });
 
 
+  // جلب السعر
+  const dayType = ([5, 6].includes(this.calendarDate.getDay())) ? 1 : 0;
+  this.bookingService.getBasePrice(chaletType, period, dayType).subscribe({
+    next: (res: any) => {
+      this.basePrice   = typeof res === 'number' ? res : (res?.price ?? 0);
+      this.priceLoaded = true;
+      this.cdr.detectChanges();
+    },
+    error: () => { this.basePrice = 0; this.cdr.detectChanges(); }
+  });
+
+  this.buildBookingStatusMap();
+  this.addStep      = 3;
+  this.showAddModal = true;
+  this.cdr.detectChanges();
+}
+
+onOverviewBookingDetail(bookingId: number): void {
+  const found = this.bookings.find(b => b.id === bookingId);
+  if (found) {
+    window.innerWidth < 768 ? this.openDetailSheet(found) : this.openDetail(found);
+  } else {
+    this.bookingService.getBookingById(bookingId).subscribe({
+      next: full => {
+        this.selectedBooking = full;
+        this._buildPaymentsMapFromBooking(full);
+        window.innerWidth < 768
+          ? (this.showDetailSheet = true)
+          : (this.showDetailPanel = true);
+        this.cdr.detectChanges();
+      }
+    });
+  }
+}
 }

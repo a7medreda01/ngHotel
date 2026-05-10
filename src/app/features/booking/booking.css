@@ -1878,3 +1878,7 @@ dp-btn-invoice {
     print-color-adjust: exact;
   }
 }
+/* Fix 2: modal الحجز يكون فوق overview */
+.modal-overlay {
+  z-index: 10000 !important; /* أعلى من 1000 بتاع overview */
+}

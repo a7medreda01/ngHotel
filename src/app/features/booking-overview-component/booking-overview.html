@@ -1,0 +1,275 @@
+<!-- ══════════════════════════════════════════════════════
+     booking-overview.component.html
+     ══════════════════════════════════════════════════════ -->
+<div class="bov-wrapper" dir="rtl">
+
+  <!-- ╔══════════════════════════════╗
+       ║     CALENDAR VIEW            ║
+       ╚══════════════════════════════╝ -->
+  <ng-container *ngIf="viewMode === 'calendar'">
+
+    <!-- Header -->
+    <div class="bov-header">
+      <div class="bov-header__title">
+        <span class="bov-header__icon">📅</span>
+        <h1>نظرة عامة على الحجوزات</h1>
+      </div>
+      <div class="bov-header__legend">
+        <span class="legend-item"><span class="dot full"></span> مكتمل</span>
+        <span class="legend-item"><span class="dot partial"></span> جزئي</span>
+        <span class="legend-item"><span class="dot pending"></span> انتظار</span>
+        <span class="legend-item"><span class="dot available"></span> متاح</span>
+        <span class="legend-item"><span class="dot empty"></span> فارغ</span>
+      </div>
+    </div>
+
+    <!-- Month Navigation -->
+    <div class="bov-nav">
+      <button class="bov-nav__btn" (click)="prevMonth()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <polyline points="15 18 9 12 15 6"></polyline>
+        </svg>
+      </button>
+      <h2 class="bov-nav__month">{{ monthYearLabel }}</h2>
+      <button class="bov-nav__btn" (click)="nextMonth()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <polyline points="9 18 15 12 9 6"></polyline>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Loading -->
+    <div class="bov-loading" *ngIf="loading">
+      <div class="spinner"></div>
+      <span>جاري تحميل البيانات...</span>
+    </div>
+
+    <!-- Calendar Grid -->
+    <div class="bov-calendar" *ngIf="!loading">
+      <!-- Weekday Headers -->
+      <div class="bov-calendar__weekdays">
+        <div class="weekday" *ngFor="let d of WEEKDAY_NAMES">{{ d }}</div>
+      </div>
+
+      <!-- Weeks -->
+      <div class="bov-calendar__grid">
+        <ng-container *ngFor="let week of weeks">
+          <div
+            class="cal-day"
+            *ngFor="let day of week; trackBy: trackByDate"
+            [class.cal-day--other]="!day.isCurrentMonth"
+            [class.cal-day--past]="day.isPast && day.isCurrentMonth"
+            [class.cal-day--today]="day.isToday"
+            [class.cal-day--clickable]="day.isCurrentMonth"
+            [class]="'cal-day cal-day--' + day.colorClass + (day.isCurrentMonth ? ' cal-day--current' : ' cal-day--other') + (day.isToday ? ' cal-day--today' : '') + (day.isPast && day.isCurrentMonth ? ' cal-day--past' : '')"
+            (click)="selectDay(day)"
+          >
+            <div class="cal-day__num">{{ day.day }}</div>
+
+            <!-- Booking counts for current month -->
+            <ng-container *ngIf="day.isCurrentMonth && day.total > 0">
+              <div class="cal-day__badge confirmed" *ngIf="day.confirmed > 0" title="مؤكد">
+                {{ day.confirmed }}
+              </div>
+              <div class="cal-day__badge pending-badge" *ngIf="day.pending > 0" title="انتظار">
+                {{ day.pending }}
+              </div>
+              <div class="cal-day__bar">
+                <div
+                  class="cal-day__bar-fill"
+                  [style.width.%]="(day.confirmed + day.pending) * 20 > 100 ? 100 : (day.confirmed + day.pending) * 20"
+                ></div>
+              </div>
+            </ng-container>
+
+            <!-- Available indicator -->
+            <div class="cal-day__available" *ngIf="day.isCurrentMonth && !day.isPast && day.total === 0">
+              ✓
+            </div>
+          </div>
+        </ng-container>
+      </div>
+    </div>
+
+    <!-- Summary Strip -->
+    <div class="bov-summary" *ngIf="!loading">
+      <div class="summary-card summary-card--confirmed">
+        <div class="summary-card__num">{{ upcomingBookings | filterStatus:'Confirmed' }}</div>
+        <div class="summary-card__lbl">حجوزات مؤكدة</div>
+      </div>
+      <div class="summary-card summary-card--pending">
+        <div class="summary-card__num">{{ upcomingBookings | filterStatus:'Pending' }}</div>
+        <div class="summary-card__lbl">قيد الانتظار</div>
+      </div>
+      <div class="summary-card summary-card--total">
+        <div class="summary-card__num">{{ upcomingBookings.length }}</div>
+        <div class="summary-card__lbl">إجمالي الحجوزات</div>
+      </div>
+    </div>
+
+  </ng-container>
+
+
+  <!-- ╔══════════════════════════════╗
+       ║      DAY DETAIL VIEW         ║
+       ╚══════════════════════════════╝ -->
+  <ng-container *ngIf="viewMode === 'day' && selectedDay">
+
+    <div class="bov-page-header">
+      <button class="back-btn" (click)="backToCalendar()">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <polyline points="15 18 9 12 15 6"></polyline>
+        </svg>
+        العودة للتقويم
+      </button>
+      <div class="bov-page-header__info">
+        <h2>{{ selectedDayLabel }}</h2>
+        <span class="bov-page-header__sub">{{ selectedDay?.date }}</span>
+      </div>
+      <!-- Quick Stats -->
+      <div class="day-quick-stats">
+        <span class="qs qs--confirmed">{{ selectedDay?.confirmed }} مؤكد</span>
+        <span class="qs qs--pending">{{ selectedDay?.pending }} انتظار</span>
+        <span class="qs qs--total">{{ selectedDay?.total }} إجمالي</span>
+      </div>
+    </div>
+
+    <!-- No bookings -->
+    <div class="bov-empty" *ngIf="dayGroups.length === 0">
+      <div class="bov-empty__icon">🏕️</div>
+      <p>لا توجد حجوزات لهذا اليوم</p>
+      <button class="btn-new" (click)="openNewBookingFromDay(0, 0)">+ حجز جديد</button>
+    </div>
+
+    <!-- Groups -->
+    <div class="day-groups" *ngIf="dayGroups.length > 0">
+      <div
+        class="day-group"
+        *ngFor="let g of dayGroups"
+      >
+        <div class="day-group__header">
+          <div class="day-group__title">
+            <span class="period-badge">{{ getPeriodLabel(g.period).icon }} {{ getPeriodLabel(g.period).label }}</span>
+            <span class="type-badge type-badge--{{ g.type }}">{{ getChaletTypeLabel(g.type) }}</span>
+            <span class="count-badge">{{ g.bookings.length }} حجز</span>
+          </div>
+          <button
+            class="btn-add-small"
+            (click)="openNewBookingFromDay(g.type, g.period)"
+            title="حجز جديد لهذا النوع والفترة"
+          >+ جديد</button>
+        </div>
+
+        <!-- Status rows -->
+        <div class="status-rows">
+          <ng-container *ngFor="let status of ['Confirmed','Pending','Cancelled','Done']">
+            <div
+              class="status-row status-row--{{ getStatusColor(status) }}"
+              *ngIf="statusCount(g.bookings, status) > 0"
+              (click)="openDrilldown(g.type, g.period, status)"
+            >
+              <span class="status-row__dot"></span>
+              <span class="status-row__label">{{ getStatusLabel(status) }}</span>
+              <span class="status-row__count">{{ statusCount(g.bookings, status) }}</span>
+              <svg class="status-row__arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <polyline points="9 18 15 12 9 6"></polyline>
+              </svg>
+            </div>
+          </ng-container>
+
+          <!-- Available CTA -->
+          <div
+            class="status-row status-row--available"
+            *ngIf="!selectedDay.isPast"
+            (click)="openNewBookingFromDay(g.type, g.period)"
+          >
+            <span class="status-row__dot"></span>
+            <span class="status-row__label">متاح للحجز</span>
+            <span class="status-row__cta">+ احجز الآن</span>
+            <svg class="status-row__arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <polyline points="9 18 15 12 9 6"></polyline>
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      <!-- Add new group CTA -->
+      <div class="day-add-new" *ngIf="!selectedDay.isPast">
+        <span>إضافة حجز بنوع وفترة مختلفة</span>
+        <div class="add-new-btns">
+          <ng-container *ngFor="let p of PERIOD_LABELS">
+            <button class="btn-add-period" (click)="openNewBookingFromDay(0, p.value)">
+              {{ p.icon }} عادي - {{ p.label }}
+            </button>
+            <button class="btn-add-period btn-add-period--royal" (click)="openNewBookingFromDay(1, p.value)">
+              {{ p.icon }} رويال - {{ p.label }}
+            </button>
+          </ng-container>
+        </div>
+      </div>
+    </div>
+
+  </ng-container>
+
+
+  <!-- ╔══════════════════════════════╗
+       ║      DRILLDOWN VIEW          ║
+       ╚══════════════════════════════╝ -->
+  <ng-container *ngIf="viewMode === 'drilldown'">
+
+    <div class="bov-page-header">
+      <button class="back-btn" (click)="backToDay()">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <polyline points="15 18 9 12 15 6"></polyline>
+        </svg>
+        {{ selectedDayLabel }}
+      </button>
+      <div class="bov-page-header__info">
+        <h2>{{ drilldownLabel }}</h2>
+        <span class="status-pill status-pill--{{ getStatusColor(drilldownStatus!) }}" *ngIf="drilldownStatus">
+          {{ getStatusLabel(drilldownStatus!) }}
+        </span>
+      </div>
+      <button
+        class="btn-new"
+        *ngIf="!selectedDay?.isPast"
+        (click)="openNewBooking()"
+      >+ حجز جديد</button>
+    </div>
+
+    <!-- Bookings List -->
+    <div class="drilldown-list">
+      <div
+        class="booking-card"
+        *ngFor="let b of drilldownBookings; trackBy: trackById"
+        (click)="openBookingDetail(b.id)"
+      >
+        <div class="booking-card__top">
+          <div class="booking-card__id">#{{ b.id }}</div>
+          <span class="booking-card__status status-pill--{{ getStatusColor(b.status) }}">
+            {{ getStatusLabel(b.status) }}
+          </span>
+        </div>
+        <div class="booking-card__meta">
+          <span>{{ getPeriodLabel(b.period).icon }} {{ getPeriodLabel(b.period).label }}</span>
+          <span class="sep">·</span>
+          <span>{{ getChaletTypeLabel(b.chaletType) }}</span>
+          <span class="sep" *ngIf="b.chaletId">·</span>
+          <span *ngIf="b.chaletId">كوخ #{{ b.chaletId }}</span>
+        </div>
+        <div class="booking-card__date">{{ b.date | date:'d MMM yyyy' }}</div>
+        <svg class="booking-card__arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <polyline points="9 18 15 12 9 6"></polyline>
+        </svg>
+      </div>
+
+      <!-- Empty -->
+      <div class="bov-empty" *ngIf="drilldownBookings.length === 0">
+        <div class="bov-empty__icon">📭</div>
+        <p>لا توجد حجوزات في هذا القسم</p>
+      </div>
+    </div>
+
+  </ng-container>
+
+</div>

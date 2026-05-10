@@ -42,12 +42,11 @@ export class LoginComponent {
         this.router.navigate(['/dashboard']);
       },
       error: (err) => {
-        this.isLoading = false;
-        if (err.status === 401) {
-          this.errorMessage = 'البريد الإلكتروني أو كلمة المرور غير صحيحة';
-        } else {
-          this.errorMessage = 'حدث خطأ، يرجى المحاولة مرة أخرى';
-        }
+          this.isLoading = false;
+  // يقرأ الرسالة من الـ backend مباشرة
+  this.errorMessage =
+    err.error?.message ||
+    'حدث خطأ، يرجى المحاولة مرة أخرى';
       }
     });
   }

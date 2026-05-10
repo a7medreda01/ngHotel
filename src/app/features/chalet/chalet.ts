@@ -137,37 +137,36 @@ export class Chalet implements OnInit {
     this.showModal         = true;
   }
 
-  openEditModal(chalet: chaletSvc.Chalet): void {
-    this.isEditMode = true;
+openEditModal(chalet: chaletSvc.Chalet): void {
+  this.isEditMode = true;
 
-    // ✅ بعد الـ normalize القيم boolean صح مباشرة
-    this.form = {
-      id:         chalet.id,
-      name:       chalet.name,
-      type:       chalet.type === 'Royal' ? 1 : 0,
-      status:     chalet.status === 'Available' ? 0 : chalet.status === 'Booked' ? 1 : 2,
-      partnerId:  chalet.partnerId ?? 0,
-      hasMorning: chalet.hasMorning === true,
-      hasEvening: chalet.hasEvening === true,
-      hasFullDay: chalet.hasFullDay === true,
-    };
+  this.form = {
+    id:         chalet.id,
+    name:       chalet.name,
+    type:       chalet.type === 'Royal' ? 1 : 0,
+    status:     chalet.status === 'Available' ? 0
+                : chalet.status === 'Booked' ? 1 : 2,
+    partnerId:  chalet.partnerId ?? 0,
+    hasMorning: chalet.hasMorning === true,
+    hasEvening: chalet.hasEvening === true,
+    hasFullDay: chalet.hasFullDay === true,
+  };
 
-    // بناء قائمة الصور
-    if (chalet.imageObjects && chalet.imageObjects.length > 0) {
-      this.currentImageItems = chalet.imageObjects.map(img => ({ id: img.id, url: img.url }));
-    } else if (chalet.images && chalet.images.length > 0) {
-      this.currentImageItems = chalet.images.map((url, i) => ({ id: i, url }));
-    } else {
-      this.currentImageItems = [];
-    }
-
-    this.removedImageIds = [];
-    this.selectedFiles   = [];
-    this.previewUrls     = [];
-    this.error           = '';
-    this.showModal       = true;
-    
+  // ✅ imageObjects دلوقتي بييجي صح مع Id حقيقي
+  if (chalet.imageObjects && chalet.imageObjects.length > 0) {
+    this.currentImageItems = (chalet.imageObjects ?? [])
+    .filter(img => !!img.url)
+    .map(img => ({ id: img.id, url: img.url }));
+  } else {
+    this.currentImageItems = [];
   }
+
+  this.removedImageIds = [];
+  this.selectedFiles   = [];
+  this.previewUrls     = [];
+  this.error           = '';
+  this.showModal       = true;
+}
 
   closeModal(): void {
     this.showModal = false;
@@ -205,26 +204,27 @@ export class Chalet implements OnInit {
 
   // ════ FORM BUILD ════
 
-  buildFormData(): FormData {
-    const fd = new FormData();
-    fd.append('Id',         this.form.id.toString());
-    fd.append('Name',       this.form.name.trim());
-    fd.append('Status',     this.form.status.toString());
+buildFormData(): FormData {
+  const fd = new FormData();
+  fd.append('Id',         this.form.id.toString());
+  fd.append('Name',       this.form.name.trim());
+  fd.append('Status',     this.form.status.toString());
+  fd.append('HasMorning', this.form.hasMorning.toString());
+  fd.append('HasEvening', this.form.hasEvening.toString());
+  fd.append('HasFullDay', this.form.hasFullDay.toString());
 
-    // ✅ إرسال boolean fields مباشرة
-    fd.append('HasMorning', this.form.hasMorning.toString());
-    fd.append('HasEvening', this.form.hasEvening.toString());
-    fd.append('HasFullDay', this.form.hasFullDay.toString());
+  this.selectedFiles.forEach(file => fd.append('NewImages', file));
 
-    this.selectedFiles.forEach(file => fd.append('NewImages', file));
+  // ✅ تحقق إن الـ ids مش صفر قبل الإرسال
+  const validRemovedIds = this.removedImageIds.filter(id => id > 0);
+  validRemovedIds.forEach(id => fd.append('RemovedImageIds', id.toString()));
 
-    if (this.removedImageIds.length > 0) {
-      console.log(this.removedImageIds)
-      this.removedImageIds.forEach(id => fd.append('RemovedImageIds', id.toString()));
-    } 
+  // Debug — احذفه بعد التأكد
+  console.log('RemovedImageIds being sent:', validRemovedIds);
+  console.log('currentImageItems:', this.currentImageItems);
 
-    return fd;
-  }
+  return fd;
+}
 
   buildCreateFormData(): FormData {
     const fd = new FormData();

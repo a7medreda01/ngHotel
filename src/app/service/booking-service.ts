@@ -52,14 +52,39 @@ export interface CreateBookingDto {
   note: string;
   extras:          { extraId: number; quantity: number }[];
 }
-
+export interface DashboardData {
+  // Current period
+  totalBookings:     number;
+  confirmedBookings: number;
+  doneBookings:      number;
+  pendingBookings:   number;
+  cancelledBookings: number;
+  totalRevenue:      number;
+  chaletRevenue:     number;
+  extrasRevenue:     number;
+  depositSum:        number;
+  discountSum:       number;
+ 
+  // Previous period (للمقارنة)
+  prevTotalBookings:     number;
+  prevTotalRevenue:      number;
+  prevCancelledBookings: number;
+  prevConfirmedBookings: number;   // اختياري — أضفه في الـ backend لو حبيت
+  prevDoneBookings:      number;   // اختياري — أضفه في الـ backend لو حبيت
+ 
+  // Recent bookings (آخر 8)
+  recentBookings: Bookings[];
+ 
+  // Chalets status
+  chalets: { name: string; status: string; type: string }[];
+}
 export interface UpdateBookingDto {
   bookingId:       number;
   customerName:    string;
   phone:           string;
   additionalPhone?: string;   // ✅ جديد
-  discountAmount?:  number;   // ✅ جديد
-  payMoney:        number;
+  discountAmount?:  number|null;   // ✅ جديد
+  payMoney:        number | null ;
   deposit:         number;
   removedExtraIds: number[];
 }
@@ -80,7 +105,12 @@ export interface ChaletByTypePeriod {
   name: string;
   type: string;
 }
-
+export interface CustomerDto {
+  customerName:    string;
+  phone:           string;
+  bookingsCount:   number;
+  lastBookingDate: string;
+}
 export interface UpcomingBooking {
   id:         number;
   chaletId:   number | null;
@@ -130,6 +160,13 @@ export interface BookingNote {
   note:      string;
   userName:  string;
   createdAt: string;
+}
+export interface PagedResult<T> {
+  data:       T[];
+  total:      number;
+  page:       number;
+  pageSize:   number;
+  totalPages: number;
 }
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 export function normalizeChaletType(raw: any): number {
@@ -280,4 +317,60 @@ export class BookingService {
     createdAt: new Date().toISOString()
   });
 }
+
+
+// أضف الـ method في BookingService
+getBookingsPaged(params: {
+  page:      number;
+  pageSize:  number;
+  search?:   string;
+  status?:   string;
+  dateFrom?: string;
+  dateTo?:   string;
+}): Observable<PagedResult<Bookings>> {
+  let httpParams = new HttpParams()
+    .set('page',     params.page)
+    .set('pageSize', params.pageSize);
+
+  if (params.search)   httpParams = httpParams.set('search',   params.search);
+  if (params.status)   httpParams = httpParams.set('status',   params.status);
+  if (params.dateFrom) httpParams = httpParams.set('dateFrom', params.dateFrom);
+  if (params.dateTo)   httpParams = httpParams.set('dateTo',   params.dateTo);
+
+  return this.http.get<any>(`${this.base}/Booking`, { params: httpParams }).pipe(
+    map(res => ({
+      ...res,
+      data: this.normalizeBookings(res.data ?? [])
+    }))
+  );
+}
+getDashboard(params: {
+  filter:    string;
+  dateFrom?: string;
+  dateTo?:   string;
+}): Observable<DashboardData> {
+  let p = new HttpParams().set('filter', params.filter);
+  if (params.dateFrom) p = p.set('dateFrom', params.dateFrom);
+  if (params.dateTo)   p = p.set('dateTo',   params.dateTo);
+
+  return this.http.get<DashboardData>(`${this.base}/Booking/dashboard`, { params: p }).pipe(
+    map(res => ({
+      ...res,
+      recentBookings: this.normalizeBookings(res.recentBookings ?? [])
+    }))
+  );
+}
+getBookingsForExport(year: number, month: number): Observable<Bookings[]> {
+  const params = new HttpParams()
+    .set('year',  year)
+    .set('month', month);
+  return this.http.get<any[]>(`${this.base}/Booking/export`, { params }).pipe(
+    map(list => this.normalizeBookings(list ?? []))
+  );
+}
+
+
+  getCustomers(): Observable<CustomerDto[]> {
+    return this.http.get<CustomerDto[]>(`${this.base}/Booking/customers`);
+  }
 }

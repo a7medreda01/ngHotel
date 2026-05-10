@@ -148,4 +148,21 @@ export class CreateUserComponent implements OnInit {
     };
     return map[role] ?? 'bi-person-fill';
   }
+  // في الـ properties
+togglingId: number | null = null;
+
+// ميثود جديدة
+toggleActive(user: UserItem): void {
+  this.togglingId = user.id;
+  this.auth.toggleActive(user.id).subscribe({
+    next: (res) => {
+      user.isActive = res.isActive; // تحديث لحظي بدون reload
+      this.togglingId = null;
+    },
+    error: (err) => {
+      this.togglingId = null;
+      this.usersError = err.error?.message || 'حدث خطأ أثناء تغيير حالة الحساب';
+    }
+  });
+}
 }

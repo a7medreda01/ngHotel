@@ -29,18 +29,26 @@ export interface Chalet {
 // ══════════════════════════════════════════════════════
 export function normalizeChalet(c: any): Chalet {
   const parseBool = (val: any): boolean =>
-    val === true || val === 1 || 
+    val === true || val === 1 ||
     (typeof val === 'string' && val.toLowerCase() === 'true');
 
-  // استخرج الصور سواء كانت strings أو objects
-  const rawImages = Array.isArray(c.images) ? c.images : [];
-  const images = rawImages.map((img: any) =>
-    typeof img === 'string' ? img : img?.url ?? ''
-  ).filter(Boolean);
+  // أولوية للـ imageObjects لو موجود
+  let imageObjects: ChaletImage[] = [];
 
-  const imageObjects = rawImages.map((img: any, i: number) =>
-    typeof img === 'string' ? { id: i, url: img } : { id: img?.id ?? i, url: img?.url ?? '' }
-  );
+  if (Array.isArray(c.imageObjects) && c.imageObjects.length > 0) {
+    imageObjects = c.imageObjects.map((img: any, i: number) => ({
+      id:  img.id  ?? i + 1,
+      url: img.imageUrl ?? img.url ?? ''
+    })).filter((img: any) => img.url);
+  } else if (Array.isArray(c.images) && c.images.length > 0) {
+    // fallback — images كـ strings فقط، بنحتاج الـ id من الـ backend
+    imageObjects = c.images.map((img: any, i: number) => ({
+      id:  typeof img === 'object' ? (img.id ?? i + 1) : i + 1,
+      url: typeof img === 'string' ? img : (img?.url ?? img?.imageUrl ?? '')
+    })).filter((img: any) => img.url);
+  }
+
+  const images = imageObjects.map(img => img.url);
 
   return {
     id:              c.id,
@@ -49,7 +57,6 @@ export function normalizeChalet(c: any): Chalet {
     status:          c.status,
     partnerId:       c.partnerId,
     sharePercentage: c.sharePercentage,
-    // ✅ نكتبهم صريح بدل الـ spread عشان نضمن مش بيتوورَّث قيمة غلط
     hasMorning: parseBool(c.hasMorning),
     hasEvening: parseBool(c.hasEvening),
     hasFullDay: parseBool(c.hasFullDay),

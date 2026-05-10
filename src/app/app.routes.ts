@@ -12,6 +12,7 @@ import { ForgetPasswordComponent } from './features/forget-password-component/fo
 import { ResetPasswordComponent } from './features/reset-password-component/reset-password-component';
 import { ProfileComponent } from './features/profile-component/profile-component';
 import { Dashboard } from './features/dashboard/dashboard';
+import { BookingOverviewComponent } from './features/booking-overview-component/booking-overview';
 
 export const routes: Routes = [
   // 🔓 Public
@@ -34,6 +35,7 @@ export const routes: Routes = [
       { path: 'waitinglist', component: Waitinglist },
       { path: 'extras', component: ExtrasComponent },
       { path: 'maintenance', component: Maintenance },
+      { path: 'overview', component: BookingOverviewComponent },
       { path: 'profile', component: ProfileComponent, canActivate: [AuthGuard] },
       {path: 'booking/new',component: Booking }
 

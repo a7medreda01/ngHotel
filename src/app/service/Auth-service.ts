@@ -10,6 +10,8 @@ export interface LoginRequest {
 }
 export interface LoginResponse {
   token: string;
+  refreshToken: string;           // ← جديد
+  refreshTokenExpiration: string; // ← جديد
   userId: number;
   email: string;
   fullName: string;
@@ -36,7 +38,13 @@ export interface ResetPasswordRequest {
   token: string;
   newPassword: string;
 }
-
+export interface UserItem {
+  id: number;
+  email: string;
+  fullName: string;
+  role: string;
+  isActive: boolean; // ← أضف ده
+}
 const STORAGE_KEY = 'auth_user';
 
 @Injectable({ providedIn: 'root' })
@@ -112,8 +120,33 @@ export class AuthService {
   hasRole(role: string): boolean {
     return this.getSession()?.role === role;
   }
-  logout(): void {
-    localStorage.removeItem(STORAGE_KEY);
-    this.router.navigate(['/login']);
+  toggleActive(userId: number): Observable<{ message: string; isActive: boolean }> {
+  return this.http.put<{ message: string; isActive: boolean }>(
+    `${this.baseUrl}/toggle-active/${userId}`,
+    {}
+  );
+}
+
+refreshToken(token: string): Observable<LoginResponse> {
+  return this.http.post<LoginResponse>(`${this.baseUrl}/refresh-token`, {
+    refreshToken: token
+  }).pipe(tap(res => this.saveSession(res)));
+}
+
+revokeToken(): Observable<any> {
+  const session = this.getSession();
+  return this.http.post(`${this.baseUrl}/revoke-token`, {
+    refreshToken: session?.refreshToken
+  }, { responseType: 'text' });
+}
+
+// عدّل logout
+logout(): void {
+  const session = this.getSession();
+  if (session?.refreshToken) {
+    this.revokeToken().subscribe(); // revoke في الـ backend
   }
+  localStorage.removeItem(STORAGE_KEY);
+  this.router.navigate(['/login']);
+}
 }

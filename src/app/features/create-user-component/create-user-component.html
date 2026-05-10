@@ -53,20 +53,12 @@
       <div class="form-group">
         <label><i class="bi bi-shield-fill"></i> الصلاحية</label>
         <div class="role-selector">
-          <button
-            class="role-btn"
-            [class.active-employee]="form.role === 'Employee'"
-            (click)="form.role = 'Employee'"
-            type="button"
-          >
+          <button class="role-btn" [class.active-employee]="form.role === 'Employee'" (click)="form.role = 'Employee'"
+            type="button">
             <i class="bi bi-person-fill"></i> موظف
           </button>
-          <button
-            class="role-btn"
-            [class.active-manager]="form.role === 'Manager'"
-            (click)="form.role = 'Manager'"
-            type="button"
-          >
+          <button class="role-btn" [class.active-manager]="form.role === 'Manager'" (click)="form.role = 'Manager'"
+            type="button">
             <i class="bi bi-star-fill"></i> مدير
           </button>
         </div>
@@ -77,11 +69,8 @@
       <button class="btn-reset" (click)="resetForm()" type="button">
         <i class="bi bi-arrow-counterclockwise"></i> مسح
       </button>
-      <button
-        class="btn-submit"
-        (click)="onSubmit()"
-        [disabled]="isLoading || !form.email || !form.password || !form.fullName"
-      >
+      <button class="btn-submit" (click)="onSubmit()"
+        [disabled]="isLoading || !form.email || !form.password || !form.fullName">
         <span class="btn-spinner" *ngIf="isLoading"></span>
         <i class="bi bi-person-check-fill" *ngIf="!isLoading"></i>
         {{ isLoading ? 'جاري الإنشاء...' : 'إنشاء الحساب' }}
@@ -117,6 +106,7 @@
             <th>الاسم الكامل</th>
             <th>البريد الإلكتروني</th>
             <th>الصلاحية</th>
+            <th>الحالة</th> <!-- ← جديد -->
             <th>إجراءات</th>
           </tr>
         </thead>
@@ -139,12 +129,22 @@
               </span>
             </td>
             <td>
-              <button
-                class="btn-delete-user"
-                (click)="openDeleteConfirm(user)"
-                [disabled]="deletingId === user.id"
-                title="حذف المستخدم"
-              >
+              <span class="status-badge" [ngClass]="user.isActive ? 'status-active' : 'status-inactive'">
+                <i class="bi" [ngClass]="user.isActive ? 'bi-check-circle-fill' : 'bi-x-circle-fill'"></i>
+                {{ user.isActive ? 'نشط' : 'موقوف' }}
+              </span>
+            </td>
+            <!-- Desktop table - في الـ <td> بتاع الإجراءات -->
+            <td>
+              <button class="btn-toggle-user m-1" (click)="toggleActive(user)" [disabled]="togglingId === user.id"
+                [title]="user.isActive ? 'تعطيل الحساب' : 'تفعيل الحساب'">
+                <span *ngIf="togglingId === user.id" class="btn-spinner-sm"></span>
+                <i *ngIf="togglingId !== user.id" class="bi"
+                  [ngClass]="user.isActive ? 'bi-toggle-on' : 'bi-toggle-off'"></i>
+              </button>
+
+              <button class="btn-delete-user m-1" (click)="openDeleteConfirm(user)" [disabled]="deletingId === user.id"
+                title="حذف المستخدم">
                 <span *ngIf="deletingId === user.id" class="btn-spinner-sm"></span>
                 <i *ngIf="deletingId !== user.id" class="bi bi-trash3-fill"></i>
               </button>
@@ -161,37 +161,80 @@
 
       <!-- Mobile Cards -->
       <div class="mobile-users d-md-none">
+
         <div *ngFor="let user of users" class="user-mobile-card">
-          <div class="user-mobile-header">
-            <div class="user-cell">
-              <div class="user-avatar" [ngClass]="getRoleClass(user.role)">
+
+          <div class="user-mobile-header d-flex justify-content-between align-items-start flex-wrap gap-2">
+
+            <!-- User Info -->
+            <div class="user-cell d-flex align-items-center gap-2 flex-grow-1">
+
+              <div class="user-avatar flex-shrink-0" [ngClass]="getRoleClass(user.role)">
                 {{ user.fullName.charAt(0) }}
               </div>
-              <div>
-                <div class="user-name">{{ user.fullName }}</div>
-                <div class="user-email-sm">{{ user.email }}</div>
+
+              <div class="flex-grow-1 overflow-hidden">
+                <div class="user-name text-truncate">
+                  {{ user.fullName }}
+                </div>
+
+                <div class="user-email-sm text-truncate">
+                  {{ user.email }}
+                </div>
               </div>
+
             </div>
-            <div style="display:flex; align-items:center; gap:8px;">
-              <span class="role-badge" [ngClass]="getRoleClass(user.role)">
+
+            <!-- Right Side -->
+            <div class="d-flex flex-column align-items-end gap-2 w-100 w-sm-auto">
+
+              <span class="role-badge d-inline-flex align-items-center gap-1" [ngClass]="getRoleClass(user.role)">
                 <i class="bi" [ngClass]="getRoleIcon(user.role)"></i>
                 {{ getRoleLabel(user.role) }}
               </span>
-              <button
-                class="btn-delete-user"
-                (click)="openDeleteConfirm(user)"
-                [disabled]="deletingId === user.id"
-              >
-                <span *ngIf="deletingId === user.id" class="btn-spinner-sm"></span>
-                <i *ngIf="deletingId !== user.id" class="bi bi-trash3-fill"></i>
-              </button>
+
+              <div class="mobile-actions d-flex align-items-center flex-wrap gap-2">
+
+                <span class="status-badge" [ngClass]="user.isActive ? 'status-active' : 'status-inactive'">
+                  <i class="bi" [ngClass]="user.isActive ? 'bi-check-circle-fill' : 'bi-x-circle-fill'">
+                  </i>
+                  {{ user.isActive ? 'نشط' : 'موقوف' }}
+                </span>
+
+                <button class="btn-toggle-user" (click)="toggleActive(user)" [disabled]="togglingId === user.id"
+                  [title]="user.isActive ? 'تعطيل' : 'تفعيل'">
+
+                  <span *ngIf="togglingId === user.id" class="btn-spinner-sm">
+                  </span>
+
+                  <i *ngIf="togglingId !== user.id" class="bi"
+                    [ngClass]="user.isActive ? 'bi-toggle-on' : 'bi-toggle-off'">
+                  </i>
+                </button>
+
+                <button class="btn-delete-user" (click)="openDeleteConfirm(user)" [disabled]="deletingId === user.id">
+
+                  <span *ngIf="deletingId === user.id" class="btn-spinner-sm">
+                  </span>
+
+                  <i *ngIf="deletingId !== user.id" class="bi bi-trash3-fill">
+                  </i>
+
+                </button>
+
+              </div>
+
             </div>
+
           </div>
+
         </div>
+
         <div *ngIf="users.length === 0" class="empty-cell">
           <i class="bi bi-inbox"></i>
           <p>لا يوجد مستخدمون</p>
         </div>
+
       </div>
     </div>
   </div>

@@ -1,0 +1,379 @@
+<button class="overview-trigger-btn" (click)="open()">
+  <span class="trigger-icon">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+      <rect x="3" y="4" width="18" height="18" rx="2" />
+      <line x1="16" y1="2" x2="16" y2="6" />
+      <line x1="8" y1="2" x2="8" y2="6" />
+      <line x1="3" y1="10" x2="21" y2="10" />
+      <circle cx="8" cy="15" r="1.5" fill="currentColor" />
+      <circle cx="12" cy="15" r="1.5" fill="currentColor" />
+      <circle cx="16" cy="15" r="1.5" fill="currentColor" />
+    </svg>
+  </span>
+  بحث ذكي
+</button>
+
+<!-- ══════════════════════════════════════════════════════
+     MODAL OVERLAY
+══════════════════════════════════════════════════════ -->
+<div class="ov-overlay" *ngIf="showModal" (click)="close()">
+  <div class="ov-modal" (click)="$event.stopPropagation()">
+
+    <!-- MODAL HEADER -->
+    <div class="ov-header">
+      <div class="ov-header-left">
+        <div class="ov-logo">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="4" width="18" height="18" rx="2" />
+            <line x1="3" y1="10" x2="21" y2="10" />
+            <line x1="8" y1="2" x2="8" y2="6" />
+            <line x1="16" y1="2" x2="16" y2="6" />
+          </svg>
+        </div>
+        <div>
+          <h2 class="ov-title">نظرة عامة على الإشغال</h2>
+          <p class="ov-sub">تتبع توافر الأكواخ شهرياً</p>
+        </div>
+      </div>
+      <button class="ov-close" (click)="close()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <line x1="18" y1="6" x2="6" y2="18" />
+          <line x1="6" y1="6" x2="18" y2="18" />
+        </svg>
+      </button>
+    </div>
+
+    <!-- BODY: split layout -->
+    <div class="ov-body" [class.has-detail]="selectedDay">
+
+      <!-- ══ LEFT: CALENDAR PANEL ══ -->
+      <div class="ov-cal-panel">
+
+        <!-- Month Navigation -->
+        <div class="ov-month-nav">
+          <button class="ov-nav-btn" (click)="prevMonth()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <polyline points="9 18 15 12 9 6" />
+            </svg>
+          </button>
+          <button class="ov-month-label" (click)="goToToday()">{{ headerLabel }}</button>
+          <button class="ov-nav-btn" (click)="nextMonth()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <polyline points="15 18 9 12 15 6" />
+            </svg>
+          </button>
+        </div>
+
+        <!-- Legend -->
+        <div class="ov-legend">
+          <span class="leg-item"><span class="leg-dot leg-available"></span>متاح</span>
+          <span class="leg-item"><span class="leg-dot leg-partial"></span>جزئي</span>
+          <span class="leg-item"><span class="leg-dot leg-pending"></span>انتظار</span>
+          <span class="leg-item"><span class="leg-dot leg-full"></span>مكتمل</span>
+          <span class="leg-item"><span class="leg-dot leg-empty"></span>لا يوجد</span>
+        </div>
+
+        <!-- Loading -->
+        <div class="ov-loading" *ngIf="loading">
+          <div class="ov-spinner"></div>
+          <span>جاري التحميل...</span>
+        </div>
+
+        <!-- Calendar Grid -->
+        <div class="ov-grid" *ngIf="!loading">
+          <!-- Day headers -->
+          <div class="ov-day-header" *ngFor="let d of dayNames">{{ d.slice(0,3) }}</div>
+
+          <!-- Cells -->
+          <ng-container *ngFor="let week of weeks; trackBy: trackByWeek">
+            <div class="ov-cell" *ngFor="let cell of week; trackBy: trackByDate"
+              [class.ov-cell-other]="!cell.isCurrentMonth" [class.ov-cell-past]="cell.isPast && cell.isCurrentMonth"
+              [class.ov-cell-today]="cell.isToday" [class.ov-cell-selected]="selectedDay?.dateStr === cell.dateStr"
+              [class.ov-cell-available]="!cell.isPast && cell.isCurrentMonth && cell.status === 'available'"
+              [class.ov-cell-partial]="!cell.isPast && cell.isCurrentMonth && cell.status === 'partial'"
+              [class.ov-cell-pending]="!cell.isPast && cell.isCurrentMonth && cell.status === 'pending'"
+              [class.ov-cell-full]="!cell.isPast && cell.isCurrentMonth && cell.status === 'full'"
+              (click)="selectDay(cell)">
+
+              <span class="ov-cell-num">{{ cell.date.getDate() }}</span>
+
+              <!-- Mini dots for slots -->
+
+
+              <!-- Available count badge -->
+              <div class="ov-cell-avail" *ngIf="cell.isCurrentMonth && !cell.isPast && cell.totalChalets > 0">
+                <span class="avail-num" [class.avail-zero]="cell.totalAvailable === 0">
+                  {{ cell.totalAvailable }}
+                </span>
+              </div>
+            </div>
+          </ng-container>
+        </div>
+
+        <!-- Month summary -->
+        <div class="ov-month-summary" *ngIf="!loading">
+          <div class="ms-item ms-confirmed">
+            <span class="ms-icon">✓</span>
+            <span class="ms-val">{{ getMonthStat('confirmed') }}</span>
+            <span class="ms-lbl">مؤكدة</span>
+          </div>
+          <div class="ms-item ms-pending">
+            <span class="ms-icon">⏳</span>
+            <span class="ms-val">{{ getMonthStat('pending') }}</span>
+            <span class="ms-lbl">انتظار</span>
+          </div>
+          <div class="ms-item ms-available">
+            <span class="ms-icon">🏠</span>
+            <span class="ms-val">{{ getMonthStat('available') }}</span>
+            <span class="ms-lbl">متاحة</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══ RIGHT: DETAIL PANEL ══ -->
+      <div class="ov-detail-panel" *ngIf="selectedDay">
+
+        <!-- Day Header -->
+        <div class="ov-detail-header">
+          <button class="ov-day-nav" (click)="navigateDay('prev')" [disabled]="!prevDayCell">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <polyline points="9 18 15 12 9 6" />
+            </svg>
+          </button>
+
+          <div class="ov-detail-date">
+            <div class="detail-day-num">{{ selectedDay.date.getDate() }}</div>
+            <div class="detail-day-info">
+              <span class="detail-month">{{ selectedDay.date.getDate() }}/{{ selectedDay.date.getMonth() + 1 }}/{{
+                selectedDay.date.getFullYear() }}</span> <span class="detail-weekday">{{
+                dayNames[selectedDay.date.getDay()] }}</span>
+            </div>
+            <div class="detail-status-badge" [class.dsb-available]="selectedDay.status === 'available'"
+              [class.dsb-partial]="selectedDay.status === 'partial'"
+              [class.dsb-pending]="selectedDay.status === 'pending'" [class.dsb-full]="selectedDay.status === 'full'"
+              [class.dsb-empty]="selectedDay.status === 'empty'">
+              <span *ngIf="selectedDay.status === 'available'">✓ متاح بالكامل</span>
+              <span *ngIf="selectedDay.status === 'partial'">◑ متاح جزئياً</span>
+              <span *ngIf="selectedDay.status === 'pending'">⏳ قيد الانتظار</span>
+              <span *ngIf="selectedDay.status === 'full'">● مكتمل الحجز</span>
+              <span *ngIf="selectedDay.status === 'empty'">○ لا حجوزات</span>
+            </div>
+          </div>
+  <!-- ✅ زر التحديث -->
+  <button class="ov-refresh-btn" (click)="refreshDay()" [disabled]="refreshing" title="تحديث">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+         stroke="currentColor" stroke-width="2.5"
+         [class.spinning]="refreshing">
+      <path d="M23 4v6h-6"/>
+      <path d="M1 20v-6h6"/>
+      <path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/>
+    </svg>
+  </button>
+          <button class="ov-day-nav" (click)="navigateDay('next')" [disabled]="!nextDayCell">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <polyline points="15 18 9 12 15 6" />
+            </svg>
+          </button>
+        </div>
+
+        <!-- Quick Stats -->
+        <div class="ov-day-stats">
+          <div class="ds-item ds-total">
+            <span class="ds-val">{{ selectedDay.totalChalets }}</span>
+            <span class="ds-lbl">كوخ</span>
+          </div>
+          <div class="ds-item ds-confirmed">
+            <span class="ds-val">{{ selectedDay.totalConfirmed }}</span>
+            <span class="ds-lbl">مؤكد</span>
+          </div>
+          <div class="ds-item ds-pending">
+            <span class="ds-val">{{ selectedDay.totalPending }}</span>
+            <span class="ds-lbl">انتظار</span>
+          </div>
+          <div class="ds-item ds-available">
+            <span class="ds-val">{{ selectedDay.totalAvailable }}</span>
+            <span class="ds-lbl">متاح</span>
+          </div>
+        </div>
+
+        <!-- Slots List -->
+        <div class="ov-slots-list" *ngIf="dayDetail">
+          <div class="slot-card" *ngFor="let slot of dayDetail.slots; trackBy: trackBySlot"
+            [class.slot-expanded]="isSlotExpanded(slot)" [class.slot-full]="slot.available === 0 && slot.confirmed > 0"
+            [class.slot-available]="slot.available > 0" [class.slot-pending]="slot.available === 0 && slot.pending > 0">
+
+            <!-- Slot Header (clickable) -->
+            <div class="slot-header" (click)="$event.stopPropagation()" (click)="toggleSlot(slot)">
+              <div class="slot-header-left">
+                <div class="slot-type-icon">
+                  {{ slot.chaletType === 1 ? '👑' : '🏠' }}
+                </div>
+                <div class="slot-info">
+                  <span class="slot-type-name">{{ slot.chaletType === 1 ? 'رويال' : 'عادي' }}</span>
+                  <span class="slot-period">{{ periodLabels[slot.period] }}</span>
+                </div>
+              </div>
+
+              <div class="slot-header-right">
+                <div class="slot-mini-stats">
+                  <span class="sms sms-confirmed" *ngIf="slot.confirmed > 0" title="مؤكد">
+                    <i>✓</i> {{ slot.confirmed }}
+                  </span>
+                  <span class="sms sms-pending" *ngIf="slot.pending > 0" title="انتظار">
+                    <i>⏳</i> {{ slot.pending }}
+                  </span>
+                  <span class="sms sms-available" [class.sms-zero]="slot.available === 0" title="متاح">
+                    <i>🏠</i> {{ slot.available }}/{{ slot.totalChalets }}
+                  </span>
+                </div>
+
+                <!-- Book button -->
+                <button class="slot-book-btn" *ngIf="!selectedDay.isPast && slot.available > 0"
+                  (click)="$event.stopPropagation(); requestNewBooking(slot.chaletType, slot.period)" title="احجز الآن">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <line x1="12" y1="5" x2="12" y2="19" />
+                    <line x1="5" y1="12" x2="19" y2="12" />
+                  </svg>
+                  احجز
+                </button>
+
+                <!-- Waiting book button -->
+                <button class="slot-book-btn slot-book-wait" *ngIf="!selectedDay.isPast && slot.available === 0"
+                  (click)="$event.stopPropagation(); requestNewBooking(slot.chaletType, slot.period)"
+                  title="أضف للانتظار">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <circle cx="12" cy="12" r="10" />
+                    <polyline points="12 6 12 12 16 14" />
+                  </svg>
+                  انتظار
+                </button>
+
+                <!-- Expand arrow -->
+                <span class="slot-arrow" [class.slot-arrow-open]="isSlotExpanded(slot)">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <polyline points="6 9 12 15 18 9" />
+                  </svg>
+                </span>
+              </div>
+            </div>
+
+            <!-- Slot Progress Bar -->
+            <div class="slot-progress">
+              <div class="sp-bar sp-confirmed"
+                [style.width.%]="slot.totalChalets > 0 ? (slot.confirmed / slot.totalChalets * 100) : 0">
+              </div>
+              <div class="sp-bar sp-pending"
+                [style.width.%]="slot.totalChalets > 0 ? (slot.pending / slot.totalChalets * 100) : 0">
+              </div>
+            </div>
+
+            <!-- Expanded: Bookings List -->
+            <div class="slot-bookings" *ngIf="isSlotExpanded(slot)">
+              <div class="sb-loading" *ngIf="slot.loadingBookings">
+                <div class="ov-spinner sm-spinner"></div> جاري التحميل...
+              </div>
+
+              <div class="sb-empty"
+                *ngIf="!slot.loadingBookings && slot.bookingsList.length === 0 && (slot.confirmed + slot.pending) === 0">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                  <path
+                    d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
+                </svg>
+                لا توجد حجوزات
+              </div>
+
+              <div class="sb-scroll-wrap">
+                <div class="sb-item" *ngFor="let bk of slot.bookingsList" (click)="openBookingDetail(bk.id)"
+                  title="عرض التفاصيل">
+                  <div class="sbi-left">
+                    <div class="sbi-avatar">{{ bk.customerName.charAt(0) || '#' }}</div>
+                    <div class="sbi-info">
+                      <span class="sbi-name">{{ bk.customerName || '—' }}</span>
+                      <span class="sbi-phone">{{ bk.phone || '' }}</span>
+                      <span class="sbi-chalet" *ngIf="bk.chaletName">
+                        🏠 {{ bk.chaletName }}
+                      </span>
+                    </div>
+                  </div>
+                  <div class="sbi-right">
+                    <span class="status-badge" [ngClass]="getStatusClass(bk.status)">
+                      {{ getStatusLabel(bk.status) }}
+                    </span>
+                    <span class="sbi-price" *ngIf="bk.totalPrice">{{ bk.totalPrice }} د.أ</span>
+                    <svg class="sbi-chevron" width="12" height="12" viewBox="0 0 24 24" fill="none"
+                      stroke="currentColor" stroke-width="2.5">
+                      <polyline points="15 18 9 12 15 6" />
+                    </svg>
+                  </div>
+                </div>
+
+                <!-- Waiting bookings from slot.bookings if bookingsList empty -->
+                <ng-container
+                  *ngIf="!slot.loadingBookings && slot.bookingsList.length === 0 && (slot.confirmed + slot.pending) > 0">
+                  <div class="sb-item" *ngFor="let bk of slot.bookings" (click)="openBookingDetail(bk.id)"
+                    title="عرض التفاصيل">
+                    <div class="sbi-left">
+                      <div class="sbi-avatar">#</div>
+                      <div class="sbi-info">
+                        <span class="sbi-name">حجز #{{ bk.id }}</span>
+                      </div>
+                    </div>
+                    <div class="sbi-right">
+                      <span class="status-badge" [ngClass]="getStatusClass(bk.status)">
+                        {{ getStatusLabel(bk.status) }}
+                      </span>
+                      <svg class="sbi-chevron" width="12" height="12" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2.5">
+                        <polyline points="15 18 9 12 15 6" />
+                      </svg>
+                    </div>
+                  </div>
+                </ng-container>
+              </div>
+            </div>
+          </div>
+
+          <!-- No slots message -->
+          <div class="no-slots-msg" *ngIf="dayDetail.slots.length === 0">
+            <div class="nsm-icon">📅</div>
+            <p>لا توجد أكواخ مُعرَّفة بعد</p>
+          </div>
+        </div>
+
+        <!-- Day Nav Buttons Bottom -->
+        <div class="ov-day-bottom-nav">
+          <button class="ov-day-bottom-btn" (click)="navigateDay('prev')" [disabled]="!prevDayCell">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <polyline points="9 18 15 12 9 6" />
+            </svg>
+            السابق
+          </button>
+          <span class="ov-day-indicator">{{ selectedDay.date.getDate() }}/{{ selectedDay.date.getMonth() + 1 }}</span>
+          <button class="ov-day-bottom-btn" (click)="navigateDay('next')" [disabled]="!nextDayCell">
+            التالي
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <polyline points="15 18 9 12 15 6" />
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- ══ EMPTY STATE when no day selected ══ -->
+      <div class="ov-no-select" *ngIf="!selectedDay">
+        <div class="ns-icon">
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2">
+            <rect x="3" y="4" width="18" height="18" rx="2" />
+            <line x1="3" y1="10" x2="21" y2="10" />
+            <line x1="8" y1="2" x2="8" y2="6" />
+            <line x1="16" y1="2" x2="16" y2="6" />
+            <circle cx="8" cy="15" r="1.5" fill="currentColor" stroke="none" />
+            <circle cx="12" cy="15" r="1.5" fill="currentColor" stroke="none" />
+            <circle cx="16" cy="15" r="1.5" fill="currentColor" stroke="none" />
+          </svg>
+        </div>
+        <h3>اختر يوماً</h3>
+        <p>اضغط على أي يوم في التقويم لعرض تفاصيل الإشغال والحجوزات</p>
+      </div>
+    </div>
+  </div>
+</div>
