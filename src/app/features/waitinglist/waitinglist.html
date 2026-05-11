@@ -234,13 +234,12 @@
           <button class="btn-secondary" (click)="openDetails(item)">
             <i class="bi bi-pencil-fill"></i> تعديل الحالة
           </button>
-          <button class="btn-whatsapp-full" (click)="openWhatsApp(item.phone)">
-            <i class="bi bi-whatsapp"></i> واتساب 1
-          </button>
-          <button *ngIf="item.additionalPhone" class="btn-whatsapp-full"
-                  (click)="openWhatsApp(item.additionalPhone!)">
-            <i class="bi bi-whatsapp"></i> واتساب 2
-          </button>
+          <!-- <button class="btn-whatsapp-full" (click)="openWhatsApp(item.phone)"> -->
+            <i class="bi bi-whatsapp btn-whatsapp-full" (click)="openWhatsApp(item.phone)"></i>
+          <!-- </button> -->
+          <!-- <button *ngIf="item.additionalPhone" class="btn-whatsapp-full"(click)="openWhatsApp(item.additionalPhone!)"> -->
+            <i *ngIf="item.additionalPhone" class="bi bi-whatsapp btn-whatsapp-full" (click)="openWhatsApp(item.additionalPhone!)"></i>
+          <!-- </button> -->
           <button class="btn-primary" (click)="openConvert(item, $event)">
             <i class="bi bi-arrow-right-circle-fill"></i> تحويل إلى حجز
           </button>

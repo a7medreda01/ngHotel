@@ -115,12 +115,19 @@ export class BookingOverviewComponent implements OnInit, OnChanges {
       this.buildCalendar();
     }
   }
+open(): void {
+  this.showModal = true;
 
-  open(): void {
-    this.showModal = true;
-    this.cdr.detectChanges();
-  }
+  // reset state
+  this.selectedDay = null;
+  this.dayDetail = null;
+  this.expandedSlotKey = '';
 
+  // refresh latest data every open
+  this.loadData();
+
+  this.cdr.detectChanges();
+}
   close(): void {
     this.showModal = false;
     this.selectedDay = null;
@@ -378,22 +385,40 @@ export class BookingOverviewComponent implements OnInit, OnChanges {
 refreshing = false;
 refreshDay(): void {
   if (!this.selectedDay || this.refreshing) return;
+
+  const selectedDate = this.selectedDay.dateStr;
+
   this.refreshing = true;
   this.expandedSlotKey = '';
-  this.cdr.detectChanges();
 
-  this.loadData(); // reload كامل
+  forkJoin({
+    upcoming: this.bookingService.getUpcomingBookings(),
+    chalets: this.chaletService.getAll(),
+  }).subscribe({
+    next: ({ upcoming, chalets }) => {
+      this.upcomingBookings = upcoming?.data ?? [];
+      this.chalets = chalets;
 
-  setTimeout(() => {
-    this.refreshing = false;
-    // أعد اختيار نفس اليوم بعد الـ reload
-    if (this.selectedDay) {
-      const flat  = this.weeks.flat();
-      const found = flat.find(d => d.dateStr === this.selectedDay!.dateStr);
-      if (found) this.buildDayDetail(found);
+      this.buildChaletCountMap();
+      this.buildCalendar();
+
+      const found = this.weeks
+        .flat()
+        .find(d => d.dateStr === selectedDate);
+
+      if (found) {
+        this.selectedDay = found;
+        this.buildDayDetail(found);
+      }
+
+      this.refreshing = false;
+      this.cdr.detectChanges();
+    },
+    error: () => {
+      this.refreshing = false;
+      this.cdr.detectChanges();
     }
-    this.cdr.detectChanges();
-  }, 1200);
+  });
 }
   // ─── New Booking ──────────────────────────────────────────────────────────
 
