@@ -26,7 +26,7 @@
     <!-- </div> -->
     <div style="display:flex;gap:10px;align-items:center;">
       <!-- Overview Button -->
-      <app-booking-overview [allBookings]="bookings" (newBookingRequested)="onOverviewNewBooking($any($event))"
+      <app-booking-overview [allBookings]="bookings"  (newBookingRequested)="onOverviewNewBooking($any($event))"
         (bookingDetailRequested)="onOverviewBookingDetail($event)">
       </app-booking-overview>
       <!-- <button class="btn-primary" routerLink="/overview">
@@ -120,7 +120,7 @@
         <option value="">كل الحالات</option>
         <option value="Pending">قيد الانتظار</option>
         <option value="Confirmed">مؤكد</option>
-        <option value="WaitingList">قائمة الانتظار</option>
+        <!-- <option value="WaitingList">قائمة الانتظار</option> -->
         <option value="Cancelled">ملغي</option>
         <option value="Done">تم الاستلام</option>
       </select>
@@ -530,7 +530,7 @@
       </div>
     </div>
     <div class="mobile-list-header">
-      <span class="results-count">{{ filteredBookings.length }} حجز</span>
+      <span class="results-count">{{ total }} حجز</span>
     </div>
     <div class="booking-card" *ngFor="let b of pagedBookings" [class.card-cancelled]="b.status==='Cancelled'"
       [class.card-done]="b.status==='Done'" (click)="openDetailSheet(b)">
@@ -559,7 +559,7 @@
       <p>لا توجد حجوزات مطابقة</p>
     </div>
 
-    <div class="pagination-bar mobile-pag" *ngIf="filteredBookings.length > pageSize">
+    <div class="pagination-bar mobile-pag" *ngIf="total > pageSize">
       <button class="pag-btn" (click)="goToPage(currentPage-1)" [disabled]="currentPage===1"><i
           class="bi bi-chevron-right"></i></button>
       <span class="pag-info">{{ currentPage }} / {{ totalPages }}</span>

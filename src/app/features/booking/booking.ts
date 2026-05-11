@@ -113,7 +113,7 @@ export class Booking implements OnInit {
   waitingDateFormatted = '';
 total      = 0;
 totalPages = 0;
-isLoading  = true;
+isLoading  = false;
   // ─── Edit ───────────────────────────────────────────────────────────────
   editForm: UpdateBookingDto = {
     bookingId: 0, customerName: '', phone: '', payMoney: null, deposit: 0, removedExtraIds: []
@@ -237,9 +237,9 @@ loadBookings(): void {
     dateTo:   this.getDateTo()          || undefined,
   }).subscribe({
     next: res => {
-      this.bookings          = res.data;
-      this.filteredBookings  = res.data;   // للتوافق مع باقي الكود
-      this.pagedBookings     = res.data;
+      this.bookings          = [...res.data];
+      this.filteredBookings  = [...res.data];   // للتوافق مع باقي الكود
+      this.pagedBookings     = [...res.data];
       this.total             = res.total;
       this.totalPages        = res.totalPages;
       this.isLoading         = false;
