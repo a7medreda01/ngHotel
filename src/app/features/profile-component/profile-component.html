@@ -1,19 +1,31 @@
-<!-- profile-component.html -->
-<div class="profile-page" dir="rtl">
+﻿<!-- profile-component.html -->
+<div class="profile-page">
 
   <!-- ══ Sidebar ══ -->
   <aside class="profile-sidebar">
     <!-- User identity -->
-    <div class="sidebar-identity">
-      <div class="avatar-circle">{{ initials }}</div>
-      <div class="sidebar-user-info">
-        <span class="sidebar-name">{{ user?.fullName }}</span>
-        <span class="role-badge" [ngClass]="roleClass">
-          <i class="bi" [ngClass]="roleIcon"></i>
-          {{ roleLabel }}
-        </span>
+<div class="sidebar-identity">
+  <div class="avatar-circle">{{ initials }}</div>
+  <div class="sidebar-user-info">
+    <div class="sidebar-name-row d-flex  gap-5">
+      <span class="sidebar-name">{{ user?.fullName }}</span>
+      <!-- ✅ أزرار اللغة هنا -->
+      <div class="lang-switcher" role="group" [attr.aria-label]="'lang.choose' | translate">
+        <button type="button"
+                *ngFor="let opt of langOptions"
+                class="lang-btn"
+                [class.active]="language.currentCode() === opt.code"
+                (click)="setLang(opt.code)">
+          {{ opt.labelKey | translate }}
+        </button>
       </div>
     </div>
+    <span class="role-badge" [ngClass]="roleClass">
+      <i class="bi" [ngClass]="roleIcon"></i>
+      {{ roleLabel }}
+    </span>
+  </div>
+</div>
 
     <!-- Nav tabs -->
     <nav class="sidebar-nav">
@@ -23,14 +35,14 @@
         [class.active]="activeTab === t.id"
         (click)="setTab(t.id)">
         <i class="bi" [ngClass]="t.icon"></i>
-        <span>{{ t.label }}</span>
+        <span>{{ t.labelKey | translate }}</span>
       </button>
     </nav>
 
     <!-- Logout -->
     <button class="sidebar-logout" (click)="logout()">
       <i class="bi bi-box-arrow-right"></i>
-      <span>تسجيل الخروج</span>
+      <span>{{ 'misc.logout' | translate }}</span>
     </button>
   </aside>
 
@@ -44,23 +56,23 @@
       <div class="info-card">
         <div class="card-title">
           <i class="bi bi-person-vcard-fill"></i>
-          بيانات الحساب
+          {{ 'features.profile.tabAccount' | translate }}
         </div>
         <div class="info-rows">
           <div class="info-row">
-            <span class="info-label"><i class="bi bi-person-fill"></i> الاسم الكامل</span>
+            <span class="info-label"><i class="bi bi-person-fill"></i> {{ 'features.profile.fullName' | translate }}</span>
             <span class="info-value">{{ user?.fullName }}</span>
           </div>
           <div class="info-row">
-            <span class="info-label"><i class="bi bi-envelope-fill"></i> البريد الإلكتروني</span>
+            <span class="info-label"><i class="bi bi-envelope-fill"></i> {{ 'features.profile.email' | translate }}</span>
             <span class="info-value">{{ user?.email }}</span>
           </div>
           <div class="info-row">
-            <span class="info-label"><i class="bi bi-shield-fill"></i> الصلاحية</span>
+            <span class="info-label"><i class="bi bi-shield-fill"></i> {{ 'features.profile.role' | translate }}</span>
             <span class="role-badge small-badge" [ngClass]="roleClass">{{ roleLabel }}</span>
           </div>
           <div class="info-row">
-            <span class="info-label"><i class="bi bi-hash"></i> رقم المستخدم</span>
+            <span class="info-label"><i class="bi bi-hash"></i> {{ 'features.profile.userId' | translate }}</span>
             <span class="info-value">#{{ user?.userId }}</span>
           </div>
         </div>
@@ -70,7 +82,7 @@
       <div class="info-card">
         <div class="card-title">
           <i class="bi bi-lock-fill"></i>
-          تغيير كلمة المرور
+          {{ 'misc.changePassword' | translate }}
         </div>
 
         <div class="alert-success" *ngIf="pwSuccess">
@@ -82,7 +94,7 @@
 
         <div class="pw-form">
           <div class="form-group">
-            <label>كلمة المرور الحالية</label>
+            <label>{{ 'features.profile.currentPw' | translate }}</label>
             <div class="input-wrapper">
               <i class="bi bi-lock input-icon"></i>
               <input [type]="showCurrent ? 'text' : 'password'" [(ngModel)]="currentPassword" placeholder="••••••••" />
@@ -92,7 +104,7 @@
             </div>
           </div>
           <div class="form-group">
-            <label>كلمة المرور الجديدة</label>
+            <label>{{ 'features.reset.password' | translate }}</label>
             <div class="input-wrapper">
               <i class="bi bi-lock-fill input-icon"></i>
               <input [type]="showNew ? 'text' : 'password'" [(ngModel)]="newPassword" placeholder="••••••••" />
@@ -102,7 +114,7 @@
             </div>
           </div>
           <div class="form-group">
-            <label>تأكيد كلمة المرور</label>
+            <label>{{ 'features.reset.confirm' | translate }}</label>
             <div class="input-wrapper" [class.input-error]="confirmPassword && !passwordsMatch">
               <i class="bi bi-lock-fill input-icon"></i>
               <input [type]="showConfirm ? 'text' : 'password'" [(ngModel)]="confirmPassword" placeholder="••••••••" />
@@ -111,13 +123,13 @@
               </button>
             </div>
             <span class="field-hint error-hint" *ngIf="confirmPassword && !passwordsMatch">
-              <i class="bi bi-x-circle"></i> كلمتا المرور غير متطابقتين
+              <i class="bi bi-x-circle"></i> {{ 'features.profile.pwMismatch' | translate }}
             </span>
           </div>
           <button class="btn-change-pw" (click)="onChangePassword()" [disabled]="!isValid">
             <span class="btn-spinner" *ngIf="isChangingPw"></span>
             <i class="bi bi-shield-check" *ngIf="!isChangingPw"></i>
-            {{ isChangingPw ? 'جاري التغيير...' : 'تغيير كلمة المرور' }}
+            {{ isChangingPw ? ('features.profile.changingPw' | translate) : ('features.profile.submitPw' | translate) }}
           </button>
         </div>
       </div>

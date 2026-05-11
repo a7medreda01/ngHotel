@@ -3,10 +3,11 @@ import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { AuthService } from '../../service/Auth-service';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-reset-password-component',
-  imports: [CommonModule, FormsModule, RouterModule],
+  imports: [CommonModule, FormsModule, RouterModule, TranslatePipe],
   templateUrl: './reset-password-component.html',
   styleUrl: './reset-password-component.css',
 })
@@ -26,7 +27,8 @@ export class ResetPasswordComponent implements OnInit {
   constructor(
     private route: ActivatedRoute,
     private auth: AuthService,
-    private router: Router
+    private router: Router,
+    private translate: TranslateService
   ) {}
  
   ngOnInit(): void {
@@ -66,15 +68,15 @@ export class ResetPasswordComponent implements OnInit {
     }).subscribe({
       next: () => {
         this.isLoading = false;
-        this.successMessage = 'تم تغيير كلمة المرور بنجاح! سيتم توجيهك لتسجيل الدخول...';
+        this.successMessage = this.translate.instant('features.reset.success');
         setTimeout(() => this.router.navigate(['/login']), 2500);
       },
       error: (err) => {
         this.isLoading = false;
         if (err.status === 400) {
-          this.errorMessage = 'الرابط منتهي الصلاحية أو غير صالح. يرجى طلب رابط جديد.';
+          this.errorMessage = this.translate.instant('features.reset.errorExpired');
         } else {
-          this.errorMessage = 'حدث خطأ، يرجى المحاولة لاحقاً';
+          this.errorMessage = this.translate.instant('features.reset.errorGeneric');
         }
       }
     });

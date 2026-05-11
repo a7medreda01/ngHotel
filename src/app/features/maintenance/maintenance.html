@@ -1,5 +1,5 @@
-<!-- maintenance.component.html -->
-<div class="maintenance-wrapper" dir="rtl">
+﻿<!-- maintenance.component.html -->
+<div class="maintenance-wrapper">
 
   <!-- Header -->
   <div class="page-header">
@@ -9,13 +9,13 @@
           <i class="bi bi-wrench-adjustable-circle-fill"></i>
         </div>
         <div>
-          <h1>إدارة الصيانة</h1>
-          <p>نظام متكامل لإدارة طلبات صيانة الشاليهات</p>
+          <h1>{{ 'features.maintenance.pageTitle' | translate }}</h1>
+          <p>{{ 'features.maintenance.pageSub' | translate }}</p>
         </div>
       </div>
       <button class="btn-add" (click)="openAddModal()">
         <i class="bi bi-plus-lg"></i>
-        طلب صيانة جديد
+        {{ 'features.maintenance.newRequest' | translate }}
       </button>
     </div>
   </div>
@@ -26,7 +26,7 @@
       <div class="stat-icon"><i class="bi bi-clipboard2-pulse-fill"></i></div>
       <div class="stat-info">
         <span class="stat-value">{{ totalCount }}</span>
-        <span class="stat-label">إجمالي الطلبات</span>
+        <span class="stat-label">{{ 'features.maintenance.statTotal' | translate }}</span>
       </div>
       <div class="stat-bar total-bar"></div>
     </div>
@@ -34,7 +34,7 @@
       <div class="stat-icon"><i class="bi bi-exclamation-circle-fill"></i></div>
       <div class="stat-info">
         <span class="stat-value">{{ openCount }}</span>
-        <span class="stat-label">مفتوح</span>
+        <span class="stat-label">{{ 'features.maintenance.statOpen' | translate }}</span>
       </div>
       <div class="stat-bar open-bar"></div>
     </div>
@@ -42,7 +42,7 @@
       <div class="stat-icon"><i class="bi bi-hourglass-split"></i></div>
       <div class="stat-info">
         <span class="stat-value">{{ inProgressCount }}</span>
-        <span class="stat-label">قيد التنفيذ</span>
+        <span class="stat-label">{{ 'features.maintenance.statInProgress' | translate }}</span>
       </div>
       <div class="stat-bar inprogress-bar"></div>
     </div>
@@ -50,7 +50,7 @@
       <div class="stat-icon"><i class="bi bi-check-circle-fill"></i></div>
       <div class="stat-info">
         <span class="stat-value">{{ closedCount }}</span>
-        <span class="stat-label">مغلق</span>
+        <span class="stat-label">{{ 'features.maintenance.statClosed' | translate }}</span>
       </div>
       <div class="stat-bar closed-bar"></div>
     </div>
@@ -64,27 +64,27 @@
         type="text"
         [(ngModel)]="searchText"
         (input)="onSearch()"
-        placeholder="بحث بالوصف أو اسم الشاليه..."
+        [placeholder]="'features.maintenance.searchPh' | translate"
       />
     </div>
     <div class="filter-tabs">
-      <button class="filter-tab" [class.active]="selectedStatus === 'all'" (click)="selectedStatus='all'; onStatusFilter()">الكل</button>
-      <button class="filter-tab open-tab" [class.active]="selectedStatus === 'Open'" (click)="selectedStatus='Open'; onStatusFilter()">مفتوح</button>
-      <button class="filter-tab inprogress-tab" [class.active]="selectedStatus === 'InProgress'" (click)="selectedStatus='InProgress'; onStatusFilter()">قيد التنفيذ</button>
-      <button class="filter-tab closed-tab" [class.active]="selectedStatus === 'Closed'" (click)="selectedStatus='Closed'; onStatusFilter()">مغلق</button>
+      <button class="filter-tab" [class.active]="selectedStatus === 'all'" (click)="selectedStatus='all'; onStatusFilter()">{{ 'features.maintenance.filterAll' | translate }}</button>
+      <button class="filter-tab open-tab" [class.active]="selectedStatus === 'Open'" (click)="selectedStatus='Open'; onStatusFilter()">{{ 'features.maintenance.open' | translate }}</button>
+      <button class="filter-tab inprogress-tab" [class.active]="selectedStatus === 'InProgress'" (click)="selectedStatus='InProgress'; onStatusFilter()">{{ 'features.maintenance.inProgress' | translate }}</button>
+      <button class="filter-tab closed-tab" [class.active]="selectedStatus === 'Closed'" (click)="selectedStatus='Closed'; onStatusFilter()">{{ 'features.maintenance.closed' | translate }}</button>
     </div>
   </div>
 
   <!-- Loading -->
   <div *ngIf="isLoading" class="loading-state">
     <div class="spinner"></div>
-    <span>جاري التحميل...</span>
+    <span>{{ 'features.maintenance.chaletLoading' | translate }}</span>
   </div>
 
   <!-- Table (Desktop) -->
   <div class="table-container" *ngIf="!isLoading">
     <div class="table-header-row">
-      <span class="results-count"><i class="bi bi-list-ul"></i> {{ filteredRequests.length }} طلب</span>
+      <span class="results-count"><i class="bi bi-list-ul"></i> {{ 'features.maintenance.requestsCount' | translate: { n: filteredRequests.length } }}</span>
     </div>
 
     <!-- Desktop Table -->
@@ -92,11 +92,11 @@
       <thead>
         <tr>
           <th>#</th>
-          <th>الشاليه</th>
-          <th>الوصف</th>
-          <th>الحالة</th>
-          <th>تاريخ الإنشاء</th>
-          <th>إجراءات</th>
+          <th>{{ 'features.maintenance.colChalet' | translate }}</th>
+          <th>{{ 'features.maintenance.colDesc' | translate }}</th>
+          <th>{{ 'features.maintenance.colStatus' | translate }}</th>
+          <th>{{ 'features.maintenance.colCreated' | translate }}</th>
+          <th>{{ 'features.maintenance.colActions' | translate }}</th>
         </tr>
       </thead>
       <tbody>
@@ -105,7 +105,7 @@
           <td>
             <div class="chalet-cell">
               <span class="chalet-icon"><i class="bi bi-house-fill"></i></span>
-              <span>{{ req.chaletName || 'كوخ ' + req.chaletId }}</span>
+              <span>{{ req.chaletName || ('features.maintenance.chaletFallback' | translate: { id: req.chaletId }) }}</span>
             </div>
           </td>
           <td class="desc-cell">{{ req.description }}</td>
@@ -117,14 +117,14 @@
           </td>
           <td class="date-cell">
             <i class="bi bi-calendar3"></i>
-            {{ req.createdAt || '—' }}
+            {{ req.createdAt || ('misc.none' | translate) }}
           </td>
           <td>
             <div class="action-btns">
-              <button class="btn-edit" (click)="openEditModal(req)" title="تعديل">
+              <button class="btn-edit" (click)="openEditModal(req)" [attr.title]="'misc.edit' | translate">
                 <i class="bi bi-pencil-fill"></i>
               </button>
-              <button class="btn-delete" (click)="openDeleteConfirm(req)" title="حذف">
+              <button class="btn-delete" (click)="openDeleteConfirm(req)" [attr.title]="'misc.delete' | translate">
                 <i class="bi bi-trash3-fill"></i>
               </button>
             </div>
@@ -133,7 +133,7 @@
         <tr *ngIf="filteredRequests.length === 0">
           <td colspan="6" class="empty-state">
             <i class="bi bi-inbox"></i>
-            <p>لا توجد طلبات صيانة</p>
+            <p>{{ 'features.maintenance.empty' | translate }}</p>
           </td>
         </tr>
       </tbody>
@@ -145,7 +145,7 @@
         <div class="mobile-card-header">
           <div class="mobile-card-title">
             <span class="mobile-id">#{{ req.id }}</span>
-            <span class="chalet-name"><i class="bi bi-house-fill"></i> {{ req.chaletName || 'كوخ ' + req.chaletId }}</span>
+            <span class="chalet-name"><i class="bi bi-house-fill"></i> {{ req.chaletName || ('features.maintenance.chaletFallback' | translate: { id: req.chaletId }) }}</span>
           </div>
           <span class="status-badge" [ngClass]="getStatusClass(req.status)">
             <i class="bi" [ngClass]="getStatusIcon(req.status)"></i>
@@ -154,7 +154,7 @@
         </div>
         <p class="mobile-desc">{{ req.description }}</p>
         <div class="mobile-card-footer">
-          <span class="mobile-date"><i class="bi bi-calendar3"></i> {{ req.createdAt || '—' }}</span>
+          <span class="mobile-date"><i class="bi bi-calendar3"></i> {{ req.createdAt || ('misc.none' | translate) }}</span>
           <div class="action-btns">
             <button class="btn-edit" (click)="openEditModal(req)"><i class="bi bi-pencil-fill"></i></button>
             <button class="btn-delete" (click)="openDeleteConfirm(req)"><i class="bi bi-trash3-fill"></i></button>
@@ -163,7 +163,7 @@
       </div>
       <div *ngIf="filteredRequests.length === 0" class="empty-state">
         <i class="bi bi-inbox"></i>
-        <p>لا توجد طلبات صيانة</p>
+        <p>{{ 'features.maintenance.empty' | translate }}</p>
       </div>
     </div>
   </div>
@@ -172,36 +172,35 @@
   <div class="modal-overlay" *ngIf="showAddModal" (click)="closeAddModal()">
     <div class="modal-box" (click)="$event.stopPropagation()">
       <div class="modal-header">
-        <h3><i class="bi bi-plus-circle-fill"></i> إضافة طلب صيانة</h3>
+        <h3><i class="bi bi-plus-circle-fill"></i> {{ 'features.maintenance.addTitle' | translate }}</h3>
         <button class="modal-close" (click)="closeAddModal()"><i class="bi bi-x-lg"></i></button>
       </div>
       <div class="modal-body">
         <div class="form-group">
-          <label><i class="bi bi-house"></i> الشاليه</label>
+          <label><i class="bi bi-house"></i> {{ 'features.maintenance.chaletLabel' | translate }}</label>
           <div class="select-wrapper">
             <select [(ngModel)]="newRequest.chaletId" [disabled]="chaletsLoading">
               <option [ngValue]="0" disabled>
-                {{ chaletsLoading ? 'جاري التحميل...' : 'اختر الشاليه...' }}
+                {{ chaletsLoading ? ('features.maintenance.chaletLoading' | translate) : ('features.maintenance.chaletSelectPh' | translate) }}
               </option>
               <option *ngFor="let ch of chalets" [ngValue]="ch.id">
-                {{ ch.name }}
-                <span *ngIf="ch.type === 'Royal'"> ★</span>
+                {{ ch.name }}{{ ch.type === 'Royal' ? ' ★' : '' }}
               </option>
             </select>
             <i class="bi bi-chevron-down select-arrow"></i>
           </div>
         </div>
         <div class="form-group">
-          <label><i class="bi bi-card-text"></i> وصف المشكلة</label>
-          <textarea [(ngModel)]="newRequest.description" rows="4" placeholder="اكتب وصفاً تفصيلياً للمشكلة..."></textarea>
+          <label><i class="bi bi-card-text"></i> {{ 'features.maintenance.descLabel' | translate }}</label>
+          <textarea [(ngModel)]="newRequest.description" rows="4" [placeholder]="'features.maintenance.descPhNew' | translate"></textarea>
         </div>
       </div>
       <div class="modal-footer">
-        <button class="btn-cancel" (click)="closeAddModal()" [disabled]="isSubmitting">إلغاء</button>
+        <button class="btn-cancel" (click)="closeAddModal()" [disabled]="isSubmitting">{{ 'misc.cancel' | translate }}</button>
         <button class="btn-submit text-black border border-1 border-info" (click)="submitAdd()" [disabled]="!newRequest.chaletId || !newRequest.description || isSubmitting">
           <span *ngIf="isSubmitting" class="btn-spinner"></span>
           <i *ngIf="!isSubmitting" class="bi bi-check-lg"></i>
-          {{ isSubmitting ? 'جاري الحفظ...' : 'حفظ' }}
+          {{ isSubmitting ? ('features.maintenance.saving' | translate) : ('features.maintenance.save' | translate) }}
         </button>
       </div>
     </div>
@@ -211,30 +210,30 @@
   <div class="modal-overlay" *ngIf="showEditModal" (click)="closeEditModal()">
     <div class="modal-box" (click)="$event.stopPropagation()">
       <div class="modal-header">
-        <h3><i class="bi bi-pencil-square"></i> تعديل طلب الصيانة</h3>
+        <h3><i class="bi bi-pencil-square"></i> {{ 'features.maintenance.editTitle' | translate }}</h3>
         <button class="modal-close" (click)="closeEditModal()"><i class="bi bi-x-lg"></i></button>
       </div>
       <div class="modal-body">
         <div class="form-group">
-          <label><i class="bi bi-card-text"></i> وصف المشكلة</label>
-          <textarea [(ngModel)]="editForm.description" rows="4" placeholder="وصف المشكلة..."></textarea>
+          <label><i class="bi bi-card-text"></i> {{ 'features.maintenance.descLabel' | translate }}</label>
+          <textarea [(ngModel)]="editForm.description" rows="4" [placeholder]="'features.maintenance.descPhEdit' | translate"></textarea>
         </div>
         <div class="form-group">
-          <label><i class="bi bi-toggles"></i> الحالة</label>
+          <label><i class="bi bi-toggles"></i> {{ 'features.maintenance.statusField' | translate }}</label>
           <div class="status-selector">
             <button
               *ngFor="let opt of statusOptions"
               class="status-opt"
               [class.selected]="editForm.status === opt.value"
               (click)="editForm.status = opt.value"
-            >{{ opt.label }}</button>
+            >{{ opt.labelKey | translate }}</button>
           </div>
         </div>
       </div>
       <div class="modal-footer">
-        <button class="btn-cancel" (click)="closeEditModal()">إلغاء</button>
+        <button class="btn-cancel" (click)="closeEditModal()">{{ 'misc.cancel' | translate }}</button>
         <button class="btn-submit  text-black border border-1 border-info" (click)="submitEdit()" [disabled]="!editForm.description">
-          <i class="bi bi-check-lg"></i> تحديث
+          <i class="bi bi-check-lg"></i> {{ 'features.maintenance.update' | translate }}
         </button>
       </div>
     </div>
@@ -244,17 +243,17 @@
   <div class="modal-overlay" *ngIf="showDeleteConfirm" (click)="closeDeleteConfirm()">
     <div class="modal-box modal-sm" (click)="$event.stopPropagation()">
       <div class="modal-header danger-header">
-        <h3><i class="bi bi-exclamation-triangle-fill"></i> تأكيد الحذف</h3>
+        <h3><i class="bi bi-exclamation-triangle-fill"></i> {{ 'features.maintenance.deleteTitle' | translate }}</h3>
         <button class="modal-close" (click)="closeDeleteConfirm()"><i class="bi bi-x-lg"></i></button>
       </div>
       <div class="modal-body text-center">
-        <p>هل أنت متأكد من حذف طلب الصيانة؟</p>
+        <p>{{ 'features.maintenance.deleteConfirm' | translate }}</p>
         <p class="delete-target">{{ selectedRequest?.description }}</p>
       </div>
       <div class="modal-footer">
-        <button class="btn-cancel" (click)="closeDeleteConfirm()">إلغاء</button>
+        <button class="btn-cancel" (click)="closeDeleteConfirm()">{{ 'misc.cancel' | translate }}</button>
         <button class="btn-danger" (click)="confirmDelete()">
-          <i class="bi bi-trash3-fill"></i> حذف
+          <i class="bi bi-trash3-fill"></i> {{ 'misc.delete' | translate }}
         </button>
       </div>
     </div>

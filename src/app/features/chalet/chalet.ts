@@ -5,6 +5,7 @@ import { normalizeChalet } from '../../service/chalet-service';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { StatCountPipe } from '../../adds/pipes/count.pipe';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 interface ImageItem {
   id: number;
@@ -13,7 +14,7 @@ interface ImageItem {
 
 @Component({
   selector: 'app-chalet',
-  imports: [CommonModule, FormsModule, StatCountPipe],
+  imports: [CommonModule, FormsModule, StatCountPipe, TranslatePipe],
   templateUrl: './chalet.html',
   styleUrl: './chalet.css',
 })
@@ -47,20 +48,10 @@ export class Chalet implements OnInit {
     hasFullDay: true,
   };
 
-  typeOptions = [
-    { value: 0, label: '🏠 عادي' },
-    { value: 1, label: '👑 رويال' }
-  ];
-
-  statusOptions = [
-    { value: 0, label: 'متاح' },
-    { value: 1, label: 'محجوز' },
-    { value: 2, label: 'صيانة' }
-  ];
-
   constructor(
     private chaletService: ChaletService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private translate: TranslateService
   ) {}
 
   ngOnInit(): void {
@@ -77,7 +68,7 @@ export class Chalet implements OnInit {
         this.cdr.detectChanges();
       },
       error: () => {
-        this.error   = 'حدث خطأ أثناء تحميل البيانات';
+        this.error   = this.translate.instant('features.chalet.loadError');
         this.loading = false;
         this.cdr.detectChanges();
       }
@@ -87,11 +78,15 @@ export class Chalet implements OnInit {
   // ════ LABELS ════
 
   getTypeLabel(type: string): string {
-    return type === 'Royal' ? '👑 رويال' : '🏠 عادي';
+    return type === 'Royal'
+      ? this.translate.instant('misc.royal')
+      : this.translate.instant('misc.normal');
   }
 
   getStatusLabel(status: string): string {
-    return ({ Available: 'متاح', Booked: 'محجوز', Maintenance: 'صيانة' } as any)[status] ?? status;
+    const key = `chaletStatus.${status}`;
+    const t = this.translate.instant(key);
+    return t !== key ? t : status;
   }
 
   getStatusClass(status: string): string {
@@ -113,11 +108,11 @@ export class Chalet implements OnInit {
   getPeriodsLabel(chalet: chaletSvc.Chalet): string {
     const p = this.getChaletPeriods(chalet);
     const labels: string[] = [];
-    if (p.morning) labels.push('🌅 صباحي');
-    if (p.evening) labels.push('🌇 مسائي');
-    if (p.fullDay) labels.push('🌞 كامل');
-    if (labels.length === 3) return '🌅🌇🌞 كل الفترات';
-    if (labels.length === 0) return 'لا توجد فترات';
+    if (p.morning) labels.push(this.translate.instant('misc.overviewPeriodMorning'));
+    if (p.evening) labels.push(this.translate.instant('misc.overviewPeriodEvening'));
+    if (p.fullDay) labels.push(this.translate.instant('misc.overviewPeriodFull'));
+    if (labels.length === 3) return this.translate.instant('features.chalet.allPeriodsShort');
+    if (labels.length === 0) return this.translate.instant('features.chalet.noPeriods');
     return labels.join(' + ');
   }
 
@@ -244,11 +239,11 @@ buildFormData(): FormData {
 
   submitForm(): void {
     if (!this.form.name.trim()) {
-      this.error = 'يرجى إدخال اسم الشاليه';
+      this.error = this.translate.instant('features.chalet.nameRequired');
       return;
     }
     if (!this.atLeastOnePeriod) {
-      this.error = 'يرجى اختيار فترة واحدة على الأقل';
+      this.error = this.translate.instant('features.chalet.periodRequired');
       return;
     }
 
@@ -264,13 +259,15 @@ buildFormData(): FormData {
       next: () => {
         this.submitting = false;
         this.showModal  = false;
-        this.successMsg = this.isEditMode ? 'تم تعديل الشاليه بنجاح ✓' : 'تم إضافة الشاليه بنجاح ✓';
+        this.successMsg = this.isEditMode
+          ? this.translate.instant('features.chalet.saveOkEdit')
+          : this.translate.instant('features.chalet.saveOkAdd');
         this.loadChalets();
         setTimeout(() => this.successMsg = '', 3500);
       },
       error: (err) => {
         this.submitting = false;
-        this.error      = err?.error?.message || 'حدث خطأ، يرجى المحاولة مرة أخرى';
+        this.error      = err?.error?.message || this.translate.instant('features.chalet.saveError');
       }
     });
   }
@@ -293,13 +290,13 @@ buildFormData(): FormData {
       next: () => {
         this.showDeleteModal = false;
         this.chaletToDelete  = null;
-        this.successMsg      = 'تم حذف الشاليه بنجاح';
+        this.successMsg      = this.translate.instant('features.chalet.deleteOk');
         this.loadChalets();
         setTimeout(() => this.successMsg = '', 3000);
       },
       error: () => {
         this.showDeleteModal = false;
-        this.error           = 'حدث خطأ أثناء الحذف';
+        this.error           = this.translate.instant('features.chalet.deleteError');
       }
     });
   }

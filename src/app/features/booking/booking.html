@@ -1,4 +1,4 @@
-<div class="bookings-page" dir="rtl">
+﻿<div class="bookings-page">
 
   <!-- Toast -->
   <div class="toast-notification" [class.show]="showToast" [class.toast-error]="toastType==='error'"
@@ -13,12 +13,12 @@
     <div class="header-title">
       <div class="header-icon"><i class="bi bi-building"></i></div>
       <div>
-        <h1>إدارة الحجوزات</h1>
-        <p class="header-sub">نظام متكامل لإدارة حجوزات الأكواخ</p>
+        <h1>{{ 'booking.pageTitle' | translate }}</h1>
+        <p class="header-sub">{{ 'booking.pageSubtitle' | translate }}</p>
       </div>
     </div>
     <!-- <button class="btn-primary" (click)="openAddModal()">
-      <i class="bi bi-plus-lg"></i> حجز جديد
+      <i class="bi bi-plus-lg"></i> {{ 'nav.newBooking' | translate }}
     </button>
     <div class="page-header">
   <div class="header-title"> -->
@@ -30,11 +30,11 @@
         (bookingDetailRequested)="onOverviewBookingDetail($event)">
       </app-booking-overview>
       <!-- <button class="btn-primary" routerLink="/overview">
-      <i class="bi bi-plus-lg"></i>التحقق من المتاح
+      <i class="bi bi-plus-lg"></i> {{ 'booking.checkAvailability' | translate }}
     </button> -->
       <!-- Existing Add Button -->
       <button class="btn-primary" (click)="openAddModal()">
-        <i class="bi bi-plus-lg"></i> حجز جديد
+        <i class="bi bi-plus-lg"></i> {{ 'nav.newBooking' | translate }}
       </button>
       <!-- </div> -->
     </div>
@@ -42,10 +42,10 @@
 
   <!-- TODAY STATS -->
   <div class="today-stats-header">
-    <span class="today-label"><i class="bi bi-calendar-day-fill"></i> إحصاءيات اليوم</span>
+    <span class="today-label"><i class="bi bi-calendar-day-fill"></i> {{ 'misc.todayStats' | translate }}</span>
     <button class="btn-compare" (click)="showComparison = !showComparison">
       <i class="bi" [class.bi-bar-chart-fill]="!showComparison" [class.bi-x-lg]="showComparison"></i>
-      {{ showComparison ? 'إخفاء المقارنة' : 'مقارنة بالأمس' }}
+      {{ showComparison ? ('misc.hideComparison' | translate) : ('misc.compareYesterday' | translate) }}
     </button>
   </div>
 
@@ -54,11 +54,11 @@
       <div class="stat-icon"><i class="bi bi-journal-bookmark-fill"></i></div>
       <div class="stat-body">
         <span class="stat-value">{{ todayTotal }}</span>
-        <span class="stat-label">حجوزات اليوم</span>
+        <span class="stat-label">{{ 'misc.bookingsToday' | translate }}</span>
         <div class="stat-compare" *ngIf="showComparison">
           <span [ngClass]="getDiffClass(todayTotal, yesterdayTotal)">
             <i class="bi" [ngClass]="getDiffIcon(todayTotal, yesterdayTotal)"></i>
-            {{ getDiff(todayTotal, yesterdayTotal) >= 0 ? '+' : '' }}{{ getDiff(todayTotal, yesterdayTotal) }} عن الأمس
+            {{ getDiff(todayTotal, yesterdayTotal) >= 0 ? '+' : '' }}{{ getDiff(todayTotal, yesterdayTotal) }} {{ 'misc.versusYesterday' | translate }}
             ({{ yesterdayTotal }})
           </span>
         </div>
@@ -68,12 +68,12 @@
       <div class="stat-icon"><i class="bi bi-hourglass-split"></i></div>
       <div class="stat-body">
         <span class="stat-value">{{ todayPending }}</span>
-        <span class="stat-label">قيد الانتظار اليوم</span>
+        <span class="stat-label">{{ 'misc.pendingToday' | translate }}</span>
         <div class="stat-compare" *ngIf="showComparison">
           <span [ngClass]="getDiffClass(todayPending, yesterdayPending)">
             <i class="bi" [ngClass]="getDiffIcon(todayPending, yesterdayPending)"></i>
             {{ getDiff(todayPending, yesterdayPending) >= 0 ? '+' : '' }}{{ getDiff(todayPending, yesterdayPending) }}
-            عن الأمس ({{ yesterdayPending }})
+            {{ 'misc.versusYesterday' | translate }} ({{ yesterdayPending }})
           </span>
         </div>
       </div>
@@ -82,12 +82,12 @@
       <div class="stat-icon"><i class="bi bi-check-circle-fill"></i></div>
       <div class="stat-body">
         <span class="stat-value">{{ todayConfirmed }}</span>
-        <span class="stat-label">مؤكدة اليوم</span>
+        <span class="stat-label">{{ 'misc.confirmedToday' | translate }}</span>
         <div class="stat-compare" *ngIf="showComparison">
           <span [ngClass]="getDiffClass(todayConfirmed, yesterdayConfirmed)">
             <i class="bi" [ngClass]="getDiffIcon(todayConfirmed, yesterdayConfirmed)"></i>
             {{ getDiff(todayConfirmed, yesterdayConfirmed) >= 0 ? '+' : '' }}{{ getDiff(todayConfirmed,
-            yesterdayConfirmed) }} عن الأمس ({{ yesterdayConfirmed }})
+            yesterdayConfirmed) }} {{ 'misc.versusYesterday' | translate }} ({{ yesterdayConfirmed }})
           </span>
         </div>
       </div>
@@ -96,12 +96,12 @@
       <div class="stat-icon"><i class="bi bi-cash-coin"></i></div>
       <div class="stat-body">
         <span class="stat-value">{{ todayRevenue }}</span>
-        <span class="stat-label">إيرادات اليوم (د.أ)</span>
+        <span class="stat-label">{{ 'misc.revenueToday' | translate }}</span>
         <div class="stat-compare" *ngIf="showComparison">
           <span [ngClass]="getDiffClass(todayRevenue, yesterdayRevenue)">
             <i class="bi" [ngClass]="getDiffIcon(todayRevenue, yesterdayRevenue)"></i>
             {{ getDiff(todayRevenue, yesterdayRevenue) >= 0 ? '+' : '' }}{{ getDiff(todayRevenue, yesterdayRevenue) }}
-            عن الأمس ({{ yesterdayRevenue }})
+            {{ 'misc.versusYesterday' | translate }} ({{ yesterdayRevenue }})
           </span>
         </div>
       </div>
@@ -112,42 +112,42 @@
   <div class="filter-bar">
     <div class="search-box">
       <i class="bi bi-search search-icon"></i>
-      <input type="text" placeholder="بحث بالاسم، الهاتف، أو الكوخ..." [(ngModel)]="searchQuery"
+      <input type="text" [placeholder]="'misc.searchBookingsPlaceholder' | translate" [(ngModel)]="searchQuery"
         (input)="applyFilter()" />
     </div>
     <div class="status-filter">
       <select [(ngModel)]="filterStatus" (change)="applyFilter()">
-        <option value="">كل الحالات</option>
-        <option value="Pending">قيد الانتظار</option>
-        <option value="Confirmed">مؤكد</option>
-        <option value="WaitingList">قائمة الانتظار</option>
-        <option value="Cancelled">ملغي</option>
-        <option value="Done">تم الاستلام</option>
+        <option value="">{{ 'misc.allStatuses' | translate }}</option>
+        <option value="Pending">{{ 'status.Pending' | translate }}</option>
+        <option value="Confirmed">{{ 'status.Confirmed' | translate }}</option>
+        <option value="WaitingList">{{ 'status.WaitingList' | translate }}</option>
+        <option value="Cancelled">{{ 'status.Cancelled' | translate }}</option>
+        <option value="Done">{{ 'status.Done' | translate }}</option>
       </select>
     </div>
     <!-- Date Range Filter -->
     <div class="date-filter">
       <select [(ngModel)]="filterDateRange" (change)="applyFilter()">
-        <option value="">كل الفترات</option>
-        <option value="today">اليوم</option>
-        <option value="yesterday">أمس</option>
-        <option value="week">آخر أسبوع</option>
-        <option value="month">آخر شهر</option>
-        <option value="last_month">الشهر الماضي</option>
-        <option value="custom">فترة مخصصة</option>
+        <option value="">{{ 'misc.allRanges' | translate }}</option>
+        <option value="today">{{ 'misc.today' | translate }}</option>
+        <option value="yesterday">{{ 'misc.yesterday' | translate }}</option>
+        <option value="week">{{ 'misc.lastWeek' | translate }}</option>
+        <option value="month">{{ 'misc.lastMonth' | translate }}</option>
+        <option value="last_month">{{ 'misc.prevMonth' | translate }}</option>
+        <option value="custom">{{ 'misc.customRange' | translate }}</option>
       </select>
     </div>
     <ng-container *ngIf="filterDateRange === 'custom'">
       <div class="custom-date-input">
-        <input type="date" [(ngModel)]="filterDateFrom" (change)="applyFilter()" class="form-input" placeholder="من" />
+        <input type="date" [(ngModel)]="filterDateFrom" (change)="applyFilter()" class="form-input" [placeholder]="'misc.from' | translate" />
       </div>
       <div class="custom-date-input">
-        <input type="date" [(ngModel)]="filterDateTo" (change)="applyFilter()" class="form-input" placeholder="إلى" />
+        <input type="date" [(ngModel)]="filterDateTo" (change)="applyFilter()" class="form-input" [placeholder]="'misc.to' | translate" />
       </div>
     </ng-container>
     <div class="page-size-select">
       <select [(ngModel)]="pageSize" (change)="onPageSizeChange()">
-        <option *ngFor="let s of pageSizeOptions" [value]="s">{{ s }} لكل صفحة</option>
+        <option *ngFor="let s of pageSizeOptions" [value]="s">{{ 'misc.perPage' | translate: { n: s } }}</option>
       </select>
     </div>
   </div>
@@ -156,27 +156,27 @@
   <div class="desktop-layout desktop-only">
     <div class="table-card" [class.panel-open]="showDetailPanel">
       <div class="table-header">
-        <h3><i class="bi bi-list-ul"></i> قائمة الحجوزات</h3>
-        <span class="results-count">{{ total }} حجز</span>
+        <h3><i class="bi bi-list-ul"></i> {{ 'misc.bookingList' | translate }}</h3>
+        <span class="results-count">{{ total }} {{ 'misc.bookingsWord' | translate }}</span>
       </div>
       <div class="table-wrapper">
         <table class="bookings-table" *ngIf="pagedBookings.length > 0">
           <thead>
             <tr>
               <th>#</th>
-              <th>اسم العميل</th>
-              <th>النوع / الكوخ</th>
-              <th>وقت الحجز</th>
-              <th>يوم الحجز</th>
-              <th>الفترة</th>
-              <th>الحالة</th>
-              <th>سعر</th>
-              <th>الإضافات</th>
-              <th>خصم</th>
-              <th>الإجمالي</th>
-              <th>مدفوع</th>
-              <th>الباقي</th>
-              <th>إجراءات</th>
+              <th>{{ 'misc.customerName' | translate }}</th>
+              <th>{{ 'misc.typeChaletCol' | translate }}</th>
+              <th>{{ 'misc.bookingCreatedAt' | translate }}</th>
+              <th>{{ 'misc.bookingDay' | translate }}</th>
+              <th>{{ 'misc.period' | translate }}</th>
+              <th>{{ 'misc.status' | translate }}</th>
+              <th>{{ 'misc.price' | translate }}</th>
+              <th>{{ 'misc.extras' | translate }}</th>
+              <th>{{ 'misc.discount' | translate }}</th>
+              <th>{{ 'misc.total' | translate }}</th>
+              <th>{{ 'misc.paid' | translate }}</th>
+              <th>{{ 'misc.remainingCol' | translate }}</th>
+              <th>{{ 'misc.actions' | translate }}</th>
             </tr>
           </thead>
           <tbody>
@@ -200,11 +200,11 @@
               <td>
                 <div class="chalet-type-cell">
                   <span class="type-badge" [class.type-royal]="b.chaletType===1" [class.type-normal]="b.chaletType===0">
-                    {{ b.chaletType === 1 ? '👑 رويال' : '🏠 عادي' }}
+                    {{ (b.chaletType === 1 ? 'misc.royal' : 'misc.normal') | translate }}
                   </span>
                   <span class="chalet-tag" *ngIf="b.chaletName"><i class="bi bi-house-fill"></i> {{ b.chaletName
                     }}</span>
-                  <span class="no-val" *ngIf="!b.chaletName">غير محدد</span>
+                  <span class="no-val" *ngIf="!b.chaletName">{{ 'misc.notSpecified' | translate }}</span>
                 </div>
               </td>
               <td>{{ formatDateTime(b.createdAt | jordanDate ) }}</td>
@@ -212,19 +212,19 @@
               <td><span class="period-badge">{{ getPeriodLabel(b.period) }}</span></td>
               <td><span class="status-badge" [ngClass]="getStatusClass(b.status)">{{ getStatusLabel(b.status) }}</span>
               </td>
-              <td class="cell-price">{{ b.chaletPrice ?? '—' }} <small>د.أ</small></td>
+              <td class="cell-price">{{ b.chaletPrice ?? '—' }} <small>{{ 'misc.currency' | translate }}</small></td>
               <td class="cell-extras">
-                <span *ngIf="b.extrasTotal">{{ b.extrasTotal }} <small>د.أ</small></span>
+                <span *ngIf="b.extrasTotal">{{ b.extrasTotal }} <small>{{ 'misc.currency' | translate }}</small></span>
                 <span *ngIf="!b.extrasTotal" class="no-val">—</span>
               </td>
               <!-- ✅ عمود الخصم -->
               <td class="cell-discount">
                 <span *ngIf="b.discountAmount && b.discountAmount > 0" class="discount-chip">
-                  -{{ b.discountAmount }} <small>د.أ</small>
+                  -{{ b.discountAmount }} <small>{{ 'misc.currency' | translate }}</small>
                 </span>
                 <span *ngIf="!b.discountAmount || b.discountAmount === 0" class="no-val">—</span>
               </td>
-              <td class="cell-total">{{ b.totalPrice }} <small>د.أ</small></td>
+              <td class="cell-total">{{ b.totalPrice }} <small>{{ 'misc.currency' | translate }}</small></td>
               <td>
                 <ng-container *ngIf="!isDone(b)">
                   <span *ngIf="b.deposit" class="deposit-value">
@@ -235,7 +235,7 @@
                 </ng-container>
                 <ng-container *ngIf="isDone(b)">
                   <span *ngIf="getRemaining(b) === 0" class="done-paid-badge">
-                    <i class="bi bi-check-all"></i> مدفوع
+                    <i class="bi bi-check-all"></i> {{ 'misc.paid' | translate }}
                   </span>
                   <span *ngIf="getRemaining(b) > 0" class="deposit-value">
                     <i class="bi bi-check2-circle"></i>
@@ -246,39 +246,39 @@
               <td>
                 <ng-container *ngIf="!isDone(b)">
                   <span *ngIf="b.deposit" class="remaining-val">
-                    {{ getRemaining(b) }} <small>د.أ</small>
+                    {{ getRemaining(b) }} <small>{{ 'misc.currency' | translate }}</small>
                   </span>
                   <span *ngIf="!b.deposit" class="no-val">—</span>
                 </ng-container>
                 <ng-container *ngIf="isDone(b)">
                   <span *ngIf="getRemaining(b) > 0" class="remaining-val">
-                    {{ getRemaining(b) }} <small>د.أ</small>
+                    {{ getRemaining(b) }} <small>{{ 'misc.currency' | translate }}</small>
                   </span>
                   <span *ngIf="getRemaining(b) === 0" class="no-val">—</span>
                 </ng-container>
               </td>
               <td (click)="$event.stopPropagation()">
                 <div class="actions-group">
-                  <button class="action-btn btn-payments" (click)="openPaymentsModal(b, $event)" title="سجل الدفعات">
+                  <button class="action-btn btn-payments" (click)="openPaymentsModal(b, $event)" [attr.title]="'misc.paymentLog' | translate">
                     <i class="bi bi-receipt"></i>
                   </button>
-                  <button class="action-btn btn-edit" (click)="openEditModal(b)" title="تعديل"
+                  <button class="action-btn btn-edit" (click)="openEditModal(b)" [attr.title]="'misc.edit' | translate"
                     *ngIf="b.status !== 'Cancelled'">
                     <i class="bi bi-pencil-fill"></i>
                   </button>
-                  <button class="action-btn btn-deposit" (click)="openDepositModal(b)" title="ديبوزت"
+                  <button class="action-btn btn-deposit" (click)="openDepositModal(b)" [attr.title]="'misc.deposit' | translate"
                     *ngIf="auth.hasRole('Manager') && (b.status === 'Pending' || b.status === 'WaitingList')">
                     <i class="bi bi-credit-card-fill"></i>
                   </button>
-                  <button class="action-btn btn-done" (click)="promptDone(b.id)" title="تم الاستلام"
+                  <button class="action-btn btn-done" (click)="promptDone(b.id)" [attr.title]="'misc.received' | translate"
                     *ngIf="b.status === 'Confirmed' && !isFutureDate(b.date)">
                     <i class="bi bi-check2-all"></i>
                   </button>
-                  <button class="action-btn btn-notes" (click)="openNotesModal(b, $event)" title="ملاحظات">
+                  <button class="action-btn btn-notes" (click)="openNotesModal(b, $event)" [attr.title]="'misc.notes' | translate">
                     <i class="bi bi-chat-dots-fill"></i>
                     <span class="notes-badge" *ngIf="getNotesCount(b) > 0">{{ getNotesCount(b) }}</span>
                   </button>
-                  <button class="action-btn btn-cancel" (click)="promptCancel(b.id)" title="إلغاء"
+                  <button class="action-btn btn-cancel" (click)="promptCancel(b.id)" [attr.title]="'misc.cancel' | translate"
                     *ngIf="b.status !== 'Cancelled' && b.status !== 'Done'">
                     <i class="bi bi-x-lg"></i>
                   </button>
@@ -289,13 +289,13 @@
         </table>
         <div class="empty-state" *ngIf="pagedBookings.length === 0">
           <i class="bi bi-inbox empty-icon"></i>
-          <p>لا توجد حجوزات مطابقة</p>
+          <p>{{ 'misc.noMatchingBookings' | translate }}</p>
         </div>
       </div>
 
       <!-- PAGINATION -->
       <div class="pagination-bar" *ngIf="total > pageSize">
-        <div class="pag-info">عرض {{ startIndex }}–{{ endIndex }} من {{ total }}</div>
+        <div class="pag-info">{{ 'misc.showRange' | translate: { start: startIndex, end: endIndex, total: total } }}</div>
         <div class="pag-controls">
           <button class="pag-btn" (click)="goToPage(1)" [disabled]="currentPage===1"><i
               class="bi bi-chevron-double-right"></i></button>
@@ -334,7 +334,7 @@
               <span class="period-badge">{{ getPeriodLabel(selectedBooking.period) }}</span>
               <span class="type-badge" [class.type-royal]="selectedBooking.chaletType===1"
                 [class.type-normal]="selectedBooking.chaletType===0">
-                {{ selectedBooking.chaletType === 1 ? '👑 رويال' : '🏠 عادي' }}
+                {{ (selectedBooking.chaletType === 1 ? 'misc.royal' : 'misc.normal') | translate }}
               </span>
             </div>
             <div class="badge bg-primary small" style="font-size:11px;padding:4px 8px;border-radius:8px;">
@@ -343,16 +343,16 @@
           </div>
 
           <div class="dp-section">
-            <div class="dp-section-title"><i class="bi bi-person-fill"></i> بيانات التواصل</div>
+            <div class="dp-section-title"><i class="bi bi-person-fill"></i> {{ 'booking.detailContactTitle' | translate }}</div>
             <div class="dp-row">
               <i class="bi bi-telephone-fill dp-icon"></i>
-              <span class="dp-label">الهاتف</span>
+              <span class="dp-label">{{ 'misc.phone' | translate }}</span>
               <span class="dp-val dir-ltr">{{ selectedBooking.phone }}</span>
             </div>
             <!-- ✅ رقم هاتف إضافي في Detail Panel -->
             <div class="dp-row" *ngIf="selectedBooking.additionalPhone">
               <i class="bi bi-telephone-plus-fill dp-icon"></i>
-              <span class="dp-label">هاتف إضافي</span>
+              <span class="dp-label">{{ 'misc.additionalPhone' | translate }}</span>
               <span class="dp-val dir-ltr">{{ selectedBooking.additionalPhone }}</span>
             </div>
             <div class="d-flex gap-2">
@@ -361,7 +361,7 @@
                   <path
                     d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
                 </svg>
-                تواصل واتساب 1
+                {{ 'misc.whatsapp1' | translate }}
               </button>
               <button class="whatsapp-btn" *ngIf="selectedBooking.additionalPhone"
                 (click)="openWhatsApp(selectedBooking.additionalPhone)">
@@ -369,91 +369,91 @@
                   <path
                     d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
                 </svg>
-                تواصل واتساب 2
+                {{ 'misc.whatsapp2' | translate }}
               </button>
             </div>
           </div>
 
           <div class="dp-section">
-            <div class="dp-section-title"><i class="bi bi-calendar3"></i> تفاصيل الحجز</div>
+            <div class="dp-section-title"><i class="bi bi-calendar3"></i> {{ 'booking.bookingSectionInvoice' | translate }}</div>
             <div class="dp-row">
               <i class="bi bi-house-fill dp-icon"></i>
-              <span class="dp-label">الكوخ</span>
+              <span class="dp-label">{{ 'misc.chalet' | translate }}</span>
               <span class="dp-val">{{ selectedBooking.chaletName || (selectedBooking.chaletId ?
-                getChaletName(selectedBooking.chaletId) : 'غير محدد') }}</span>
+                getChaletName(selectedBooking.chaletId) : ('misc.notSpecified' | translate)) }}</span>
             </div>
             <div class="dp-row">
               <i class="bi bi-calendar-event dp-icon"></i>
-              <span class="dp-label">التاريخ</span>
+              <span class="dp-label">{{ 'misc.date' | translate }}</span>
               <span class="dp-val">{{ formatDate(selectedBooking.date) }}</span>
             </div>
             <div class="dp-row">
               <i class="bi bi-clock-fill dp-icon"></i>
-              <span class="dp-label">الفترة</span>
+              <span class="dp-label">{{ 'misc.period' | translate }}</span>
               <span class="dp-val">{{ getPeriodLabel(selectedBooking.period) }}</span>
             </div>
             <div class="dp-row">
               <i class="bi bi-people-fill dp-icon"></i>
-              <span class="dp-label">عدد الزوار</span>
+              <span class="dp-label">{{ 'misc.numGuests' | translate }}</span>
               <span class="dp-val">{{ selectedBooking.numOfGuests }}</span>
             </div>
             <div class="dp-row">
               <i class="bi bi-clock dp-icon"></i>
-              <span class="dp-label">لحظة الحجز</span>
+              <span class="dp-label">{{ 'misc.bookingTime' | translate }}</span>
               <span class="dp-val">{{ selectedBooking.createdAt | jordanDate}}</span>
             </div>
           </div>
 
           <div class="dp-section">
-            <div class="dp-section-title"><i class="bi bi-receipt-cutoff"></i> تفاصيل الأسعار</div>
+            <div class="dp-section-title"><i class="bi bi-receipt-cutoff"></i> {{ 'misc.priceDetails' | translate }}</div>
             <div class="price-breakdown">
               <div class="pb-row">
-                <span><i class="bi bi-house-door"></i> سعر الكوخ</span>
-                <strong>{{ selectedBooking.chaletPrice ?? 0 }} د.أ</strong>
+                <span><i class="bi bi-house-door"></i> {{ 'booking.baseChaletPrice' | translate }}</span>
+                <strong>{{ selectedBooking.chaletPrice ?? 0 }} {{ 'misc.currency' | translate }}</strong>
               </div>
               <div class="pb-row" *ngIf="selectedBooking.extras && selectedBooking.extras.length > 0">
-                <span><i class="bi bi-plus-circle"></i> الإضافات</span>
-                <strong>{{ selectedBooking.extrasTotal ?? 0 }} د.أ</strong>
+                <span><i class="bi bi-plus-circle"></i> {{ 'booking.extrasTotal' | translate }}</span>
+                <strong>{{ selectedBooking.extrasTotal ?? 0 }} {{ 'misc.currency' | translate }}</strong>
               </div>
               <!-- ✅ خصم في Detail Panel -->
               <div class="pb-row pb-discount"
                 *ngIf="selectedBooking.discountAmount && selectedBooking.discountAmount > 0">
-                <span><i class="bi bi-tag-fill"></i> خصم</span>
-                <strong class="text-red">- {{ selectedBooking.discountAmount }} د.أ</strong>
+                <span><i class="bi bi-tag-fill"></i> {{ 'misc.discount' | translate }}</span>
+                <strong class="text-red">- {{ selectedBooking.discountAmount }} {{ 'misc.currency' | translate }}</strong>
               </div>
               <div class="pb-divider"></div>
               <div class="pb-row pb-total">
-                <span>الإجمالي</span>
-                <strong>{{ selectedBooking.totalPrice }} د.أ</strong>
+                <span>{{ 'misc.total' | translate }}</span>
+                <strong>{{ selectedBooking.totalPrice }} {{ 'misc.currency' | translate }}</strong>
               </div>
               <ng-container *ngIf="!isDone(selectedBooking)">
                 <div class="pb-row pb-deposit" *ngIf="selectedBooking.deposit">
-                  <span><i class="bi bi-check2-circle"></i> المدفوع</span>
+                  <span><i class="bi bi-check2-circle"></i> {{ 'misc.paid' | translate }}</span>
                   <strong class="text-green">
                     {{ bookingPaymentsMap[selectedBooking.id] !== undefined ? bookingPaymentsMap[selectedBooking.id] :
-                    selectedBooking.deposit }} د.أ
+                    selectedBooking.deposit }} {{ 'misc.currency' | translate }}
                   </strong>
                 </div>
                 <div class="pb-row pb-remaining" *ngIf="selectedBooking.deposit">
-                  <span><i class="bi bi-hourglass-bottom"></i> المتبقي</span>
-                  <strong class="text-orange">{{ getRemaining(selectedBooking) }} د.أ</strong>
+                  <span><i class="bi bi-hourglass-bottom"></i> {{ 'misc.remaining' | translate }}</span>
+                  <strong class="text-orange">{{ getRemaining(selectedBooking) }} {{ 'misc.currency' | translate }}</strong>
                 </div>
               </ng-container>
               <ng-container *ngIf="isDone(selectedBooking)">
                 <div class="pb-row pb-deposit">
-                  <span><i class="bi bi-check2-circle"></i> المدفوع الفعلي</span>
+                  <span><i class="bi bi-check2-circle"></i> {{ 'misc.paidActual' | translate }}</span>
                   <strong class="text-green">
                     {{ bookingPaymentsMap[selectedBooking.id] !== undefined
                     ? bookingPaymentsMap[selectedBooking.id]
-                    : selectedBooking.deposit ?? 0 }} د.أ
+                    : selectedBooking.deposit ?? 0 }} {{ 'misc.currency' | translate }}
                   </strong>
                 </div>
                 <div class="pb-row pb-remaining" *ngIf="getRemaining(selectedBooking) > 0">
-                  <span><i class="bi bi-hourglass-bottom"></i> المتبقي</span>
-                  <strong class="text-orange">{{ getRemaining(selectedBooking) }} د.أ</strong>
+                  <span><i class="bi bi-hourglass-bottom"></i> {{ 'misc.remaining' | translate }}</span>
+                  <strong class="text-orange">{{ getRemaining(selectedBooking) }} {{ 'misc.currency' | translate }}</strong>
                 </div>
                 <div class="pb-row" *ngIf="getRemaining(selectedBooking) === 0">
-                  <span><i class="bi bi-check-all text-green"></i> مسدد بالكامل</span>
+                  <span><i class="bi bi-check-all text-green"></i> {{ 'misc.fullyPaid' | translate }}</span>
                   <strong class="text-green">✓</strong>
                 </div>
               </ng-container>
@@ -461,13 +461,13 @@
           </div>
 
           <div class="dp-section" *ngIf="selectedBooking.extras && selectedBooking.extras.length > 0">
-            <div class="dp-section-title"><i class="bi bi-bag-plus-fill"></i> الإضافات</div>
+            <div class="dp-section-title"><i class="bi bi-bag-plus-fill"></i> {{ 'booking.extrasSection' | translate }}</div>
             <div class="extra-chip" *ngFor="let ex of selectedBooking.extras">
               <div class="chip-left">
-                <span class="chip-name">{{ ex.extraName || 'إضافة' }}</span>
-                <span class="chip-qty">× {{ ex.quantity }} | {{ ex.price }} د.أ للواحدة</span>
+                <span class="chip-name">{{ ex.extraName || ('misc.extraDefault' | translate) }}</span>
+                <span class="chip-qty">× {{ ex.quantity }} | {{ ex.price }} {{ 'misc.currency' | translate }} {{ 'misc.eachUnit' | translate }}</span>
               </div>
-              <span class="chip-total">{{ ex.total }} د.أ</span>
+              <span class="chip-total">{{ ex.total }} {{ 'misc.currency' | translate }}</span>
             </div>
           </div>
         </div>
@@ -477,32 +477,32 @@
 
           <button class="dp-btn dp-btn-edit" (click)="openEditModal(selectedBooking, true)"
             *ngIf="selectedBooking.status !== 'Cancelled'">
-            <i class="bi bi-pencil-fill"></i> تعديل
+            <i class="bi bi-pencil-fill"></i> {{ 'misc.edit' | translate }}
           </button>
           <button class="dp-btn dp-btn-deposit"
             *ngIf="auth.hasRole('Manager') && (selectedBooking.status === 'Pending' || selectedBooking.status === 'WaitingList')"
             (click)="openDepositModal(selectedBooking, true)">
-            <i class="bi bi-credit-card-fill"></i> ديبوزت
+            <i class="bi bi-credit-card-fill"></i> {{ 'misc.deposit' | translate }}
           </button>
           <button class="dp-btn dp-btn-done" *ngIf="selectedBooking.status === 'Confirmed'"
             (click)="promptDone(selectedBooking.id, true)">
-            <i class="bi bi-check2-all"></i> استلام
+            <i class="bi bi-check2-all"></i> {{ 'misc.receive' | translate }}
           </button>
           <button class="dp-btn dp-btn-payments" (click)="openPaymentsModal(selectedBooking)">
-            <i class="bi bi-receipt"></i> الدفعات
+            <i class="bi bi-receipt"></i> {{ 'misc.payments' | translate }}
           </button>
           <button class="dp-btn dp-btn-invoice" (click)="openInvoice(selectedBooking!)">
-            <i class="bi bi-receipt-cutoff"></i> فاتورة
+            <i class="bi bi-receipt-cutoff"></i> {{ 'misc.invoice' | translate }}
           </button>
           <button class="dp-btn dp-btn-notes" (click)="openNotesModal(selectedBooking!)">
-            <i class="bi bi-chat-dots-fill"></i> ملاحظات
+            <i class="bi bi-chat-dots-fill"></i> {{ 'misc.notes' | translate }}
             <span class="notes-badge-lg" *ngIf="getNotesCount(selectedBooking)">{{ getNotesCount(selectedBooking)
               }}</span>
           </button>
           <button class="dp-btn dp-btn-cancel"
             *ngIf="selectedBooking.status !== 'Cancelled' && selectedBooking.status !== 'Done'"
             (click)="promptCancel(selectedBooking.id, true)">
-            <i class="bi bi-x-circle-fill"></i> إلغاء
+            <i class="bi bi-x-circle-fill"></i> {{ 'misc.cancelWord' | translate }}
           </button>
         </div>
       </div>
@@ -530,7 +530,7 @@
       </div>
     </div>
     <div class="mobile-list-header">
-      <span class="results-count">{{ filteredBookings.length }} حجز</span>
+      <span class="results-count">{{ 'misc.overviewBookingsCount' | translate: { n: filteredBookings.length } }}</span>
     </div>
     <div class="booking-card" *ngFor="let b of pagedBookings" [class.card-cancelled]="b.status==='Cancelled'"
       [class.card-done]="b.status==='Done'" (click)="openDetailSheet(b)">
@@ -541,7 +541,7 @@
           <div class="card-chalet">
             <span class="type-badge-sm" [class.type-royal]="b.chaletType===1">{{ b.chaletType === 1 ? '👑' : '🏠'
               }}</span>
-            {{ b.chaletName || (b.chaletType === 1 ? 'رويال' : 'عادي') }}
+            {{ b.chaletName || (b.chaletType === 1 ? ('misc.royalPlain' | translate) : ('misc.normalPlain' | translate)) }}
           </div>
         </div>
         <span class="status-badge" [ngClass]="getStatusClass(b.status)">{{ getStatusLabel(b.status) }}</span>
@@ -549,14 +549,14 @@
       <div class="card-row-bottom">
         <span class="card-date"><i class="bi bi-calendar3"></i> {{ formatDate(b.date) }}</span>
         <span class="card-period period-badge">{{ getPeriodLabel(b.period) }}</span>
-        <span class="card-price">{{ b.totalPrice }} د.أ</span>
+        <span class="card-price">{{ b.totalPrice }} {{ 'misc.currency' | translate }}</span>
         <i class="bi bi-chevron-left card-chevron"></i>
       </div>
     </div>
 
     <div class="empty-state" *ngIf="pagedBookings.length === 0 ">
       <i class="bi bi-inbox empty-icon"></i>
-      <p>لا توجد حجوزات مطابقة</p>
+      <p>{{ 'misc.noMatchingBookings' | translate }}</p>
     </div>
 
     <div class="pagination-bar mobile-pag" *ngIf="filteredBookings.length > pageSize">
@@ -585,38 +585,38 @@
         <div class="detail-section">
           <div class="detail-row">
             <i class="bi bi-telephone-fill detail-icon"></i>
-            <span class="detail-label">الهاتف</span>
+            <span class="detail-label">{{ 'misc.phone' | translate }}</span>
             <span class="detail-val dir-ltr">{{ selectedBooking.phone }}</span>
           </div>
           <!-- ✅ رقم هاتف إضافي في Mobile Sheet -->
           <div class="detail-row" *ngIf="selectedBooking.additionalPhone">
             <i class="bi bi-telephone-plus-fill detail-icon"></i>
-            <span class="detail-label">هاتف إضافي</span>
+            <span class="detail-label">{{ 'misc.additionalPhone' | translate }}</span>
             <span class="detail-val dir-ltr">{{ selectedBooking.additionalPhone }}</span>
           </div>
           <div class="detail-row">
             <i class="bi bi-house-fill detail-icon"></i>
-            <span class="detail-label">الكوخ</span>
+            <span class="detail-label">{{ 'misc.chalet' | translate }}</span>
             <span class="detail-val">
               <span class="type-badge-sm" [class.type-royal]="selectedBooking.chaletType===1">{{
                 selectedBooking.chaletType===1?'👑':'🏠' }}</span>
               {{ selectedBooking.chaletName || (selectedBooking.chaletId ? getChaletName(selectedBooking.chaletId) :
-              'غير محدد') }}
+              ('misc.notSpecified' | translate)) }}
             </span>
           </div>
           <div class="detail-row">
             <i class="bi bi-calendar-event detail-icon"></i>
-            <span class="detail-label">التاريخ</span>
+            <span class="detail-label">{{ 'misc.date' | translate }}</span>
             <span class="detail-val">{{ formatDate(selectedBooking.date) }}</span>
           </div>
           <div class="detail-row">
             <i class="bi bi-clock-fill detail-icon"></i>
-            <span class="detail-label">الفترة</span>
+            <span class="detail-label">{{ 'misc.period' | translate }}</span>
             <span class="detail-val">{{ getPeriodLabel(selectedBooking.period) }}</span>
           </div>
           <div class="detail-row">
             <i class="bi bi-clock detail-icon"></i>
-            <span class="detail-label">لحظة الحجز</span>
+            <span class="detail-label">{{ 'misc.bookingTime' | translate }}</span>
             <span class="detail-val">{{ formatDateTime(selectedBooking.createdAt | jordanDate ) }}</span>
           </div>
           <div class="d-flex flex-row gap-2">
@@ -625,7 +625,7 @@
                 <path
                   d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
               </svg>
-              1 تواصل واتساب
+              {{ 'misc.whatsapp1Short' | translate }}
             </button>
             <button *ngIf="selectedBooking.additionalPhone?.trim()" class="whatsapp-btn"
               (click)="openWhatsApp(selectedBooking.additionalPhone!)">
@@ -633,64 +633,64 @@
                 <path
                   d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
               </svg>
-              2 تواصل واتساب
+              {{ 'misc.whatsapp2Short' | translate }}
             </button>
           </div>
         </div>
 
         <div class="detail-section finance-section">
-          <div class="finance-row"><span><i class="bi bi-house-door"></i> سعر الكوخ</span><strong>{{
-              selectedBooking.chaletPrice ?? 0 }} د.أ</strong></div>
+          <div class="finance-row"><span><i class="bi bi-house-door"></i> {{ 'booking.baseChaletPrice' | translate }}</span><strong>{{
+              selectedBooking.chaletPrice ?? 0 }} {{ 'misc.currency' | translate }}</strong></div>
           <div class="finance-row" *ngIf="selectedBooking.extrasTotal"><span><i class="bi bi-bag-plus"></i>
-              الإضافات</span><strong>{{ selectedBooking.extrasTotal }} د.أ</strong></div>
+              {{ 'booking.extrasTotal' | translate }}</span><strong>{{ selectedBooking.extrasTotal }} {{ 'misc.currency' | translate }}</strong></div>
           <!-- ✅ خصم في Mobile Sheet -->
           <div class="finance-row finance-discount"
             *ngIf="selectedBooking.discountAmount && selectedBooking.discountAmount > 0">
-            <span><i class="bi bi-tag-fill"></i> خصم</span>
-            <strong class="text-red">- {{ selectedBooking.discountAmount }} د.أ</strong>
+            <span><i class="bi bi-tag-fill"></i> {{ 'misc.discount' | translate }}</span>
+            <strong class="text-red">- {{ selectedBooking.discountAmount }} {{ 'misc.currency' | translate }}</strong>
           </div>
           <div class="finance-divider"></div>
-          <div class="finance-row finance-total"><span>الإجمالي</span><strong>{{ selectedBooking.totalPrice }}
-              د.أ</strong></div>
+          <div class="finance-row finance-total"><span>{{ 'misc.total' | translate }}</span><strong>{{ selectedBooking.totalPrice }}
+              {{ 'misc.currency' | translate }}</strong></div>
           <ng-container *ngIf="!isDone(selectedBooking)">
             <div class="finance-row" *ngIf="selectedBooking.deposit">
-              <span>المدفوع</span>
+              <span>{{ 'misc.paid' | translate }}</span>
               <strong class="text-green">
                 {{ bookingPaymentsMap[selectedBooking.id] !== undefined ? bookingPaymentsMap[selectedBooking.id] :
-                selectedBooking.deposit }} د.أ
+                selectedBooking.deposit }} {{ 'misc.currency' | translate }}
               </strong>
             </div>
-            <div class="finance-row" *ngIf="selectedBooking.deposit"><span>المتبقي</span><strong class="text-orange">{{
-                getRemaining(selectedBooking) }} د.أ</strong></div>
+            <div class="finance-row" *ngIf="selectedBooking.deposit"><span>{{ 'misc.remaining' | translate }}</span><strong class="text-orange">{{
+                getRemaining(selectedBooking) }} {{ 'misc.currency' | translate }}</strong></div>
           </ng-container>
           <ng-container *ngIf="isDone(selectedBooking)">
             <div class="finance-row">
-              <span><i class="bi bi-check2-circle"></i> المدفوع الفعلي</span>
+              <span><i class="bi bi-check2-circle"></i> {{ 'misc.paidActual' | translate }}</span>
               <strong class="text-green">
                 {{ bookingPaymentsMap[selectedBooking.id] !== undefined
                 ? bookingPaymentsMap[selectedBooking.id]
-                : selectedBooking.deposit ?? 0 }} د.أ
+                : selectedBooking.deposit ?? 0 }} {{ 'misc.currency' | translate }}
               </strong>
             </div>
             <div class="finance-row" *ngIf="getRemaining(selectedBooking) > 0">
-              <span><i class="bi bi-hourglass-bottom"></i> المتبقي</span>
-              <strong class="text-orange">{{ getRemaining(selectedBooking) }} د.أ</strong>
+              <span><i class="bi bi-hourglass-bottom"></i> {{ 'misc.remaining' | translate }}</span>
+              <strong class="text-orange">{{ getRemaining(selectedBooking) }} {{ 'misc.currency' | translate }}</strong>
             </div>
             <div class="finance-row" *ngIf="getRemaining(selectedBooking) === 0">
-              <span><i class="bi bi-check-all"></i> مسدد بالكامل</span>
+              <span><i class="bi bi-check-all"></i> {{ 'misc.fullyPaid' | translate }}</span>
               <strong class="text-green">✓</strong>
             </div>
           </ng-container>
         </div>
 
         <div class="detail-section" *ngIf="selectedBooking.extras && selectedBooking.extras.length > 0">
-          <div class="extras-label"><i class="bi bi-bag-plus-fill"></i> الإضافات</div>
+          <div class="extras-label"><i class="bi bi-bag-plus-fill"></i> {{ 'booking.extrasSection' | translate }}</div>
           <div class="extra-chip" *ngFor="let ex of selectedBooking.extras">
             <div class="chip-left">
-              <span class="chip-name">{{ ex.extraName || 'إضافة' }}</span>
+              <span class="chip-name">{{ ex.extraName || ('misc.extraDefault' | translate) }}</span>
               <span class="chip-qty">× {{ ex.quantity }}</span>
             </div>
-            <span class="chip-total">{{ ex.total }} د.أ</span>
+            <span class="chip-total">{{ ex.total }} {{ 'misc.currency' | translate }}</span>
           </div>
         </div>
 <div class="sheet-actions">
@@ -699,27 +699,27 @@
   <button class="sheet-btn btn-deposit-sheet"
     *ngIf="auth.hasRole('Manager') && (selectedBooking.status === 'Pending' || selectedBooking.status === 'WaitingList')"
     (click)="openDepositModal(selectedBooking)">
-    <i class="ti ti-credit-card"></i> ديبوزت
+    <i class="ti ti-credit-card"></i> {{ 'misc.deposit' | translate }}
   </button>
 
   <button class="sheet-btn btn-done-sheet"
     *ngIf="selectedBooking.status === 'Confirmed' && !isFutureDate(selectedBooking.date)"
     (click)="promptDone(selectedBooking.id)">
-    <i class="ti ti-check"></i> استلام
+    <i class="ti ti-check"></i> {{ 'misc.receive' | translate }}
   </button>
   <button class="sheet-btn btn-edit-sheet"
     (click)="openEditModal(selectedBooking)"
     *ngIf="selectedBooking.status !== 'Cancelled'">
-    <i class="ti ti-pencil"></i> تعديل
+    <i class="ti ti-pencil"></i> {{ 'misc.edit' | translate }}
   </button>
   <button class="sheet-btn btn-payments-sheet"
     (click)="openPaymentsModal(selectedBooking)">
-    <i class="ti ti-receipt"></i> الدفعات
+    <i class="ti ti-receipt"></i> {{ 'misc.payments' | translate }}
   </button>
 
   <button class="sheet-btn btn-notes-sheet"
     (click)="openNotesModal(selectedBooking!)">
-    <i class="ti ti-message-dots"></i> ملاحظات
+    <i class="ti ti-message-dots"></i> {{ 'misc.notes' | translate }}
     <span class="notes-badge-lg" *ngIf="getNotesCount(selectedBooking)">
       {{ getNotesCount(selectedBooking) }}
     </span>
@@ -727,13 +727,13 @@
 
   <button class="sheet-btn btn-invoice-sheet"
     (click)="openInvoice(selectedBooking!)">
-    <i class="ti ti-receipt-2"></i> فاتورة
+    <i class="ti ti-receipt-2"></i> {{ 'misc.invoice' | translate }}
   </button>
 
   <button class="sheet-btn btn-cancel-sheet"
     *ngIf="selectedBooking.status !== 'Cancelled' && selectedBooking.status !== 'Done'"
     (click)="promptCancel(selectedBooking.id)">
-    <i class="ti ti-x"></i> إلغاء
+    <i class="ti ti-x"></i> {{ 'misc.cancelWord' | translate }}
   </button>
 </div>
       </div>
@@ -750,8 +750,8 @@
         <div class="modal-title-group">
           <div class="modal-icon"><i class="bi bi-building"></i></div>
           <div>
-            <h2>إضافة حجز جديد</h2>
-            <p class="modal-sub">الخطوة {{ addStep }} من 3</p>
+            <h2>{{ 'booking.addBookingTitle' | translate }}</h2>
+            <p class="modal-sub">{{ 'booking.stepOf' | translate: { step: addStep } }}</p>
           </div>
         </div>
         <button class="modal-close" (click)="closeAddModal()"><i class="bi bi-x-lg"></i></button>
@@ -761,17 +761,17 @@
       <div class="steps-indicator">
         <div class="step-item" [class.step-active]="addStep >= 1" [class.step-done]="addStep > 1">
           <div class="step-circle">{{ addStep > 1 ? '✓' : '1' }}</div>
-          <span>النوع والفترة</span>
+          <span>{{ 'booking.stepTypePeriod' | translate }}</span>
         </div>
         <div class="step-line" [class.step-line-done]="addStep > 1"></div>
         <div class="step-item" [class.step-active]="addStep >= 2" [class.step-done]="addStep > 2">
           <div class="step-circle">{{ addStep > 2 ? '✓' : '2' }}</div>
-          <span>التاريخ</span>
+          <span>{{ 'booking.stepDate' | translate }}</span>
         </div>
         <div class="step-line" [class.step-line-done]="addStep > 2"></div>
         <div class="step-item" [class.step-active]="addStep >= 3">
           <div class="step-circle">3</div>
-          <span>البيانات</span>
+          <span>{{ 'booking.stepData' | translate }}</span>
         </div>
       </div>
 
@@ -780,20 +780,20 @@
         <!-- STEP 1 -->
         <ng-container *ngIf="addStep === 1">
           <div class="form-section">
-            <div class="section-label"><i class="bi bi-grid-fill"></i> اختر نوع الكوخ</div>
+            <div class="section-label"><i class="bi bi-grid-fill"></i> {{ 'booking.chooseChaletType' | translate }}</div>
             <div class="chalet-type-selector">
               <div class="type-option" [class.selected]="newBooking.chaletType === 0"
                 (click)="newBooking.chaletType = 0; onChaletTypeChange()">
                 <span class="type-icon">🏠</span>
-                <span class="type-name">عادي</span>
-                <span class="type-count">{{ getTotalChaletsForType(0) }} كوخ</span>
+                <span class="type-name">{{ 'misc.normalPlain' | translate }}</span>
+                <span class="type-count">{{ 'booking.chaletCount' | translate: { n: getTotalChaletsForType(0) } }}</span>
                 <i class="bi bi-check-circle-fill type-check" *ngIf="newBooking.chaletType === 0"></i>
               </div>
               <div class="type-option" [class.selected]="newBooking.chaletType === 1"
                 (click)="newBooking.chaletType = 1; onChaletTypeChange()">
                 <span class="type-icon">👑</span>
-                <span class="type-name">رويال</span>
-                <span class="type-count">{{ getTotalChaletsForType(1) }} كوخ</span>
+                <span class="type-name">{{ 'misc.royalPlain' | translate }}</span>
+                <span class="type-count">{{ 'booking.chaletCount' | translate: { n: getTotalChaletsForType(1) } }}</span>
                 <i class="bi bi-check-circle-fill type-check" *ngIf="newBooking.chaletType === 1"></i>
               </div>
             </div>
@@ -801,9 +801,9 @@
 
           <div class="form-section">
             <div class="section-label">
-              <i class="bi bi-clock-fill"></i> الفترة المتاحة
+              <i class="bi bi-clock-fill"></i> {{ 'booking.availablePeriodLabel' | translate }}
               <span *ngIf="loadingChaletsForType" style="font-size:11px;color:#8a9bb0;margin-right:6px;">
-                <i class="bi bi-hourglass-split"></i> جاري التحميل...
+                <i class="bi bi-hourglass-split"></i> {{ 'booking.loadingChalets' | translate }}
               </span>
             </div>
 
@@ -813,33 +813,33 @@
                 (click)="isPeriodAvailableForType(0) && (newBooking.period = 0); onPeriodChange()">
                 <input type="radio" name="period" [value]="0" [(ngModel)]="newBooking.period"
                   [disabled]="!isPeriodAvailableForType(0)" />
-                🌅 صباحي
+                🌅 {{ 'booking.morningSlot' | translate }}
                 <span class="period-count-chip" *ngIf="isPeriodAvailableForType(0)">
-                  {{ getChaletCountForTypePeriod(newBooking.chaletType, 0) }} كوخ
+                  {{ 'booking.chaletCount' | translate: { n: getChaletCountForTypePeriod(newBooking.chaletType, 0) } }}
                 </span>
-                <span class="period-unavail-hint" *ngIf="!isPeriodAvailableForType(0)">غير متاح</span>
+                <span class="period-unavail-hint" *ngIf="!isPeriodAvailableForType(0)">{{ 'booking.notAvailable' | translate }}</span>
               </label>
               <label class="period-option" [class.selected]="newBooking.period === 1"
                 [class.period-disabled]="!isPeriodAvailableForType(1)"
                 (click)="isPeriodAvailableForType(1) && (newBooking.period = 1); onPeriodChange()">
                 <input type="radio" name="period" [value]="1" [(ngModel)]="newBooking.period"
                   [disabled]="!isPeriodAvailableForType(1)" />
-                🌇 مسائي
+                🌇 {{ 'booking.eveningSlot' | translate }}
                 <span class="period-count-chip" *ngIf="isPeriodAvailableForType(1)">
-                  {{ getChaletCountForTypePeriod(newBooking.chaletType, 1) }} كوخ
+                  {{ 'booking.chaletCount' | translate: { n: getChaletCountForTypePeriod(newBooking.chaletType, 1) } }}
                 </span>
-                <span class="period-unavail-hint" *ngIf="!isPeriodAvailableForType(1)">غير متاح</span>
+                <span class="period-unavail-hint" *ngIf="!isPeriodAvailableForType(1)">{{ 'booking.notAvailable' | translate }}</span>
               </label>
               <label class="period-option" [class.selected]="newBooking.period === 2"
                 [class.period-disabled]="!isPeriodAvailableForType(2)"
                 (click)="isPeriodAvailableForType(2) && (newBooking.period = 2); onPeriodChange()">
                 <input type="radio" name="period" [value]="2" [(ngModel)]="newBooking.period"
                   [disabled]="!isPeriodAvailableForType(2)" />
-                🌞 يوم كامل
+                🌞 {{ 'booking.fullDaySlot' | translate }}
                 <span class="period-count-chip" *ngIf="isPeriodAvailableForType(2)">
-                  {{ getChaletCountForTypePeriod(newBooking.chaletType, 2) }} كوخ
+                  {{ 'booking.chaletCount' | translate: { n: getChaletCountForTypePeriod(newBooking.chaletType, 2) } }}
                 </span>
-                <span class="period-unavail-hint" *ngIf="!isPeriodAvailableForType(2)">غير متاح</span>
+                <span class="period-unavail-hint" *ngIf="!isPeriodAvailableForType(2)">{{ 'booking.notAvailable' | translate }}</span>
               </label>
             </div>
 
@@ -857,65 +857,62 @@
             <div class="add-step2-summary">
               <span class="type-badge" [class.type-royal]="newBooking.chaletType===1"
                 [class.type-normal]="newBooking.chaletType===0">
-                {{ newBooking.chaletType === 1 ? '👑 رويال' : '🏠 عادي' }}
+                {{ (newBooking.chaletType === 1 ? 'misc.royal' : 'misc.normal') | translate }}
               </span>
               <span class="period-badge">{{ getPeriodLabel(newBooking.period) }}</span>
               <span class="period-count-badge">
                 <i class="bi bi-house-fill"></i>
-                {{ getChaletCountForTypePeriod(newBooking.chaletType, newBooking.period) }} كوخ يدعم هذه الفترة
+                {{ 'booking.chaletsSupportThisPeriod' | translate: { n: getChaletCountForTypePeriod(newBooking.chaletType, newBooking.period) } }}
               </span>
             </div>
 
             <div class="cal-legend" style="margin-top:10px;">
-              <span><span class="dot grey"></span> أيام سابقة</span>
-              <span><span class="dot green"></span> أكواخ متاحة</span>
-              <span><span class="dot orange-border"></span> بعض الأكواخ محجوز</span>
-              <span><span class="dot orange"></span> قيد الانتظار</span>
-              <span><span class="dot red"></span> مكتمل الحجز</span>
+              <span><span class="dot grey"></span> {{ 'booking.calLegendPastDays' | translate }}</span>
+              <span><span class="dot green"></span> {{ 'booking.calLegendAvailable' | translate }}</span>
+              <span><span class="dot orange-border"></span> {{ 'booking.calLegendSomeBooked' | translate }}</span>
+              <span><span class="dot orange"></span> {{ 'booking.calLegendWaiting' | translate }}</span>
+              <span><span class="dot red"></span> {{ 'booking.calLegendFullyBooked' | translate }}</span>
             </div>
 
             <div class="cal-wrapper" style="margin-top:12px;">
               <mat-form-field appearance="outline" class="cal-field">
-                <mat-label>تاريخ الحجز</mat-label>
+                <mat-label>{{ 'booking.matBookingDateLabel' | translate }}</mat-label>
                 <input matInput [matDatepicker]="picker" [(ngModel)]="calendarDate" [min]="minDate"
-                  (dateChange)="onDateSelected($event.value)" placeholder="اختر تاريخ الحجز" readonly />
+                  (dateChange)="onDateSelected($event.value)" [placeholder]="'booking.phSelectBookingDate' | translate" readonly />
                 <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
                 <mat-datepicker #picker [dateClass]="dateClass"></mat-datepicker>
               </mat-form-field>
               <button class="btn-open-cal" type="button" (click)="picker.open()">
-                <i class="bi bi-calendar3"></i> فتح التقويم
+                <i class="bi bi-calendar3"></i> {{ 'booking.openCalendarBtn' | translate }}
               </button>
             </div>
 
             <div class="availability-banner" *ngIf="calendarDate" style="margin-top:12px;">
               <div class="avail-banner avail-green" *ngIf="getAvailableCountForSelectedDate() > 0">
                 <i class="bi bi-check-circle-fill"></i>
-                متاح — <strong>{{ getAvailableCountForSelectedDate() }}</strong> من
-                <strong>{{ getChaletCountForTypePeriod(newBooking.chaletType, newBooking.period) }}</strong>
-                كوخ متاح في {{ formatDate(formatDateLocal(calendarDate!))}}
+                {{ 'booking.availCountBanner' | translate: { avail: getAvailableCountForSelectedDate(), total: getChaletCountForTypePeriod(newBooking.chaletType, newBooking.period), date: formatDate(formatDateLocal(calendarDate!)) } }}
               </div>
               <div class="avail-banner avail-yellow" *ngIf="getAvailableCountForSelectedDate() === 0">
                 <i class="bi bi-exclamation-triangle-fill"></i>
-                لا توجد أكواخ متاحة في {{ formatDate(calendarDate.toISOString()) }} —
-                سيتم وضع الحجز في <strong>قائمة الانتظار</strong>
+                {{ 'booking.noAvailOnDateWillWait' | translate: { date: formatDate(calendarDate.toISOString()) } }}
               </div>
             </div>
 
             <div class="selected-date" *ngIf="calendarDate">
-              <i class="bi bi-check-circle-fill"></i> تم اختيار: {{ formatDate(formatDateLocal(calendarDate!)) }}
+              <i class="bi bi-check-circle-fill"></i> {{ 'booking.dateSelectedLine' | translate: { date: formatDate(formatDateLocal(calendarDate!)) } }}
             </div>
 
             <div class="price-summary" *ngIf="priceLoaded" style="margin-top:14px;">
               <div class="price-row">
-                <span><i class="bi bi-house-door"></i> سعر الكوخ
-                  <small *ngIf="calendarDate">({{ calendarDate.getDay() === 5 || calendarDate.getDay() === 6 ? 'عطلة' :
-                    'أيام عادية' }})</small>
+                <span><i class="bi bi-house-door"></i> {{ 'booking.baseChaletPrice' | translate }}
+                  <small *ngIf="calendarDate">({{ calendarDate.getDay() === 5 || calendarDate.getDay() === 6 ? ('booking.dayTypeHoliday' | translate) :
+                    ('booking.dayTypeWeekday' | translate) }})</small>
                 </span>
-                <span>{{ basePrice }} د.أ</span>
+                <span>{{ basePrice }} {{ 'misc.currency' | translate }}</span>
               </div>
             </div>
             <div class="price-summary loading-row" *ngIf="basePriceLoading">
-              <i class="bi bi-hourglass-split"></i> جاري احتساب السعر...
+              <i class="bi bi-hourglass-split"></i> {{ 'booking.calculatingPrice' | translate }}
             </div>
           </div>
         </ng-container>
@@ -925,35 +922,35 @@
           <div class="add-step2-summary" style="margin-bottom:16px;">
             <span class="type-badge" [class.type-royal]="newBooking.chaletType===1"
               [class.type-normal]="newBooking.chaletType===0">
-              {{ newBooking.chaletType === 1 ? '👑 رويال' : '🏠 عادي' }}
+              {{ (newBooking.chaletType === 1 ? 'misc.royal' : 'misc.normal') | translate }}
             </span>
             <span class="period-badge">{{ getPeriodLabel(newBooking.period) }}</span>
             <span class="period-badge" style="background:#d1fae5;color:#065f46;" *ngIf="calendarDate">
               <i class="bi bi-calendar3"></i> {{ formatDate(formatDateLocal(calendarDate!)) }}
             </span>
             <span class="period-count-badge" *ngIf="getAvailableCountForSelectedDate() > 0">
-              <i class="bi bi-house-fill"></i> {{ getAvailableCountForSelectedDate() }} كوخ متاح
+              <i class="bi bi-house-fill"></i> {{ 'booking.nChaletsAvailableShort' | translate: { n: getAvailableCountForSelectedDate() } }}
             </span>
             <span class="waiting-badge" *ngIf="getAvailableCountForSelectedDate() === 0">
-              <i class="bi bi-clock-history"></i> قائمة انتظار
+              <i class="bi bi-clock-history"></i> {{ 'booking.waitingListShort' | translate }}
             </span>
           </div>
 
           <div class="waiting-alert" *ngIf="getAvailableCountForSelectedDate() === 0">
             <i class="bi bi-info-circle-fill"></i>
-            سيتم إنشاء الحجز بحالة <strong>قائمة انتظار</strong> — سيُؤكد عند توفر كوخ
+            {{ 'booking.createAsWaitingListHint' | translate }}
           </div>
 
           <div class="form-section">
-            <div class="section-label"><i class="bi bi-person-fill"></i> بيانات العميل</div>
+            <div class="section-label"><i class="bi bi-person-fill"></i> {{ 'booking.clientDataSection' | translate }}</div>
             <div class="form-grid">
               <div class="form-group">
-                <label>اسم العميل *</label>
-                <input type="text" [(ngModel)]="newBooking.customerName" placeholder="الاسم بالكامل"
+                <label>{{ 'booking.customerNameRequired' | translate }}</label>
+                <input type="text" [(ngModel)]="newBooking.customerName" [placeholder]="'booking.customerNamePh' | translate"
                   class="form-input" />
               </div>
               <div class="form-group">
-                <label>رقم الهاتف *</label>
+                <label>{{ 'booking.phoneRequired' | translate }}</label>
                 <div class="phone-row">
                   <select [(ngModel)]="selectedCountryCode" class="country-select">
                     <option *ngFor="let c of countryCodes" [value]="c.value">{{ c.label }}</option>
@@ -963,69 +960,69 @@
                 </div>
               </div>
               <div class="form-group">
-                <label>رقم هاتف إضافي</label>
+                <label>{{ 'booking.additionalPhoneLabel' | translate }}</label>
                 <div class="phone-row">
                   <select [(ngModel)]="selectedCountryCode" class="country-select">
                     <option *ngFor="let c of countryCodes" [value]="c.value">{{ c.label }}</option>
                   </select>
                   <input type="tel" inputmode="numeric" pattern="[0-9]*" [(ngModel)]="newBooking.additionalPhone"
-                    placeholder="اختياري" class="form-input phone-input" />
+                    [placeholder]="'booking.optionalShort' | translate" class="form-input phone-input" />
                 </div>
               </div>
               <div class="form-group">
-                <label>خصم (د.أ)</label>
+                <label>{{ 'booking.discountJodLabel' | translate }}</label>
                 <input type="number" [(ngModel)]="newBooking.discountAmount"
                   (ngModelChange)="validateDiscountNewBooking()" min="0" [max]="auth.hasRole('Manager') ? 999999 : 10"
-                  class="form-input" placeholder="ادخل الخصم" />
+                  class="form-input" [placeholder]="'booking.enterDiscountPh' | translate" />
               </div>
               <div class="form-group">
-                <label>عدد الزوار</label>
-                <input type="number" [(ngModel)]="newBooking.numOfGuests" placeholder="العدد" class="form-input" />
+                <label>{{ 'booking.guestsCountLabel' | translate }}</label>
+                <input type="number" [(ngModel)]="newBooking.numOfGuests" [placeholder]="'booking.countPh' | translate" class="form-input" />
               </div>
             </div>
           </div>
           <div class="form-group">
-            <label>ملاحظة</label>
-            <input type="text" [(ngModel)]="newBooking.note" placeholder="ملاحظات الحجز" class="form-input" />
+            <label>{{ 'booking.noteSingle' | translate }}</label>
+            <input type="text" [(ngModel)]="newBooking.note" [placeholder]="'booking.bookingNotePh' | translate" class="form-input" />
           </div>
           <div class="form-section">
-            <div class="section-label"><i class="bi bi-bag-plus-fill"></i> الإضافات (اختياري)</div>
+            <div class="section-label"><i class="bi bi-bag-plus-fill"></i> {{ 'booking.extrasOptionalSection' | translate }}</div>
             <div class="extra-add-row">
               <select [(ngModel)]="addSelectedExtraId" class="form-input">
-                <option [ngValue]="0">اختر إضافة...</option>
-                <option *ngFor="let ex of extras" [ngValue]="ex.id">{{ ex.name }} — {{ ex.price }} د.أ</option>
+                <option [ngValue]="0">{{ 'booking.chooseExtraPh' | translate }}</option>
+                <option *ngFor="let ex of extras" [ngValue]="ex.id">{{ ex.name }} — {{ ex.price }} {{ 'misc.currency' | translate }}</option>
               </select>
               <input type="number" [(ngModel)]="addSelectedExtraQty" min="1" class="form-input qty-input"
-                placeholder="الكمية" />
+                [placeholder]="'booking.qty' | translate" />
               <button class="btn-add-extra" type="button" (click)="addExtraToNewBooking()">
-                <i class="bi bi-plus-lg"></i> إضافة
+                <i class="bi bi-plus-lg"></i> {{ 'misc.add' | translate }}
               </button>
             </div>
             <div class="extras-tags" *ngIf="addExtrasList.length > 0">
               <div class="extra-tag" *ngFor="let ex of addExtrasList; let i = index">
-                <span>{{ ex.name }} × {{ ex.quantity }} = {{ ex.price * ex.quantity }} د.أ</span>
+                <span>{{ ex.name }} × {{ ex.quantity }} = {{ ex.price * ex.quantity }} {{ 'misc.currency' | translate }}</span>
                 <button type="button" (click)="removeExtraFromNew(i)"><i class="bi bi-x-lg"></i></button>
               </div>
             </div>
-            <div class="no-extras-hint" *ngIf="addExtrasList.length === 0">لا توجد إضافات بعد</div>
+            <div class="no-extras-hint" *ngIf="addExtrasList.length === 0">{{ 'booking.noExtrasYetHint' | translate }}</div>
           </div>
 
           <div class="price-summary">
             <div class="price-row">
-              <span><i class="bi bi-house-door"></i> سعر الكوخ</span>
-              <span>{{ basePrice }} د.أ</span>
+              <span><i class="bi bi-house-door"></i> {{ 'booking.baseChaletPrice' | translate }}</span>
+              <span>{{ basePrice }} {{ 'misc.currency' | translate }}</span>
             </div>
             <div class="price-row" *ngIf="addExtrasList.length > 0">
-              <span><i class="bi bi-bag-plus"></i> إضافات</span>
-              <span>{{ addExtrasTotal }} د.أ</span>
+              <span><i class="bi bi-bag-plus"></i> {{ 'booking.extrasShort' | translate }}</span>
+              <span>{{ addExtrasTotal }} {{ 'misc.currency' | translate }}</span>
             </div>
             <div class="price-row" *ngIf="newBooking.discountAmount! > 0" style="color:#ef4444;">
-              <span><i class="bi bi-tag-fill"></i> خصم</span>
-              <span>- {{ newBooking.discountAmount }} د.أ</span>
+              <span><i class="bi bi-tag-fill"></i> {{ 'misc.discount' | translate }}</span>
+              <span>- {{ newBooking.discountAmount }} {{ 'misc.currency' | translate }}</span>
             </div>
             <div class="price-row total">
-              <span>الإجمالي</span>
-              <span>{{ addGrandTotal }} د.أ</span>
+              <span>{{ 'misc.total' | translate }}</span>
+              <span>{{ addGrandTotal }} {{ 'misc.currency' | translate }}</span>
             </div>
           </div>
         </ng-container>
@@ -1034,16 +1031,16 @@
 
       <div class="modal-footer">
         <button class="btn-ghost" type="button" (click)="addStep > 1 ? addStep = addStep - 1 : closeAddModal()">
-          <i class="bi bi-chevron-right"></i> {{ addStep > 1 ? 'السابق' : 'إلغاء' }}
+          <i class="bi bi-chevron-right"></i> {{ addStep > 1 ? ('booking.previousStep' | translate) : ('misc.cancel' | translate) }}
         </button>
         <button class="btn-primary" type="button" *ngIf="addStep < 3"
           (click)="addStep === 1 ? goToStep2() : goToStep3()"
           [disabled]="(addStep === 1 && newBooking.period < 0) || loadingChaletsForType">
-          التالي <i class="bi bi-chevron-left"></i>
+          {{ 'booking.nextBtn' | translate }} <i class="bi bi-chevron-left"></i>
         </button>
         <button class="btn-primary" type="button" *ngIf="addStep === 3" (click)="submitNewBooking()">
           <i class="bi bi-check-lg"></i>
-          {{ getAvailableCountForSelectedDate() === 0 ? 'إضافة لقائمة الانتظار' : 'تأكيد الحجز' }}
+          {{ getAvailableCountForSelectedDate() === 0 ? ('booking.addToWaitingListBtn' | translate) : ('booking.confirmBookingBtn' | translate) }}
         </button>
       </div>
     </div>
@@ -1059,7 +1056,7 @@
         <div class="modal-title-group">
           <div class="modal-icon waiting-icon"><i class="bi bi-clock-history"></i></div>
           <div>
-            <h2>يوم مكتمل الحجز</h2>
+            <h2>{{ 'booking.dayFullyBookedTitle' | translate }}</h2>
             <p class="modal-sub">{{ waitingDateFormatted }}</p>
           </div>
         </div>
@@ -1067,20 +1064,19 @@
       <div class="modal-body">
         <div class="waiting-confirm-content">
           <div class="waiting-icon-big">⏳</div>
-          <p class="waiting-msg">لا توجد أكواخ متاحة في هذا اليوم للنوع والفترة المختارة.</p>
+          <p class="waiting-msg">{{ 'booking.waitingNoChaletsMsg' | translate }}</p>
           <p class="waiting-msg-sub">
-            هل تريد متابعة الحجز وإضافته إلى <strong>قائمة الانتظار</strong>؟
-            سيُؤكد الحجز تلقائياً عند توفر كوخ.
+            {{ 'booking.waitingContinueQuestion' | translate }}
           </p>
         </div>
       </div>
       <div class="modal-footer">
         <button class="btn-ghost" type="button" (click)="cancelWaitingAndResetDate()">
-          <i class="bi bi-arrow-right"></i> اختر يوم آخر
+          <i class="bi bi-arrow-right"></i> {{ 'booking.pickAnotherDay' | translate }}
         </button>
         <button class="btn-waiting-confirm btn-ghost bg-primary-subtle" type="button"
           (click)="confirmProceedToWaiting()">
-          <i class="bi bi-clock-history"></i> نعم، أضف للانتظار
+          <i class="bi bi-clock-history"></i> {{ 'booking.yesAddToWaiting' | translate }}
         </button>
       </div>
     </div>
@@ -1096,7 +1092,7 @@
         <div class="modal-title-group">
           <div class="modal-icon"><i class="bi bi-pencil-fill"></i></div>
           <div>
-            <h2>تعديل الحجز</h2>
+            <h2>{{ 'booking.editBookingTitle' | translate }}</h2>
             <p class="modal-sub" *ngIf="selectedBooking">{{ selectedBooking.customerName }} — #{{ selectedBooking.id }}
             </p>
           </div>
@@ -1106,14 +1102,14 @@
       <div class="modal-body" *ngIf="selectedBooking">
 
         <div class="form-section">
-          <div class="section-label"><i class="bi bi-person-fill"></i> بيانات العميل</div>
+          <div class="section-label"><i class="bi bi-person-fill"></i> {{ 'booking.clientDataSection' | translate }}</div>
           <div class="form-grid">
             <div class="form-group">
-              <label>اسم العميل</label>
+              <label>{{ 'booking.customerNamePh' | translate }}</label>
               <input type="text" [(ngModel)]="editForm.customerName" class="form-input" />
             </div>
             <div class="form-group">
-              <label>رقم الهاتف</label>
+              <label>{{ 'booking.phonePh' | translate }}</label>
               <div class="phone-row">
                 <select [(ngModel)]="editCountryCode" class="country-select">
                   <option *ngFor="let c of countryCodes" [value]="c.value">{{ c.label }}</option>
@@ -1126,110 +1122,110 @@
         </div>
 
         <div class="form-section">
-          <div class="section-label"><i class="bi bi-telephone-plus-fill"></i> بيانات إضافية</div>
+          <div class="section-label"><i class="bi bi-telephone-plus-fill"></i> {{ 'booking.additionalDataSection' | translate }}</div>
           <div class="form-grid">
             <div class="form-group">
-              <label>رقم هاتف إضافي</label>
+              <label>{{ 'booking.additionalPhoneLabel' | translate }}</label>
               <div class="phone-row">
                 <select [(ngModel)]="editCountryCode" class="country-select">
                   <option *ngFor="let c of countryCodes" [value]="c.value">{{ c.label }}</option>
                 </select>
                 <input type="tel" inputmode="numeric" pattern="[0-9]*" [(ngModel)]="editForm.additionalPhone"
-                  class="form-input phone-input" placeholder="اختياري" />
+                  class="form-input phone-input" [placeholder]="'booking.optionalShort' | translate" />
               </div>
             </div>
             <div class="form-group">
-              <label>خصم (د.أ)</label>
+              <label>{{ 'booking.discountJodLabel' | translate }}</label>
 
               <input type="number" [(ngModel)]="editForm.discountAmount" (ngModelChange)="validateDiscount()" min="0"
-                [max]="auth.hasRole('Manager') ? 999999 : 10" class="form-input" placeholder="ادخل الخصم" />
+                [max]="auth.hasRole('Manager') ? 999999 : 10" class="form-input" [placeholder]="'booking.enterDiscountPh' | translate" />
             </div>
           </div>
         </div>
 
         <div class="form-section" *ngIf="selectedBooking.status == 'Done' ||selectedBooking.status == 'Confirmed'">
-          <div class="section-label"><i class="bi bi-cash-coin"></i> تسجيل دفعة</div>
+          <div class="section-label"><i class="bi bi-cash-coin"></i> {{ 'booking.registerPaymentSection' | translate }}</div>
           <div class="pay-input-row">
             <div class="form-group" style="flex:1;">
-              <label>مبلغ الدفع (د.أ)</label>
+              <label>{{ 'booking.paymentAmountJod' | translate }}</label>
               <input type="number" [(ngModel)]="editForm.payMoney" class="form-input" min="0"
-                placeholder="ادخل مبلغ جديد" />
+                [placeholder]="'booking.enterNewPaymentPh' | translate" />
             </div>
             <div class="pay-hint">
               <i class="bi bi-info-circle-fill"></i>
-              لو أدخلت مبلغ سيُسجّل كدفعة جديدة في سجل المدفوعات
+              {{ 'booking.paymentWillRegisterHint' | translate }}
             </div>
           </div>
         </div>
 
         <div class="form-section">
-          <div class="section-label"><i class="bi bi-bag-fill"></i> الإضافات الحالية</div>
+          <div class="section-label"><i class="bi bi-bag-fill"></i> {{ 'booking.currentExtrasSection' | translate }}</div>
           <div *ngIf="selectedBooking.extras && selectedBooking.extras.length > 0; else noExtras">
             <div class="extra-item" *ngFor="let ex of selectedBooking.extras"
               [class.marked-remove]="isMarkedForRemoval(ex.extraId)">
               <div class="extra-details">
-                <span class="extra-name">{{ ex.extraName || 'إضافة #' + ex.extraId }}</span>
-                <span class="extra-meta">{{ ex.quantity }} × {{ ex.price }} د.أ</span>
+                <span class="extra-name">{{ ex.extraName || ('booking.extraWithId' | translate: { id: ex.extraId }) }}</span>
+                <span class="extra-meta">{{ ex.quantity }} × {{ ex.price }} {{ 'misc.currency' | translate }}</span>
               </div>
               <div class="extra-right">
-                <span class="extra-total">{{ ex.total }} د.أ</span>
+                <span class="extra-total">{{ ex.total }} {{ 'misc.currency' | translate }}</span>
                 <button class="btn-toggle-remove" type="button" (click)="toggleRemoveExtra(ex.extraId)">
                   <i class="bi" [class.bi-arrow-counterclockwise]="isMarkedForRemoval(ex.extraId)"
                     [class.bi-trash-fill]="!isMarkedForRemoval(ex.extraId)"></i>
-                  {{ isMarkedForRemoval(ex.extraId) ? 'تراجع' : 'حذف' }}
+                  {{ isMarkedForRemoval(ex.extraId) ? ('booking.revert' | translate) : ('misc.delete' | translate) }}
                 </button>
               </div>
             </div>
           </div>
           <ng-template #noExtras>
-            <p class="empty-state-sm">لا توجد إضافات</p>
+            <p class="empty-state-sm">{{ 'booking.noExtrasYetHint' | translate }}</p>
           </ng-template>
         </div>
 
         <div class="form-section">
-          <div class="section-label"><i class="bi bi-plus-circle-fill"></i> إضافة خدمة</div>
+          <div class="section-label"><i class="bi bi-plus-circle-fill"></i> {{ 'booking.addServiceSection' | translate }}</div>
           <div class="extra-add-row">
             <select [(ngModel)]="editAddExtraId" class="form-input">
-              <option [ngValue]="0">اختر إضافة...</option>
-              <option *ngFor="let ex of extras" [ngValue]="ex.id">{{ ex.name }} — {{ ex.price }} د.أ</option>
+              <option [ngValue]="0">{{ 'booking.chooseExtraPh' | translate }}</option>
+              <option *ngFor="let ex of extras" [ngValue]="ex.id">{{ ex.name }} — {{ ex.price }} {{ 'misc.currency' | translate }}</option>
             </select>
             <input type="number" [(ngModel)]="editAddExtraQty" min="1" class="form-input qty-input" />
             <button class="btn-add-extra" type="button" (click)="addExtraToEdit()" [disabled]="editExtraAdding">
               <i class="bi" [class.bi-plus-lg]="!editExtraAdding" [class.bi-hourglass-split]="editExtraAdding"></i>
-              {{ editExtraAdding ? 'جاري...' : 'إضافة' }}
+              {{ editExtraAdding ? ('booking.processingShort' | translate) : ('misc.add' | translate) }}
             </button>
           </div>
         </div>
 
         <div class="price-summary">
           <div class="price-row">
-            <span><i class="bi bi-house-door"></i> سعر الكوخ</span>
-            <span>{{ selectedBooking.chaletPrice ?? 0 }} د.أ</span>
+            <span><i class="bi bi-house-door"></i> {{ 'booking.baseChaletPrice' | translate }}</span>
+            <span>{{ selectedBooking.chaletPrice ?? 0 }} {{ 'misc.currency' | translate }}</span>
           </div>
           <div class="price-row">
-            <span><i class="bi bi-bag-plus"></i> الإضافات</span>
-            <span>{{ editExtrasTotal }} د.أ</span>
+            <span><i class="bi bi-bag-plus"></i> {{ 'booking.extrasTotal' | translate }}</span>
+            <span>{{ editExtrasTotal }} {{ 'misc.currency' | translate }}</span>
           </div>
           <div class="price-row total">
-            <span>الإجمالي</span>
-            <span>{{ selectedBooking.totalPrice }} د.أ</span>
+            <span>{{ 'misc.total' | translate }}</span>
+            <span>{{ selectedBooking.totalPrice }} {{ 'misc.currency' | translate }}</span>
           </div>
           <div class="price-row" *ngIf="selectedBooking.deposit">
-            <span><i class="bi bi-check2-circle"></i> المدفوع حتى الآن</span>
+            <span><i class="bi bi-check2-circle"></i> {{ 'booking.paidSoFarLabel' | translate }}</span>
             <span>{{ bookingPaymentsMap[selectedBooking.id] !== undefined ? bookingPaymentsMap[selectedBooking.id] :
-              selectedBooking.deposit }} د.أ</span>
+              selectedBooking.deposit }} {{ 'misc.currency' | translate }}</span>
           </div>
           <div class="price-row" *ngIf="(editForm.payMoney ?? 0) > 0" style="color:#10b981;">
-            <span><i class="bi bi-plus-circle"></i> دفعة جديدة</span>
-            <span>+ {{ editForm.payMoney ||0}} د.أ</span>
+            <span><i class="bi bi-plus-circle"></i> {{ 'booking.newPaymentLabel' | translate }}</span>
+            <span>+ {{ editForm.payMoney ||0}} {{ 'misc.currency' | translate }}</span>
           </div>
           <div class="price-row" style="color:#fbbf24; font-weight:700;">
-            <span><i class="bi bi-hourglass-bottom"></i> الباقي بعد الدفعة</span>
+            <span><i class="bi bi-hourglass-bottom"></i> {{ 'booking.afterPaymentRemaining' | translate }}</span>
             <span>
               {{ selectedBooking.totalPrice
               - (bookingPaymentsMap[selectedBooking.id] !== undefined ? bookingPaymentsMap[selectedBooking.id] :
               (selectedBooking.deposit || 0))
-              - (editForm.payMoney || 0) }} د.أ
+              - (editForm.payMoney || 0) }} {{ 'misc.currency' | translate }}
             </span>
           </div>
         </div>
@@ -1239,10 +1235,10 @@
         </div>
       </div>
       <div class="modal-footer">
-        <button class="btn-ghost" type="button" (click)="closeEditModal()">إغلاق</button>
+        <button class="btn-ghost" type="button" (click)="closeEditModal()">{{ 'misc.close' | translate }}</button>
         <button class="btn-primary" type="button" (click)="saveEdit()" [disabled]="editSaving">
           <i class="bi" [class.bi-floppy-fill]="!editSaving" [class.bi-hourglass-split]="editSaving"></i>
-          {{ editSaving ? 'جاري الحفظ...' : 'حفظ التعديلات' }}
+          {{ editSaving ? ('booking.savingEdits' | translate) : ('booking.saveEdits' | translate) }}
         </button>
       </div>
     </div>
@@ -1258,7 +1254,7 @@
         <div class="modal-title-group">
           <div class="modal-icon"><i class="bi bi-credit-card-fill"></i></div>
           <div>
-            <h2>تأكيد الحجز والديبوزت</h2>
+            <h2>{{ 'booking.confirmBookingDepositTitle' | translate }}</h2>
             <p class="modal-sub" *ngIf="selectedBooking">{{ selectedBooking.customerName }} — #{{ selectedBooking.id }}
             </p>
           </div>
@@ -1268,47 +1264,47 @@
       <div class="modal-body" *ngIf="selectedBooking">
         <div class="deposit-info">
           <div class="deposit-booking-detail">
-            <span class="detail-label"><i class="bi bi-house-fill"></i> الكوخ</span>
+            <span class="detail-label"><i class="bi bi-house-fill"></i> {{ 'misc.chalet' | translate }}</span>
             <span class="detail-value-sm">{{ selectedBooking.chaletName || getChaletName(selectedBooking.chaletId)
               }}</span>
           </div>
           <div class="deposit-booking-detail">
-            <span class="detail-label"><i class="bi bi-calendar3"></i> التاريخ</span>
+            <span class="detail-label"><i class="bi bi-calendar3"></i> {{ 'misc.date' | translate }}</span>
             <span class="detail-value-sm">{{ formatDate(selectedBooking.date) }}</span>
           </div>
           <div class="deposit-booking-detail">
-            <span class="detail-label"><i class="bi bi-clock-fill"></i> الفترة</span>
+            <span class="detail-label"><i class="bi bi-clock-fill"></i> {{ 'misc.period' | translate }}</span>
             <span class="detail-value-sm">{{ getPeriodLabel(selectedBooking.period) }}</span>
           </div>
           <div class="deposit-price-breakdown">
-            <div class="dpb-row"><span>سعر الكوخ</span><span>{{ selectedBooking.chaletPrice ?? 0 }} د.أ</span></div>
-            <div class="dpb-row" *ngIf="selectedBooking.extrasTotal"><span>الإضافات</span><span>{{
-                selectedBooking.extrasTotal }} د.أ</span></div>
+            <div class="dpb-row"><span>{{ 'booking.baseChaletPrice' | translate }}</span><span>{{ selectedBooking.chaletPrice ?? 0 }} {{ 'misc.currency' | translate }}</span></div>
+            <div class="dpb-row" *ngIf="selectedBooking.extrasTotal"><span>{{ 'booking.extrasTotal' | translate }}</span><span>{{
+                selectedBooking.extrasTotal }} {{ 'misc.currency' | translate }}</span></div>
           </div>
           <div class="deposit-booking-detail highlight">
-            <span class="detail-label"><i class="bi bi-receipt-cutoff"></i> الإجمالي</span>
-            <span class="detail-value">{{ selectedBooking.totalPrice }} د.أ</span>
+            <span class="detail-label"><i class="bi bi-receipt-cutoff"></i> {{ 'misc.total' | translate }}</span>
+            <span class="detail-value">{{ selectedBooking.totalPrice }} {{ 'misc.currency' | translate }}</span>
           </div>
         </div>
         <div class="form-group" style="margin-top:16px">
-          <label>مبلغ الديبوزت *</label>
-          <input type="number" [(ngModel)]="depositAmount" placeholder="أدخل المبلغ" class="form-input deposit-input"
+          <label>{{ 'booking.depositAmountRequired' | translate }}</label>
+          <input type="number" [(ngModel)]="depositAmount" [placeholder]="'booking.enterAmountPh' | translate" class="form-input deposit-input"
             min="1" />
         </div>
         <div class="deposit-remaining" *ngIf="(depositAmount ?? 0) > 0">
-          <span><i class="bi bi-hourglass-bottom"></i> المتبقي:</span>
-          <strong>{{ selectedBooking.totalPrice - (depositAmount ?? 0) }} د.أ</strong>
+          <span><i class="bi bi-hourglass-bottom"></i> {{ 'booking.remainingLabel' | translate }}</span>
+          <strong>{{ selectedBooking.totalPrice - (depositAmount ?? 0) }} {{ 'misc.currency' | translate }}</strong>
         </div>
         <div class="deposit-note">
           <i class="bi bi-info-circle-fill"></i>
-          سيتم تأكيد الحجز وتغيير الحالة إلى <strong>مؤكد</strong>
+          {{ 'booking.depositConfirmNote' | translate: { status: ('status.Confirmed' | translate) } }}
         </div>
       </div>
       <div class="modal-footer">
-        <button class="btn-ghost" type="button" (click)="closeDepositModal()">إلغاء</button>
+        <button class="btn-ghost" type="button" (click)="closeDepositModal()">{{ 'misc.cancel' | translate }}</button>
         <button class="btn-confirm" type="button" (click)="confirmDeposit()" [disabled]="depositSaving">
           <i class="bi bi-check-lg"></i>
-          {{ depositSaving ? 'جاري التأكيد...' : 'تأكيد الحجز' }}
+          {{ depositSaving ? ('booking.confirmingDeposit' | translate) : ('booking.confirmBookingBtn' | translate) }}
         </button>
       </div>
     </div>
@@ -1323,21 +1319,21 @@
       <div class="modal-header">
         <div class="modal-title-group">
           <div class="modal-icon danger-icon"><i class="bi bi-exclamation-triangle-fill"></i></div>
-          <h2>تأكيد الإلغاء</h2>
+          <h2>{{ 'booking.confirmCancelHeader' | translate }}</h2>
         </div>
       </div>
       <div class="modal-body">
-        <p class="danger-text">هل أنت متأكد من إلغاء هذا الحجز؟ لا يمكن التراجع عن هذا الإجراء.</p>
+        <p class="danger-text">{{ 'booking.cancelBookingConfirmWarn' | translate }}</p>
         <div class="form-group" style="margin-top:12px;">
-          <label>سبب الإلغاء</label>
-          <textarea [(ngModel)]="cancelReason" rows="3" placeholder="اكتب سبب الإلغاء..." class="form-input"></textarea>
+          <label>{{ 'booking.cancelReasonPrompt' | translate }}</label>
+          <textarea [(ngModel)]="cancelReason" rows="3" [placeholder]="'booking.cancelReasonPlaceholder' | translate" class="form-input"></textarea>
         </div>
       </div>
       <div class="modal-footer">
-        <button class="btn-ghost" type="button" (click)="showCancelConfirm = false">تراجع</button>
+        <button class="btn-ghost" type="button" (click)="showCancelConfirm = false">{{ 'booking.backOff' | translate }}</button>
         <button class="btn-danger" type="button" (click)="confirmCancel()" [disabled]="cancelSaving">
           <i class="bi bi-x-circle-fill"></i>
-          {{ cancelSaving ? 'جاري الإلغاء...' : 'نعم، إلغاء' }}
+          {{ cancelSaving ? ('booking.cancellingProgress' | translate) : ('booking.yesCancelBooking' | translate) }}
         </button>
       </div>
     </div>
@@ -1353,20 +1349,20 @@
         <div class="modal-title-group">
           <div class="modal-icon done-icon"><i class="bi bi-check2-all"></i></div>
           <div>
-            <h2>تسليم الكوخ</h2>
-            <p class="modal-sub">اختر الكوخ المتاح وسجّل المبلغ المتبقي</p>
+            <h2>{{ 'booking.doneModalTitle' | translate }}</h2>
+            <p class="modal-sub">{{ 'booking.handoverChaletSubtitle' | translate }}</p>
           </div>
         </div>
       </div>
       <div class="modal-body">
         <div class="form-section">
-          <div class="section-label"><i class="bi bi-house-fill"></i> اختر الكوخ المخصص</div>
+          <div class="section-label"><i class="bi bi-house-fill"></i> {{ 'booking.selectAssignedChalet' | translate }}</div>
           <div *ngIf="loadingAvailableChalets" class="cal-placeholder">
-            <i class="bi bi-hourglass-split"></i> جاري البحث عن الأكواخ المتاحة...
+            <i class="bi bi-hourglass-split"></i> {{ 'booking.searchingAvailableChalets' | translate }}
           </div>
           <div *ngIf="!loadingAvailableChalets && availableChaletsForDone.length === 0" class="avail-banner avail-red"
             style="margin-top:8px;">
-            <i class="bi bi-x-circle-fill"></i> لا توجد أكواخ متاحة لهذا التاريخ والفترة
+            <i class="bi bi-x-circle-fill"></i> {{ 'booking.noChaletsForDatePeriod' | translate }}
           </div>
           <div class="done-chalets-grid" *ngIf="!loadingAvailableChalets && availableChaletsForDone.length > 0">
             <div class="done-chalet-option" *ngFor="let ch of availableChaletsForDone"
@@ -1379,28 +1375,28 @@
         </div>
 
         <div class="form-section" *ngIf="doneBookingRemaining > 0 && !loadingAvailableChalets">
-          <div class="section-label"><i class="bi bi-cash-coin"></i> الدفع عند الاستلام</div>
+          <div class="section-label"><i class="bi bi-cash-coin"></i> {{ 'booking.payOnDelivery' | translate }}</div>
           <div class="deposit-remaining" style="margin-bottom:10px;">
-            <span>المبلغ المتبقي:</span>
-            <strong>{{ doneBookingRemaining }} د.أ</strong>
+            <span>{{ 'booking.remainingAmountLabel' | translate }}</span>
+            <strong>{{ doneBookingRemaining }} {{ 'misc.currency' | translate }}</strong>
           </div>
           <div class="form-group">
-            <label>المبلغ المدفوع (د.أ)</label>
+            <label>{{ 'booking.amountPaidJod' | translate }}</label>
             <input type="number" [(ngModel)]="donePayAmount" class="form-input deposit-input"
-              placeholder="ادخل المبلغ المدفوع" min="0" [max]="doneBookingRemaining" />
+              [placeholder]="'booking.enterPaidAmountPh' | translate" min="0" [max]="doneBookingRemaining" />
           </div>
         </div>
 
         <p class="done-text" *ngIf="!loadingAvailableChalets">
-          سيتم تغيير حالة الحجز إلى <strong>تم الاستلام</strong> وتسجيل أي مبلغ مدفوع.
+          {{ 'booking.doneStatusNote' | translate }}
         </p>
       </div>
       <div class="modal-footer">
-        <button class="btn-ghost" type="button" (click)="showDoneConfirm = false">تراجع</button>
+        <button class="btn-ghost" type="button" (click)="showDoneConfirm = false">{{ 'booking.backOff' | translate }}</button>
         <button class="btn-done-confirm" type="button" (click)="confirmDone()"
           [disabled]="doneSaving || !doneSelectedChaletId || loadingAvailableChalets">
           <i class="bi bi-check2-all"></i>
-          {{ doneSaving ? 'جاري...' : 'تأكيد الاستلام' }}
+          {{ doneSaving ? ('booking.processingShort' | translate) : ('booking.confirmHandoverBtn' | translate) }}
         </button>
       </div>
     </div>
@@ -1417,53 +1413,53 @@
           <div class="modal-icon" style="background:linear-gradient(135deg,#0369a1,#0ea5e9)"><i
               class="bi bi-receipt-cutoff"></i></div>
           <div>
-            <h2>سجل الدفعات</h2>
-            <p class="modal-sub">حجز #{{ paymentsBookingId }}</p>
+            <h2>{{ 'booking.paymentsModalTitle' | translate }}</h2>
+            <p class="modal-sub">{{ 'booking.paymentsBookingRef' | translate: { id: paymentsBookingId } }}</p>
           </div>
         </div>
         <button class="modal-close" (click)="closePaymentsModal()"><i class="bi bi-x-lg"></i></button>
       </div>
       <div class="modal-body">
         <div class="cal-placeholder" *ngIf="paymentsLoading">
-          <i class="bi bi-hourglass-split"></i> جاري التحميل...
+          <i class="bi bi-hourglass-split"></i> {{ 'booking.paymentsLoading' | translate }}
         </div>
         <div *ngIf="!paymentsLoading && paymentsList.length === 0" class="empty-state-sm"
           style="text-align:center;padding:20px;">
           <i class="bi bi-receipt" style="font-size:32px;color:#c5d0db;display:block;margin-bottom:8px;"></i>
-          لا توجد دفعات مسجلة
+          {{ 'booking.paymentsEmpty' | translate }}
         </div>
         <div *ngIf="!paymentsLoading && paymentsList.length > 0">
           <div class="payments-summary">
             <div class="pay-sum-item">
-              <span class="pay-sum-label">ديبوزت</span>
-              <strong class="pay-sum-val text-green">{{ paymentsDeposit }} د.أ</strong>
+              <span class="pay-sum-label">{{ 'booking.paymentsSummaryDeposit' | translate }}</span>
+              <strong class="pay-sum-val text-green">{{ paymentsDeposit }} {{ 'misc.currency' | translate }}</strong>
             </div>
             <div class="pay-sum-item">
-              <span class="pay-sum-label">دفعات</span>
-              <strong class="pay-sum-val" style="color:#2d6a9f;">{{ paymentsPrice }} د.أ</strong>
+              <span class="pay-sum-label">{{ 'booking.paymentsSummaryPayments' | translate }}</span>
+              <strong class="pay-sum-val" style="color:#2d6a9f;">{{ paymentsPrice }} {{ 'misc.currency' | translate }}</strong>
             </div>
             <div class="pay-sum-item pay-sum-total">
-              <span class="pay-sum-label">الإجمالي المدفوع</span>
-              <strong class="pay-sum-val">{{ paymentsTotalPaid }} د.أ</strong>
+              <span class="pay-sum-label">{{ 'booking.totalPaidLabel' | translate }}</span>
+              <strong class="pay-sum-val">{{ paymentsTotalPaid }} {{ 'misc.currency' | translate }}</strong>
             </div>
           </div>
           <div class="payment-item" *ngFor="let p of paymentsList">
             <div class="payment-item-left">
               <span class="payment-reason-badge" [class.reason-deposit]="p.paymentReson === 0"
                 [class.reason-price]="p.paymentReson === 1">
-                {{ p.paymentReson === 0 ? 'ديبوزت' : 'دفعة' }}
+                {{ p.paymentReson === 0 ? ('booking.paymentTypeDeposit' | translate) : ('booking.paymentTypePayment' | translate) }}
               </span>
               <div class="payment-item-meta">
                 <span class="payment-method"><i class="bi bi-cash-stack"></i> {{ p.method }}</span>
                 <span class="payment-date">{{ formatDateTime(p.createdAt | jordanDate ) }}</span>
               </div>
             </div>
-            <strong class="payment-amount">{{ p.amount }} د.أ</strong>
+            <strong class="payment-amount">{{ p.amount }} {{ 'misc.currency' | translate }}</strong>
           </div>
         </div>
       </div>
       <div class="modal-footer">
-        <button class="btn-ghost" type="button" (click)="closePaymentsModal()">إغلاق</button>
+        <button class="btn-ghost" type="button" (click)="closePaymentsModal()">{{ 'misc.close' | translate }}</button>
       </div>
     </div>
   </div>
@@ -1484,13 +1480,13 @@
         }}
       </span>
       <div class="inv-modal-actions">
-        <button class="inv-action-btn inv-share" (click)="shareInvoice()" [disabled]="!shareBtn" title="مشاركة">
+        <button class="inv-action-btn inv-share" (click)="shareInvoice()" [disabled]="!shareBtn" [attr.title]="'booking.shareTitle' | translate">
           <i class="bi" [class.bi-share-fill]="shareBtn" [class.bi-hourglass-split]="!shareBtn"></i>
-          <span>{{ shareBtn ? 'مشاركة' : 'جاري التحضير...' }}</span>
+          <span>{{ shareBtn ? ('booking.shareTitle' | translate) : ('booking.sharePreparing' | translate) }}</span>
         </button>
-        <button class="inv-action-btn inv-print" (click)="printInvoice()" title="طباعة / تنزيل">
+        <button class="inv-action-btn inv-print" (click)="printInvoice()" [attr.title]="'booking.printDownloadTitle' | translate">
           <i class="bi bi-printer-fill"></i>
-          <span>طباعة</span>
+          <span>{{ 'booking.printBtn' | translate }}</span>
         </button>
         <button class="inv-close-btn" (click)="closeInvoice()">
           <i class="bi bi-x-lg"></i>
@@ -1507,9 +1503,9 @@
           <div class="inv-hero-overlay"></div>
           <div class="inv-hero-content">
             <div class="inv-hero-chalet-name">
-              {{ invoiceBooking.chaletName || 'كوخ' }}
+              {{ invoiceBooking.chaletName || ('booking.invoiceHeroChalet' | translate) }}
               <span class="inv-hero-type-tag" [class.royal]="invoiceBooking.chaletType === 1">
-                {{ invoiceBooking.chaletType === 1 ? '👑 رويال' : '🏠 عادي' }}
+                {{ (invoiceBooking.chaletType === 1 ? 'misc.royal' : 'misc.normal') | translate }}
               </span>
             </div>
             <div class="inv-hero-date">
@@ -1525,7 +1521,7 @@
             <div class="brand-icon">
               <img src="/favicon2.png" alt="" class="img-fluid">
             </div>
-            <div class="inv-brand-sub">نظام إدارة الحجوزات</div>
+            <div class="inv-brand-sub">{{ 'brand.bookingSystem' | translate }}</div>
           </div>
           <div class="inv-meta-block">
             <div class="inv-num" style="direction:ltr; text-align:right;">
@@ -1542,47 +1538,47 @@
         <!-- بيانات العميل + تفاصيل الحجز -->
         <div class="inv-info-grid">
           <div class="inv-card">
-            <div class=""><i class="bi bi-person-fill"></i> بيانات العميل</div>
+            <div class=""><i class="bi bi-person-fill"></i> {{ 'booking.customerSection' | translate }}</div>
             <div class="inv-info-row">
-              <span class="inv-info-label">الاسم</span>
+              <span class="inv-info-label">{{ 'misc.name' | translate }}</span>
               <span class="inv-info-val">{{ invoiceBooking.customerName }}</span>
             </div>
             <div class="inv-info-row">
-              <span class="inv-info-label">الهاتف</span>
+              <span class="inv-info-label">{{ 'misc.phone' | translate }}</span>
               <span class="inv-info-val dir-ltr">{{ invoiceBooking.phone }}</span>
             </div>
             <!-- ✅ رقم هاتف إضافي في الفاتورة -->
             <div class="inv-info-row" *ngIf="invoiceBooking.additionalPhone">
-              <span class="inv-info-label">هاتف إضافي</span>
+              <span class="inv-info-label">{{ 'misc.additionalPhone' | translate }}</span>
               <span class="inv-info-val dir-ltr">{{ invoiceBooking.additionalPhone }}</span>
             </div>
             <div class="inv-info-row">
-              <span class="inv-info-label">عدد الزوار</span>
-              <span class="inv-info-val">{{ invoiceBooking.numOfGuests }} أشخاص</span>
+              <span class="inv-info-label">{{ 'misc.numGuests' | translate }}</span>
+              <span class="inv-info-val">{{ invoiceBooking.numOfGuests }} {{ 'misc.guests' | translate }}</span>
             </div>
           </div>
 
           <div class="inv-card">
-            <div class=""><i class="bi bi-calendar3"></i> تفاصيل الحجز</div>
+            <div class=""><i class="bi bi-calendar3"></i> {{ 'booking.bookingSectionInvoice' | translate }}</div>
             <div class="inv-info-row">
-              <span class="inv-info-label">الكوخ</span>
+              <span class="inv-info-label">{{ 'misc.chalet' | translate }}</span>
               <span class="inv-info-val">
-                {{ invoiceBooking.chaletName || 'غير محدد' }}
+                {{ invoiceBooking.chaletName || ('misc.notSpecified' | translate) }}
                 <span class="inv-type-tag" [class.royal]="invoiceBooking.chaletType === 1">
-                  {{ invoiceBooking.chaletType === 1 ? '👑 رويال' : '🏠 عادي' }}
+                  {{ (invoiceBooking.chaletType === 1 ? 'misc.royal' : 'misc.normal') | translate }}
                 </span>
               </span>
             </div>
             <div class="inv-info-row">
-              <span class="inv-info-label">تاريخ الحجز</span>
+              <span class="inv-info-label">{{ 'booking.bookingDateLabel' | translate }}</span>
               <span class="inv-info-val">{{ formatDate(invoiceBooking.date) }}</span>
             </div>
             <div class="inv-info-row">
-              <span class="inv-info-label">الفترة</span>
+              <span class="inv-info-label">{{ 'misc.period' | translate }}</span>
               <span class="inv-info-val">{{ getPeriodLabel(invoiceBooking.period) }}</span>
             </div>
             <div class="inv-info-row">
-              <span class="inv-info-label">أُنشئ بواسطة</span>
+              <span class="inv-info-label">{{ 'misc.createdBy' | translate }}</span>
               <span class="inv-info-val">{{ invoiceBooking.createdBy }}</span>
             </div>
           </div>
@@ -1590,15 +1586,15 @@
 
         <!-- جدول البنود -->
         <div class="inv-table-wrap">
-          <div class=""><i class="bi bi-list-ul"></i> بنود الفاتورة</div>
+          <div class=""><i class="bi bi-list-ul"></i> {{ 'booking.invoiceLinesTitle' | translate }}</div>
           <table class="inv-table">
             <thead>
               <tr>
                 <th>#</th>
-                <th>البند</th>
-                <th>الكمية</th>
-                <th>سعر الوحدة</th>
-                <th>الإجمالي</th>
+                <th>{{ 'booking.colDescription' | translate }}</th>
+                <th>{{ 'booking.colQuantity' | translate }}</th>
+                <th>{{ 'booking.colUnitPrice' | translate }}</th>
+                <th>{{ 'misc.total' | translate }}</th>
               </tr>
             </thead>
             <tbody>
@@ -1607,26 +1603,26 @@
                 <td>
                   <div class="inv-item-name">
                     <i class="bi bi-house-fill inv-item-icon"></i>
-                    إيجار كوخ — {{ invoiceBooking.chaletName || 'كوخ' }}
+                    {{ 'booking.chaletRentLine' | translate: { name: invoiceBooking.chaletName || ('booking.invoiceHeroChalet' | translate) } }}
                   </div>
                   <div class="inv-item-sub">{{ getPeriodLabel(invoiceBooking.period) }} | {{
                     formatDate(invoiceBooking.date) }}</div>
                 </td>
                 <td>1</td>
-                <td>{{ invoiceBooking.chaletPrice ?? 0 }} د.أ</td>
-                <td class="inv-td-total">{{ invoiceBooking.chaletPrice ?? 0 }} د.أ</td>
+                <td>{{ invoiceBooking.chaletPrice ?? 0 }} {{ 'misc.currency' | translate }}</td>
+                <td class="inv-td-total">{{ invoiceBooking.chaletPrice ?? 0 }} {{ 'misc.currency' | translate }}</td>
               </tr>
               <tr *ngFor="let ex of invoiceBooking.extras; let i = index">
                 <td class="inv-td-num">{{ i + 2 }}</td>
                 <td>
                   <div class="inv-item-name">
                     <i class="bi bi-bag-plus-fill inv-item-icon extra-icon"></i>
-                    {{ ex.extraName || 'إضافة' }}
+                    {{ ex.extraName || ('misc.extraDefault' | translate) }}
                   </div>
                 </td>
                 <td>{{ ex.quantity }}</td>
-                <td>{{ ex.price }} د.أ</td>
-                <td class="inv-td-total">{{ ex.total }} د.أ</td>
+                <td>{{ ex.price }} {{ 'misc.currency' | translate }}</td>
+                <td class="inv-td-total">{{ ex.total }} {{ 'misc.currency' | translate }}</td>
               </tr>
               <!-- ✅ سطر الخصم في جدول الفاتورة -->
               <tr *ngIf="invoiceBooking.discountAmount && invoiceBooking.discountAmount > 0" class="inv-discount-row">
@@ -1634,12 +1630,12 @@
                 <td>
                   <div class="inv-item-name inv-discount-label">
                     <i class="bi bi-tag-fill inv-item-icon"></i>
-                    خصم
+                    {{ 'misc.discount' | translate }}
                   </div>
                 </td>
                 <td>—</td>
                 <td>—</td>
-                <td class="inv-td-total inv-td-discount">- {{ invoiceBooking.discountAmount }} د.أ</td>
+                <td class="inv-td-total inv-td-discount">- {{ invoiceBooking.discountAmount }} {{ 'misc.currency' | translate }}</td>
               </tr>
             </tbody>
           </table>
@@ -1649,52 +1645,52 @@
         <div class="inv-totals-block">
           <div class="inv-totals-inner">
             <div class="inv-total-row" *ngIf="invoiceBooking.extrasTotal">
-              <span class="inv-tl">سعر الكوخ</span>
-              <span class="inv-tv">{{ invoiceBooking.chaletPrice ?? 0 }} د.أ</span>
+              <span class="inv-tl">{{ 'booking.baseChaletPrice' | translate }}</span>
+              <span class="inv-tv">{{ invoiceBooking.chaletPrice ?? 0 }} {{ 'misc.currency' | translate }}</span>
             </div>
             <div class="inv-total-row" *ngIf="invoiceBooking.extrasTotal">
-              <span class="inv-tl">الإضافات</span>
-              <span class="inv-tv">{{ invoiceBooking.extrasTotal }} د.أ</span>
+              <span class="inv-tl">{{ 'booking.extrasTotal' | translate }}</span>
+              <span class="inv-tv">{{ invoiceBooking.extrasTotal }} {{ 'misc.currency' | translate }}</span>
             </div>
             <!-- ✅ خصم في إجماليات الفاتورة -->
             <div class="inv-total-row inv-discount-total"
               *ngIf="invoiceBooking.discountAmount && invoiceBooking.discountAmount > 0">
-              <span class="inv-tl"><i class="bi bi-tag-fill"></i> خصم</span>
-              <span class="inv-tv inv-tv-red">- {{ invoiceBooking.discountAmount }} د.أ</span>
+              <span class="inv-tl"><i class="bi bi-tag-fill"></i> {{ 'misc.discount' | translate }}</span>
+              <span class="inv-tv inv-tv-red">- {{ invoiceBooking.discountAmount }} {{ 'misc.currency' | translate }}</span>
             </div>
             <div class="inv-total-row inv-grand">
-              <span class="inv-tl">الإجمالي</span>
-              <span class="inv-tv gold">{{ invoiceBooking.totalPrice }} د.أ</span>
+              <span class="inv-tl">{{ 'misc.total' | translate }}</span>
+              <span class="inv-tv gold">{{ invoiceBooking.totalPrice }} {{ 'misc.currency' | translate }}</span>
             </div>
             <ng-container *ngIf="!isDone(invoiceBooking) && invoiceBooking.deposit">
               <div class="inv-total-row inv-paid">
-                <span class="inv-tl"><i class="bi bi-check2-circle"></i> المدفوع</span>
+                <span class="inv-tl"><i class="bi bi-check2-circle"></i> {{ 'misc.paid' | translate }}</span>
                 <span class="inv-tv green">
                   {{ bookingPaymentsMap[invoiceBooking.id] !== undefined
                   ? bookingPaymentsMap[invoiceBooking.id]
-                  : invoiceBooking.deposit }} د.أ
+                  : invoiceBooking.deposit }} {{ 'misc.currency' | translate }}
                 </span>
               </div>
               <div class="inv-total-row inv-remaining">
-                <span class="inv-tl"><i class="bi bi-hourglass-bottom"></i> المتبقي</span>
-                <span class="inv-tv orange">{{ getRemaining(invoiceBooking) }} د.أ</span>
+                <span class="inv-tl"><i class="bi bi-hourglass-bottom"></i> {{ 'misc.remaining' | translate }}</span>
+                <span class="inv-tv orange">{{ getRemaining(invoiceBooking) }} {{ 'misc.currency' | translate }}</span>
               </div>
             </ng-container>
             <ng-container *ngIf="isDone(invoiceBooking)">
               <div class="inv-total-row inv-paid">
-                <span class="inv-tl"><i class="bi bi-check2-circle"></i> المدفوع الفعلي</span>
+                <span class="inv-tl"><i class="bi bi-check2-circle"></i> {{ 'misc.paidActual' | translate }}</span>
                 <span class="inv-tv green">
                   {{ bookingPaymentsMap[invoiceBooking.id] !== undefined
                   ? bookingPaymentsMap[invoiceBooking.id]
-                  : invoiceBooking.deposit ?? 0 }} د.أ
+                  : invoiceBooking.deposit ?? 0 }} {{ 'misc.currency' | translate }}
                 </span>
               </div>
               <div class="inv-total-row inv-remaining" *ngIf="getRemaining(invoiceBooking) > 0">
-                <span class="inv-tl"><i class="bi bi-hourglass-bottom"></i> المتبقي</span>
-                <span class="inv-tv orange">{{ getRemaining(invoiceBooking) }} د.أ</span>
+                <span class="inv-tl"><i class="bi bi-hourglass-bottom"></i> {{ 'misc.remaining' | translate }}</span>
+                <span class="inv-tv orange">{{ getRemaining(invoiceBooking) }} {{ 'misc.currency' | translate }}</span>
               </div>
               <div class="inv-total-row" *ngIf="getRemaining(invoiceBooking) === 0">
-                <span class="inv-tl"><i class="bi bi-check-all"></i> مسدد بالكامل</span>
+                <span class="inv-tl"><i class="bi bi-check-all"></i> {{ 'misc.fullyPaid' | translate }}</span>
                 <span class="inv-tv green">✓</span>
               </div>
             </ng-container>
@@ -1704,14 +1700,15 @@
         <!-- تذييل الفاتورة -->
         <div class="inv-footer">
           <div class="">
-            {{ invoiceBooking.status === 'Done' ? '✔ تم الاستلام' :
-            invoiceBooking.status === 'Confirmed' ? '✔ مؤكد' :
-            invoiceBooking.status === 'Pending' ? '⏳ قيد الانتظار' : getStatusLabel(invoiceBooking.status) }}
+            <ng-container [ngSwitch]="invoiceBooking.status">
+              <span *ngSwitchCase="'Done'">{{ 'booking.invoiceFooterDone' | translate }}</span>
+              <span *ngSwitchCase="'Confirmed'">{{ 'booking.invoiceFooterConfirmed' | translate }}</span>
+              <span *ngSwitchCase="'Pending'">{{ 'booking.invoiceFooterPending' | translate }}</span>
+              <span *ngSwitchDefault>{{ getStatusLabel(invoiceBooking.status) }}</span>
+            </ng-container>
           </div>
-          <p class="inv-footer-note">شكراً لاختياركم — نتمنى لكم إقامة طيبة 🏕️</p>
-          <p class="inv-footer-generated">تم إنشاء هذه الفاتورة تلقائياً | {{ formatDateTime(invoiceBooking.createdAt |
-            jordanDate )
-            }}</p>
+          <p class="inv-footer-note">{{ 'booking.invoiceFooterThanks' | translate }}</p>
+          <p class="inv-footer-generated">{{ 'booking.invoiceFooterGenerated' | translate: { date: formatDateTime((invoiceBooking.createdAt | jordanDate)) } }}</p>
         </div>
 
       </div>
@@ -1731,7 +1728,7 @@
           <i class="bi bi-chat-dots-fill"></i>
         </div>
         <div>
-          <h2>ملاحظات الحجز</h2>
+          <h2>{{ 'booking.notesModalTitle' | translate }}</h2>
           <p class="modal-sub" *ngIf="notesBooking">
             {{ notesBooking.customerName }} — #{{ notesBooking.id }}
           </p>
@@ -1746,7 +1743,7 @@
       <div class="chat-messages" #chatMessages>
         <div class="chat-empty" *ngIf="!notesBooking.notes || notesBooking.notes.length === 0">
           <i class="bi bi-chat-square-dots" style="font-size:32px;color:#c5d0db;display:block;margin-bottom:8px;"></i>
-          <p>لا توجد ملاحظات بعد</p>
+          <p>{{ 'booking.noNotesYet' | translate }}</p>
         </div>
         <div class="chat-msg" *ngFor="let n of notesBooking.notes">
           <div class="chat-msg-header">
@@ -1761,7 +1758,7 @@
     </div>
 
     <div class="notes-input-area">
-      <input type="text" [(ngModel)]="newNoteText" placeholder="اكتب ملاحظة..." class="form-input notes-input"
+      <input type="text" [(ngModel)]="newNoteText" [placeholder]="'booking.notesPlaceholder' | translate" class="form-input notes-input"
         (keyup.enter)="sendNote()" [disabled]="noteSending" />
       <button class="btn-send-note" (click)="sendNote()" [disabled]="!newNoteText.trim() || noteSending">
         <i class="bi" [class.bi-send-fill]="!noteSending" [class.bi-hourglass-split]="noteSending"></i>

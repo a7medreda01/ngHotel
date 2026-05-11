@@ -2,11 +2,12 @@ import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { Extra, ExtraCreateDto, ExtrasService, ExtraUpdateDto } from '../../service/extras-service';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-extras-component',
   templateUrl: './extras-component.html',
-  imports:[CommonModule,FormsModule],
+  imports: [CommonModule, FormsModule, TranslatePipe],
   styleUrls: ['./extras-component.scss']
 })
 export class ExtrasComponent implements OnInit {
@@ -37,7 +38,11 @@ export class ExtrasComponent implements OnInit {
   toastType: 'success' | 'error' = 'success';
   showToast = false;
 
-  constructor(private extrasService: ExtrasService,  private cdr: ChangeDetectorRef) {}
+  constructor(
+    private extrasService: ExtrasService,
+    private cdr: ChangeDetectorRef,
+    private translate: TranslateService,
+  ) {}
 
   ngOnInit(): void {
     this.loadExtras();
@@ -54,7 +59,7 @@ export class ExtrasComponent implements OnInit {
 
       },
       error: () => {
-        this.showNotification('حدث خطأ أثناء تحميل البيانات', 'error');
+        this.showNotification(this.translate.instant('features.extras.toastLoadFail'), 'error');
         this.loading = false;
               this.cdr.detectChanges(); // 🔥 مهم
 
@@ -110,10 +115,10 @@ export class ExtrasComponent implements OnInit {
   validateForm(): boolean {
     this.formErrors = {};
     if (!this.form.name || this.form.name.trim() === '') {
-      this.formErrors.name = 'اسم الخدمة مطلوب';
+      this.formErrors.name = this.translate.instant('features.extras.errName');
     }
     if (this.form.price == null || this.form.price < 0) {
-      this.formErrors.price = 'السعر يجب أن يكون 0 أو أكثر';
+      this.formErrors.price = this.translate.instant('features.extras.errPrice');
     }
     return Object.keys(this.formErrors).length === 0;
   }
@@ -131,13 +136,13 @@ export class ExtrasComponent implements OnInit {
       };
       this.extrasService.update(this.selectedExtra.id, dto).subscribe({
         next: () => {
-          this.showNotification('تم تحديث الخدمة بنجاح', 'success');
+          this.showNotification(this.translate.instant('features.extras.toastUpdateOk'), 'success');
           this.closeModal();
           this.loadExtras();
           this.saving = false;
         },
         error: () => {
-          this.showNotification('حدث خطأ أثناء التحديث', 'error');
+          this.showNotification(this.translate.instant('features.extras.toastUpdateFail'), 'error');
           this.saving = false;
         }
       });
@@ -148,13 +153,13 @@ export class ExtrasComponent implements OnInit {
       };
       this.extrasService.create(dto).subscribe({
         next: () => {
-          this.showNotification('تمت إضافة الخدمة بنجاح', 'success');
+          this.showNotification(this.translate.instant('features.extras.toastAddOk'), 'success');
           this.closeModal();
           this.loadExtras();
           this.saving = false;
         },
         error: () => {
-          this.showNotification('حدث خطأ أثناء الإضافة', 'error');
+          this.showNotification(this.translate.instant('features.extras.toastAddFail'), 'error');
           this.saving = false;
         }
       });
@@ -199,12 +204,14 @@ export class ExtrasComponent implements OnInit {
         extra.isActive = !extra.isActive;
         this.applyFilter();
         this.showNotification(
-          extra.isActive ? 'تم تفعيل الخدمة' : 'تم إيقاف الخدمة',
+          extra.isActive
+            ? this.translate.instant('features.extras.toastToggleOk')
+            : this.translate.instant('features.extras.toastToggleOffOk'),
           'success'
         );
       },
       error: () => {
-        this.showNotification('حدث خطأ', 'error');
+        this.showNotification(this.translate.instant('features.extras.toastToggleFail'), 'error');
       }
     });
   }

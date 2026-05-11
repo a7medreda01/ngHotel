@@ -1,4 +1,4 @@
-<div class="extras-page" dir="rtl">
+﻿<div class="extras-page">
 
   <!-- Toast Notification -->
   <div class="toast-wrapper" [class.show]="showToast">
@@ -13,13 +13,13 @@
     <div class="header-title">
       <i class="bi bi-stars"></i>
       <div>
-        <h1>الإضافات والخدمات</h1>
-        <p>إدارة الخدمات الإضافية المتاحة للحجوزات</p>
+        <h1>{{ 'features.extras.pageTitle' | translate }}</h1>
+        <p>{{ 'features.extras.pageSub' | translate }}</p>
       </div>
     </div>
     <button class="btn-add" (click)="openAddModal()">
       <i class="bi bi-plus-lg"></i>
-      إضافة خدمة
+      {{ 'features.extras.addService' | translate }}
     </button>
   </div>
 
@@ -31,7 +31,7 @@
       </div>
       <div class="stat-info">
         <span class="stat-value">{{ activeCount }}</span>
-        <span class="stat-label">خدمات فعّالة</span>
+        <span class="stat-label">{{ 'features.extras.statActive' | translate }}</span>
       </div>
     </div>
     <div class="stat-card stat-inactive">
@@ -40,7 +40,7 @@
       </div>
       <div class="stat-info">
         <span class="stat-value">{{ inactiveCount }}</span>
-        <span class="stat-label">خدمات متوقفة</span>
+        <span class="stat-label">{{ 'features.extras.statInactive' | translate }}</span>
       </div>
     </div>
     <div class="stat-card stat-total">
@@ -49,7 +49,7 @@
       </div>
       <div class="stat-info">
         <span class="stat-value">{{ extras.length }}</span>
-        <span class="stat-label">إجمالي الخدمات</span>
+        <span class="stat-label">{{ 'features.extras.statTotal' | translate }}</span>
       </div>
     </div>
     <div class="stat-card stat-price">
@@ -58,7 +58,7 @@
       </div>
       <div class="stat-info">
         <span class="stat-value">{{ totalPrice }}</span>
-        <span class="stat-label">مجموع الأسعار (د.أ)</span>
+        <span class="stat-label">{{ 'features.extras.statPrices' | translate: { currency: ('misc.currency' | translate) } }}</span>
       </div>
     </div>
   </div>
@@ -68,26 +68,26 @@
     <i class="bi bi-search search-icon"></i>
     <input
       type="text"
-      placeholder="بحث باسم الخدمة..."
+      [placeholder]="'features.extras.searchPh' | translate"
       [(ngModel)]="searchTerm"
       (input)="applyFilter()"
       class="search-input"
     />
-    <span class="results-count">{{ filteredExtras.length }} سجل</span>
+    <span class="results-count">{{ 'features.extras.recordsCount' | translate: { n: filteredExtras.length } }}</span>
   </div>
 
   <!-- Loading State -->
   <div class="loading-state" *ngIf="loading">
     <div class="spinner"></div>
-    <p>جاري التحميل...</p>
+    <p>{{ 'features.extras.loading' | translate }}</p>
   </div>
 
   <!-- Empty State -->
   <div class="empty-state" *ngIf="!loading && filteredExtras.length === 0">
     <i class="bi bi-inbox"></i>
-    <p>لا توجد خدمات مضافة حتى الآن</p>
+    <p>{{ 'features.extras.empty' | translate }}</p>
     <button class="btn-add" (click)="openAddModal()">
-      <i class="bi bi-plus-lg"></i> أضف خدمة الآن
+      <i class="bi bi-plus-lg"></i> {{ 'features.extras.addNow' | translate }}
     </button>
   </div>
 
@@ -97,10 +97,10 @@
       <thead>
         <tr>
           <th>#</th>
-          <th>اسم الخدمة</th>
-          <th>السعر (د.أ)</th>
-          <th>الحالة</th>
-          <th>الإجراءات</th>
+          <th>{{ 'features.extras.colName' | translate }}</th>
+          <th>{{ 'features.extras.colPrice' | translate: { currency: ('misc.currency' | translate) } }}</th>
+          <th>{{ 'features.extras.colStatus' | translate }}</th>
+          <th>{{ 'features.extras.colActions' | translate }}</th>
         </tr>
       </thead>
       <tbody>
@@ -113,24 +113,24 @@
             </span>
           </td>
           <td class="price-cell">
-            <span class="price-tag">{{ extra.price | number }} د.أ</span>
+            <span class="price-tag">{{ extra.price | number }} {{ 'misc.currency' | translate }}</span>
           </td>
           <td>
             <span class="status-badge" [class.active]="extra.isActive" [class.inactive]="!extra.isActive">
               <i class="bi" [class.bi-check-circle-fill]="extra.isActive" [class.bi-x-circle-fill]="!extra.isActive"></i>
-              {{ extra.isActive ? 'فعّال' : 'متوقف' }}
+              {{ extra.isActive ? ('features.extras.active' | translate) : ('features.extras.inactive' | translate) }}
             </span>
           </td>
           <td class="actions-cell">
             <button class="action-btn toggle-btn"
-              [title]="extra.isActive ? 'إيقاف الخدمة' : 'تفعيل الخدمة'"
+              [attr.title]="extra.isActive ? ('features.extras.titleDeactivate' | translate) : ('features.extras.titleActivate' | translate)"
               (click)="toggleActive(extra)">
               <i class="bi" [class.bi-toggle-on]="extra.isActive" [class.bi-toggle-off]="!extra.isActive"></i>
             </button>
-            <button class="action-btn edit-btn" title="تعديل" (click)="openEditModal(extra)">
+            <button class="action-btn edit-btn" [attr.title]="'features.extras.titleEdit' | translate" (click)="openEditModal(extra)">
               <i class="bi bi-pencil-square"></i>
             </button>
-            <button class="action-btn delete-btn" title="حذف" (click)="confirmDelete(extra)">
+            <button class="action-btn delete-btn" [attr.title]="'features.extras.titleDelete' | translate" (click)="confirmDelete(extra)">
               <i class="bi bi-trash3"></i>
             </button>
           </td>
@@ -149,23 +149,23 @@
           </div>
           <span class="status-badge" [class.active]="extra.isActive" [class.inactive]="!extra.isActive">
             <i class="bi" [class.bi-check-circle-fill]="extra.isActive" [class.bi-x-circle-fill]="!extra.isActive"></i>
-            {{ extra.isActive ? 'فعّال' : 'متوقف' }}
+            {{ extra.isActive ? ('features.extras.active' | translate) : ('features.extras.inactive' | translate) }}
           </span>
         </div>
         <div class="card-price">
           <i class="bi bi-cash-stack"></i>
-          <span>السعر: <strong>{{ extra.price | number }} د.أ</strong></span>
+          <span>{{ 'misc.price' | translate }}: <strong>{{ extra.price | number }} {{ 'misc.currency' | translate }}</strong></span>
         </div>
         <div class="card-actions">
           <button class="action-btn toggle-btn" (click)="toggleActive(extra)">
             <i class="bi" [class.bi-toggle-on]="extra.isActive" [class.bi-toggle-off]="!extra.isActive"></i>
-            {{ extra.isActive ? 'إيقاف' : 'تفعيل' }}
+            {{ extra.isActive ? ('features.extras.toggleOff' | translate) : ('features.extras.toggleOn' | translate) }}
           </button>
           <button class="action-btn edit-btn" (click)="openEditModal(extra)">
-            <i class="bi bi-pencil-square"></i> تعديل
+            <i class="bi bi-pencil-square"></i> {{ 'features.extras.titleEdit' | translate }}
           </button>
           <button class="action-btn delete-btn" (click)="confirmDelete(extra)">
-            <i class="bi bi-trash3"></i> حذف
+            <i class="bi bi-trash3"></i> {{ 'features.extras.titleDelete' | translate }}
           </button>
         </div>
       </div>
@@ -178,7 +178,7 @@
       <div class="modal-header">
         <div class="modal-title">
           <i class="bi" [class.bi-plus-circle]="!isEditMode" [class.bi-pencil-square]="isEditMode"></i>
-          <span>{{ isEditMode ? 'تعديل الخدمة' : 'إضافة خدمة جديدة' }}</span>
+          <span>{{ isEditMode ? ('features.extras.modalEdit' | translate) : ('features.extras.modalAdd' | translate) }}</span>
         </div>
         <button class="modal-close" (click)="closeModal()">
           <i class="bi bi-x-lg"></i>
@@ -187,13 +187,13 @@
 
       <div class="modal-body">
         <div class="form-group">
-          <label>اسم الخدمة <span class="required">*</span></label>
+          <label>{{ 'features.extras.nameLabel' | translate }} <span class="required">{{ 'features.extras.nameRequired' | translate }}</span></label>
           <div class="input-wrap">
             <i class="bi bi-stars input-icon"></i>
             <input
               type="text"
               [(ngModel)]="form.name"
-              placeholder="مثال: زينة، فطار، مشروبات..."
+              [placeholder]="'features.extras.namePh' | translate"
               [class.error]="formErrors.name"
             />
           </div>
@@ -201,7 +201,7 @@
         </div>
 
         <div class="form-group">
-          <label>السعر (د.أ) <span class="required">*</span></label>
+          <label>{{ 'features.extras.priceLabel' | translate: { currency: ('misc.currency' | translate) } }} <span class="required">{{ 'features.extras.priceRequired' | translate }}</span></label>
           <div class="input-wrap">
             <i class="bi bi-cash-stack input-icon"></i>
             <input
@@ -216,19 +216,19 @@
         </div>
 
         <div class="form-group" *ngIf="isEditMode">
-          <label>الحالة</label>
+          <label>{{ 'features.extras.stateLabel' | translate }}</label>
           <div class="toggle-row">
             <button
               class="status-option"
               [class.selected-active]="form.isActive"
               (click)="form.isActive = true">
-              <i class="bi bi-check-circle-fill"></i> فعّال
+              <i class="bi bi-check-circle-fill"></i> {{ 'features.extras.active' | translate }}
             </button>
             <button
               class="status-option"
               [class.selected-inactive]="!form.isActive"
               (click)="form.isActive = false">
-              <i class="bi bi-x-circle-fill"></i> متوقف
+              <i class="bi bi-x-circle-fill"></i> {{ 'features.extras.inactive' | translate }}
             </button>
           </div>
         </div>
@@ -236,10 +236,10 @@
 
       <div class="modal-footer">
         <button class="btn-save" (click)="saveExtra()" [disabled]="saving">
-          <span *ngIf="!saving"><i class="bi bi-check-lg"></i> {{ isEditMode ? 'حفظ التغييرات' : 'إضافة الخدمة' }}</span>
-          <span *ngIf="saving"><i class="bi bi-arrow-repeat spin"></i> جاري الحفظ...</span>
+          <span *ngIf="!saving"><i class="bi bi-check-lg"></i> {{ isEditMode ? ('features.extras.saveEdit' | translate) : ('features.extras.saveAdd' | translate) }}</span>
+          <span *ngIf="saving"><i class="bi bi-arrow-repeat spin"></i> {{ 'features.extras.saving' | translate }}</span>
         </button>
-        <button class="btn-cancel" (click)="closeModal()">إلغاء</button>
+        <button class="btn-cancel" (click)="closeModal()">{{ 'misc.cancel' | translate }}</button>
       </div>
     </div>
   </div>
@@ -250,7 +250,7 @@
       <div class="modal-header delete-header">
         <div class="modal-title">
           <i class="bi bi-exclamation-triangle-fill text-danger"></i>
-          <span>تأكيد الحذف</span>
+          <span>{{ 'features.extras.deleteTitle' | translate }}</span>
         </div>
         <button class="modal-close" (click)="cancelDelete()">
           <i class="bi bi-x-lg"></i>
@@ -260,15 +260,15 @@
         <div class="delete-icon">
           <i class="bi bi-trash3-fill"></i>
         </div>
-        <p class="delete-msg">هل أنت متأكد من حذف خدمة <strong>{{ selectedExtra?.name }}</strong>؟</p>
-        <p class="delete-sub">لا يمكن التراجع عن هذا الإجراء</p>
+        <p class="delete-msg">{{ 'features.extras.deleteMsg' | translate: { name: selectedExtra?.name } }}</p>
+        <p class="delete-sub">{{ 'features.extras.deleteSub' | translate }}</p>
       </div>
       <div class="modal-footer">
         <button class="btn-delete" (click)="deleteExtra()" [disabled]="deleting">
-          <span *ngIf="!deleting"><i class="bi bi-trash3"></i> نعم، احذف</span>
-          <span *ngIf="deleting"><i class="bi bi-arrow-repeat spin"></i> جاري الحذف...</span>
+          <span *ngIf="!deleting"><i class="bi bi-trash3"></i> {{ 'features.extras.deleteYes' | translate }}</span>
+          <span *ngIf="deleting"><i class="bi bi-arrow-repeat spin"></i> {{ 'features.extras.deleting' | translate }}</span>
         </button>
-        <button class="btn-cancel" (click)="cancelDelete()">إلغاء</button>
+        <button class="btn-cancel" (click)="cancelDelete()">{{ 'misc.cancel' | translate }}</button>
       </div>
     </div>
   </div>

@@ -1,4 +1,4 @@
-<div class="chalet-page" dir="rtl">
+﻿<div class="chalet-page">
 
   <!-- Header -->
   <div class="page-header">
@@ -6,12 +6,12 @@
       <div class="header-title">
         <div class="header-icon"><i class="bi bi-house-heart-fill"></i></div>
         <div>
-          <h1>إدارة الشاليهات</h1>
-          <p>عرض وإدارة جميع الشاليهات المتاحة</p>
+          <h1>{{ 'features.chalet.pageTitle' | translate }}</h1>
+          <p>{{ 'features.chalet.pageSub' | translate }}</p>
         </div>
       </div>
       <button class="btn-add" (click)="openAddModal()">
-        <i class="bi bi-plus-lg"></i> إضافة شاليه
+        <i class="bi bi-plus-lg"></i> {{ 'features.chalet.addChalet' | translate }}
       </button>
     </div>
   </div>
@@ -27,26 +27,26 @@
   <!-- Loading -->
   <div class="loading-wrap" *ngIf="loading">
     <div class="spinner"></div>
-    <span>جاري التحميل...</span>
+    <span>{{ 'features.chalet.loading' | translate }}</span>
   </div>
 
   <!-- Stats Bar -->
   <div class="stats-bar" *ngIf="!loading && chalets.length">
     <div class="stat-item">
       <i class="bi bi-grid-3x3-gap-fill"></i>
-      <span>{{ chalets.length }} شاليه</span>
+      <span>{{ 'features.chalet.count' | translate: { n: chalets.length } }}</span>
     </div>
     <div class="stat-item available">
       <i class="bi bi-check-circle"></i>
-      <span>{{ chalets | statCount:'Available' }} متاح</span>
+      <span>{{ chalets | statCount:'Available' }} {{ 'features.chalet.statAvailable' | translate }}</span>
     </div>
     <div class="stat-item booked">
       <i class="bi bi-calendar-check"></i>
-      <span>{{ chalets | statCount:'Booked' }} محجوز</span>
+      <span>{{ chalets | statCount:'Booked' }} {{ 'features.chalet.statBooked' | translate }}</span>
     </div>
     <div class="stat-item maintenance">
       <i class="bi bi-tools"></i>
-      <span>{{ chalets | statCount:'Maintenance' }} صيانة</span>
+      <span>{{ chalets | statCount:'Maintenance' }} {{ 'features.chalet.statMaintenance' | translate }}</span>
     </div>
   </div>
 
@@ -60,7 +60,7 @@
           (error)="$any($event.target).src='assets/no-image.png'" />
         <div class="no-img" *ngIf="!c.images || !c.images[0]">
           <i class="bi bi-image"></i>
-          <span>لا توجد صورة</span>
+          <span>{{ 'misc.noImage' | translate }}</span>
         </div>
         <span class="img-count" *ngIf="c.images && c.images.length > 1">
           <i class="bi bi-images"></i> {{ c.images.length }}
@@ -79,31 +79,25 @@
             {{ getStatusLabel(c.status) }}
           </span>
         </div>
-        <p class="card-id">كود: #{{ c.id }}</p>
-
-        <!-- Periods Display -->
-        <!-- <div class="card-periods">
-          <i class="bi bi-clock-fill period-icon"></i>
-          <span class="period-label">{{ getPeriodsLabel(c) }}</span>
-        </div> -->
+        <p class="card-id">{{ 'features.chalet.code' | translate }} #{{ c.id }}</p>
 
         <!-- Period Pills -->
         <div class="period-pills period-label">
-          <span class="period-pill morning" *ngIf="c.hasMorning">🌅 صباحي</span>
-          <span class="period-pill evening" *ngIf="c.hasEvening">🌇 مسائي</span>
-          <span class="period-pill full" *ngIf="c.hasFullDay">🌞 كامل</span>
+          <span class="period-pill morning" *ngIf="c.hasMorning">{{ 'misc.overviewPeriodMorning' | translate }}</span>
+          <span class="period-pill evening" *ngIf="c.hasEvening">{{ 'misc.overviewPeriodEvening' | translate }}</span>
+          <span class="period-pill full" *ngIf="c.hasFullDay">{{ 'misc.overviewPeriodFull' | translate }}</span>
           <span class="period-pill all" *ngIf="!c.hasMorning && !c.hasEvening && !c.hasFullDay">
-            كل الفترات
+            {{ 'features.chalet.allPeriods' | translate }}
           </span>
         </div>
 
         <!-- Actions -->
         <div class="card-actions">
           <button class="btn-edit" (click)="openEditModal(c)">
-            <i class="bi bi-pencil-square"></i> تعديل
+            <i class="bi bi-pencil-square"></i> {{ 'features.chalet.edit' | translate }}
           </button>
           <button class="btn-delete" (click)="confirmDelete(c)">
-            <i class="bi bi-trash3"></i> حذف
+            <i class="bi bi-trash3"></i> {{ 'features.chalet.delete' | translate }}
           </button>
         </div>
       </div>
@@ -113,9 +107,9 @@
   <!-- Empty State -->
   <div class="empty-state" *ngIf="!loading && chalets.length === 0">
     <i class="bi bi-house-slash"></i>
-    <p>لا توجد شاليهات مضافة حتى الآن</p>
+    <p>{{ 'features.chalet.empty' | translate }}</p>
     <button class="btn-add" (click)="openAddModal()">
-      <i class="bi bi-plus-lg"></i> أضف أول شاليه
+      <i class="bi bi-plus-lg"></i> {{ 'features.chalet.addFirst' | translate }}
     </button>
   </div>
 
@@ -123,7 +117,7 @@
 
 <!-- ══════════════════════ ADD / EDIT MODAL ══════════════════════ -->
 <div class="modal-overlay" *ngIf="showModal" (click)="closeModal()">
-  <div class="modal-box" (click)="$event.stopPropagation()" dir="rtl">
+  <div class="modal-box" (click)="$event.stopPropagation()">
 
     <div class="modal-header">
       <div class="modal-title-group">
@@ -131,7 +125,7 @@
           <i class="bi" [class.bi-plus-circle-fill]="!isEditMode" [class.bi-pencil-fill]="isEditMode"></i>
         </div>
         <div>
-          <h2>{{ isEditMode ? 'تعديل الشاليه' : 'إضافة شاليه جديد' }}</h2>
+          <h2>{{ isEditMode ? ('features.chalet.modalEdit' | translate) : ('features.chalet.modalAdd' | translate) }}</h2>
           <p class="modal-sub" *ngIf="isEditMode">{{ form.name }}</p>
         </div>
       </div>
@@ -147,22 +141,22 @@
 
       <!-- Name -->
       <div class="form-group">
-        <label><i class="bi bi-card-text"></i> اسم الشاليه *</label>
-        <input type="text" [(ngModel)]="form.name" placeholder="مثال: كوخ رويال 1" class="form-input" />
+        <label><i class="bi bi-card-text"></i> {{ 'features.chalet.nameLabel' | translate }}</label>
+        <input type="text" [(ngModel)]="form.name" [placeholder]="'misc.exampleChaletName' | translate" class="form-input" />
       </div>
 
       <!-- Type (add only) -->
       <div class="form-group" *ngIf="!isEditMode">
-        <label><i class="bi bi-tag"></i> النوع</label>
+        <label><i class="bi bi-tag"></i> {{ 'features.chalet.typeLabel' | translate }}</label>
         <div class="type-selector">
           <div class="type-option" [class.selected]="form.type === 0" (click)="form.type = 0">
             <span class="type-emoji">🏠</span>
-            <span>عادي</span>
+            <span>{{ 'misc.normalPlain' | translate }}</span>
             <i class="bi bi-check-circle-fill type-check" *ngIf="form.type === 0"></i>
           </div>
           <div class="type-option" [class.selected]="form.type === 1" (click)="form.type = 1">
             <span class="type-emoji">👑</span>
-            <span>رويال</span>
+            <span>{{ 'misc.royalPlain' | translate }}</span>
             <i class="bi bi-check-circle-fill type-check" *ngIf="form.type === 1"></i>
           </div>
         </div>
@@ -170,106 +164,94 @@
 
       <!-- Status -->
       <div class="form-group">
-        <label><i class="bi bi-toggle-on"></i> الحالة</label>
+        <label><i class="bi bi-toggle-on"></i> {{ 'features.chalet.statusLabel' | translate }}</label>
         <div class="status-selector">
           <div class="status-option available-opt" [class.selected]="form.status === 0" (click)="form.status = 0">
-            <i class="bi bi-check-circle"></i> متاح
+            <i class="bi bi-check-circle"></i> {{ 'chaletStatus.Available' | translate }}
           </div>
           <div class="status-option booked-opt" [class.selected]="form.status === 1" (click)="form.status = 1">
-            <i class="bi bi-calendar-check"></i> محجوز
+            <i class="bi bi-calendar-check"></i> {{ 'chaletStatus.Booked' | translate }}
           </div>
           <div class="status-option maintenance-opt" [class.selected]="form.status === 2" (click)="form.status = 2">
-            <i class="bi bi-tools"></i> صيانة
+            <i class="bi bi-tools"></i> {{ 'chaletStatus.Maintenance' | translate }}
           </div>
         </div>
       </div>
 
-      <!-- ════ PERIODS — Checkboxes ════ -->
       <div class="form-group">
-        <label><i class="bi bi-clock-fill"></i> الفترات المتاحة للحجز *</label>
+        <label><i class="bi bi-clock-fill"></i> {{ 'features.chalet.periodsLabel' | translate }}</label>
 
         <div class="periods-selector">
-
-          <!-- صباحي -->
           <label class="period-check-item" [class.checked]="form.hasMorning">
             <input type="checkbox" [(ngModel)]="form.hasMorning" />
             <span class="period-emoji">🌅</span>
-            <span>صباحي</span>
+            <span>{{ 'period.Morning' | translate }}</span>
             <i class="bi bi-check-lg period-tick" *ngIf="form.hasMorning"></i>
           </label>
-
-          <!-- مسائي -->
           <label class="period-check-item" [class.checked]="form.hasEvening">
             <input type="checkbox" [(ngModel)]="form.hasEvening" />
             <span class="period-emoji">🌇</span>
-            <span>مسائي</span>
+            <span>{{ 'period.Evening' | translate }}</span>
             <i class="bi bi-check-lg period-tick" *ngIf="form.hasEvening"></i>
           </label>
-
-          <!-- يوم كامل -->
           <label class="period-check-item" [class.checked]="form.hasFullDay">
             <input type="checkbox" [(ngModel)]="form.hasFullDay" />
             <span class="period-emoji">🌞</span>
-            <span>يوم كامل</span>
+            <span>{{ 'period.2' | translate }}</span>
             <i class="bi bi-check-lg period-tick" *ngIf="form.hasFullDay"></i>
           </label>
-
         </div>
 
-        <!-- Summary -->
         <div class="periods-summary" *ngIf="atLeastOnePeriod">
           <i class="bi bi-info-circle"></i>
-          سيُحجز في:
+          {{ 'misc.willBook' | translate }}
           <strong>
-            <span *ngIf="form.hasMorning">صباحي </span>
-            <span *ngIf="form.hasEvening">مسائي </span>
-            <span *ngIf="form.hasFullDay">يوم كامل</span>
+            <span *ngIf="form.hasMorning">{{ 'period.Morning' | translate }} </span>
+            <span *ngIf="form.hasEvening">{{ 'period.Evening' | translate }} </span>
+            <span *ngIf="form.hasFullDay">{{ 'period.2' | translate }}</span>
           </strong>
         </div>
         <div class="periods-warning" *ngIf="!atLeastOnePeriod">
           <i class="bi bi-exclamation-triangle-fill"></i>
-          يجب اختيار فترة واحدة على الأقل
+          {{ 'misc.selectOnePeriod' | translate }}
         </div>
       </div>
 
-      <!-- Partner (add only) -->
       <div class="form-group" *ngIf="!isEditMode">
-        <label><i class="bi bi-person-badge"></i> معرف الشريك (اختياري)</label>
+        <label><i class="bi bi-person-badge"></i> {{ 'features.chalet.partnerOptional' | translate }}</label>
         <input type="number" [(ngModel)]="form.partnerId" placeholder="0" class="form-input" />
       </div>
 
-      <!-- Current Images (edit) -->
       <div class="form-group" *ngIf="isEditMode && currentImageItems.length > 0">
-        <label><i class="bi bi-images"></i> الصور الحالية</label>
+        <label><i class="bi bi-images"></i> {{ 'features.chalet.currentPhotos' | translate }}</label>
         <div class="img-preview-grid">
           <div class="preview-item" *ngFor="let img of currentImageItems; let i = index">
-            <img [src]="img.url" alt="صورة" />
-            <button class="remove-img" (click)="removeCurrentImage(i)" title="حذف">
+            <img [src]="img.url" [alt]="'features.chalet.photoAlt' | translate" />
+            <button class="remove-img" (click)="removeCurrentImage(i)" [attr.title]="'misc.delete' | translate">
               <i class="bi bi-x-circle-fill"></i>
             </button>
           </div>
         </div>
         <small class="hint-text" *ngIf="removedImageIds.length > 0">
           <i class="bi bi-trash"></i>
-          سيتم حذف {{ removedImageIds.length }} صورة عند الحفظ
+          {{ 'features.chalet.imagesRemovedHint' | translate: { n: removedImageIds.length } }}
         </small>
       </div>
 
-      <!-- Upload Images -->
       <div class="form-group">
         <label>
           <i class="bi bi-cloud-arrow-up"></i>
-          {{ isEditMode ? 'إضافة صور جديدة' : 'رفع الصور' }}
+          {{ isEditMode ? ('features.chalet.uploadNew' | translate) : ('features.chalet.uploadPhotos' | translate) }}
         </label>
         <label class="file-upload-label">
           <i class="bi bi-upload"></i>
-          اختر صور
+          {{ 'features.chalet.choosePhotos' | translate }}
           <input type="file" multiple accept="image/*" (change)="onFilesSelected($event)" hidden />
         </label>
         <div class="img-preview-grid" *ngIf="previewUrls.length > 0">
           <div class="preview-item" *ngFor="let url of previewUrls">
-            <img [src]="url" alt="معاينة" />
-            <span class="new-badge">جديد</span>
+            <img [src]="url" [alt]="'features.chalet.previewAlt' | translate" />
+            <span class="new-badge">{{ 'features.chalet.newBadge' | translate }}</span>
           </div>
         </div>
       </div>
@@ -277,27 +259,26 @@
     </div>
 
     <div class="modal-footer">
-      <button class="btn-cancel" (click)="closeModal()" [disabled]="submitting">إلغاء</button>
+      <button class="btn-cancel" (click)="closeModal()" [disabled]="submitting">{{ 'features.chalet.cancel' | translate }}</button>
       <button class="btn-submit" (click)="submitForm()" [disabled]="submitting || !atLeastOnePeriod">
         <i class="bi bi-arrow-repeat spin" *ngIf="submitting"></i>
         <i class="bi bi-check-lg" *ngIf="!submitting"></i>
-        {{ submitting ? 'جاري الحفظ...' : (isEditMode ? 'حفظ التعديلات' : 'إضافة الشاليه') }}
+        {{ submitting ? ('features.chalet.saving' | translate) : (isEditMode ? ('features.chalet.saveEdits' | translate) : ('features.chalet.submitAdd' | translate)) }}
       </button>
     </div>
 
   </div>
 </div>
 
-<!-- ══════════════════════ DELETE MODAL ══════════════════════ -->
 <div class="modal-overlay" *ngIf="showDeleteModal" (click)="cancelDelete()">
-  <div class="modal-box modal-sm" (click)="$event.stopPropagation()" dir="rtl">
+  <div class="modal-box modal-sm" (click)="$event.stopPropagation()">
 
     <div class="modal-header danger">
       <div class="modal-title-group">
         <div class="modal-icon danger-icon">
           <i class="bi bi-trash3-fill"></i>
         </div>
-        <h2>تأكيد الحذف</h2>
+        <h2>{{ 'features.chalet.confirmDeleteTitle' | translate }}</h2>
       </div>
       <button class="modal-close" (click)="cancelDelete()"><i class="bi bi-x-lg"></i></button>
     </div>
@@ -306,17 +287,14 @@
       <div class="delete-icon-wrap">
         <i class="bi bi-exclamation-triangle-fill"></i>
       </div>
-      <p class="delete-msg">
-        هل أنت متأكد من حذف<br>
-        <strong>« {{ chaletToDelete?.name }} »</strong> ؟
-      </p>
-      <p class="delete-note">لا يمكن التراجع عن هذا الإجراء</p>
+      <p class="delete-msg">{{ 'features.chalet.confirmDeleteNamed' | translate: { name: chaletToDelete?.name || '' } }}</p>
+      <p class="delete-note">{{ 'features.chalet.cannotUndo' | translate }}</p>
     </div>
 
     <div class="modal-footer">
-      <button class="btn-cancel" (click)="cancelDelete()">تراجع</button>
+      <button class="btn-cancel" (click)="cancelDelete()">{{ 'features.chalet.undo' | translate }}</button>
       <button class="btn-danger" (click)="doDelete()">
-        <i class="bi bi-trash3"></i> حذف نهائي
+        <i class="bi bi-trash3"></i> {{ 'features.chalet.deleteFinal' | translate }}
       </button>
     </div>
 

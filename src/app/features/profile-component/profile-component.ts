@@ -11,6 +11,8 @@ import { CreateUserComponent } from '../create-user-component/create-user-compon
 import { Chalet } from '../chalet/chalet';
 import { ExtrasComponent } from '../extras-component/extras-component';
 import { Maintenance } from '../maintenance/maintenance';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
+import { LanguageService } from '../../service/language.service';
 
 
 type Tab = 'profile' | 'pricing' | 'holidays' | 'partners' | 'customers'|'users' |'Maintenance'|'addons'|'chalet';
@@ -18,8 +20,8 @@ type Tab = 'profile' | 'pricing' | 'holidays' | 'partners' | 'customers'|'users'
 @Component({
   selector: 'app-profile-component',
   standalone: true,
-  imports: [CommonModule, FormsModule, HolidayCopmonent, PricingComponent,
-    PartnersComponent, CustomersComponent,CreateUserComponent,Chalet,ExtrasComponent,Maintenance],
+  imports: [CommonModule, FormsModule, TranslatePipe, HolidayCopmonent, PricingComponent,
+    PartnersComponent, CustomersComponent, CreateUserComponent, Chalet, ExtrasComponent, Maintenance],
   templateUrl: './profile-component.html',
   styleUrl: './profile-component.css',
 })
@@ -50,9 +52,9 @@ export class ProfileComponent implements OnInit {
 
   get roleLabel(): string {
     const r = this.user?.role;
-    if (r === 'Manager')  return 'مدير';
-    if (r === 'Partner')  return 'شريك';
-    return 'موظف';
+    if (r === 'Manager') return this.translate.instant('features.profile.roleManager');
+    if (r === 'Partner') return this.translate.instant('features.profile.rolePartner');
+    return this.translate.instant('features.profile.roleEmployee');
   }
   get isPartner(): boolean { return this.auth.hasRole('Partner'); }
   get isManager(): boolean { return this.auth.hasRole('Manager'); }
@@ -78,24 +80,29 @@ export class ProfileComponent implements OnInit {
   }
 
   /** الـ tabs المتاحة حسب الصلاحية */
-  get tabs(): { id: Tab; label: string; icon: string; managerOnly?: boolean, partnerOnly?: boolean }[] {
+  get tabs(): { id: Tab; labelKey: string; icon: string; managerOnly?: boolean; partnerOnly?: boolean }[] {
     const all = [
-      { id: 'profile'   as Tab, label: 'الحساب',   icon: 'bi-person-circle' },
-      { id: 'pricing'   as Tab, label: 'الأسعار',  icon: 'bi-currency-dollar', managerOnly: true },
-      { id: 'holidays'  as Tab, label: 'الإجازات', icon: 'bi-calendar-heart-fill', managerOnly: true },
-      { id: 'partners'  as Tab, label: 'الشركاء',  icon: 'bi-briefcase-fill',  managerOnly: true },
-      { id: 'customers' as Tab, label: 'العملاء',  icon: 'bi-people-fill',     managerOnly: true },
-      { id: 'users' as Tab, label: 'المستخدمين',  icon: 'bi-people',     managerOnly: true },
-      { id: 'chalet' as Tab, label: 'الكوخ',  icon: 'bi-house',   managerOnly: true ,partnerOnly:true },
-      { id: 'addons' as Tab, label: 'الاضافات',  icon: 'bi-plus',     managerOnly: true },
-      { id: 'Maintenance' as Tab, label: 'الصيانة',  icon: 'bi-hammer',     managerOnly: true },
+      { id: 'profile' as Tab, labelKey: 'features.profile.tabAccount', icon: 'bi-person-circle' },
+      { id: 'pricing' as Tab, labelKey: 'features.profile.tabPricing', icon: 'bi-currency-dollar', managerOnly: true },
+      { id: 'holidays' as Tab, labelKey: 'features.profile.tabHolidays', icon: 'bi-calendar-heart-fill', managerOnly: true },
+      { id: 'partners' as Tab, labelKey: 'features.profile.tabPartners', icon: 'bi-briefcase-fill', managerOnly: true },
+      { id: 'customers' as Tab, labelKey: 'features.profile.tabCustomers', icon: 'bi-people-fill', managerOnly: true },
+      { id: 'users' as Tab, labelKey: 'features.profile.tabUsers', icon: 'bi-people', managerOnly: true },
+      { id: 'chalet' as Tab, labelKey: 'features.profile.tabChalet', icon: 'bi-house', managerOnly: true, partnerOnly: true },
+      { id: 'addons' as Tab, labelKey: 'features.profile.tabAddons', icon: 'bi-plus', managerOnly: true },
+      { id: 'Maintenance' as Tab, labelKey: 'features.profile.tabMaintenance', icon: 'bi-hammer', managerOnly: true },
     ];
-    return all.filter(t => !t.managerOnly || this.user?.role === 'Manager'|| t.partnerOnly );
+    return all.filter(t => !t.managerOnly || this.user?.role === 'Manager' || t.partnerOnly);
   }
 
   setTab(tab: Tab): void { this.activeTab = tab; }
 
-  constructor(private auth: AuthService) {}
+  constructor(
+    private auth: AuthService,
+    private translate: TranslateService,
+      readonly language: LanguageService  // ← أضفده
+
+  ) {}
 
   ngOnInit(): void {
     this.user = this.auth.getSession();
@@ -109,17 +116,19 @@ export class ProfileComponent implements OnInit {
     this.auth.forgetPassword({ email: this.user?.email ?? '' }).subscribe({
       next: () => {
         this.isChangingPw   = false;
-        this.pwSuccess      = 'تم إرسال رابط تغيير كلمة المرور إلى بريدك الإلكتروني';
+        this.pwSuccess      = this.translate.instant('features.profile.pwSuccess');
         this.currentPassword = '';
         this.newPassword     = '';
         this.confirmPassword = '';
       },
       error: () => {
         this.isChangingPw = false;
-        this.pwError      = 'حدث خطأ، يرجى المحاولة لاحقاً';
+        this.pwError      = this.translate.instant('features.profile.pwError');
       }
     });
   }
 
   logout(): void { this.auth.logout(); }
+  get langOptions() { return this.language.options; }
+setLang(code: string) { this.language.setLanguage(code); }
 }

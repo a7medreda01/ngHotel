@@ -1,10 +1,9 @@
-<div class="dashboard" dir="rtl" *ngIf="!loading; else loadingTpl">
+﻿<div class="dashboard" *ngIf="!loading; else loadingTpl">
 
-  <!-- ── HEADER ── -->
   <header class="page-header">
     <div class="header-text">
-      <h1>لوحة التحكم</h1>
-      <p>نظرة شاملة على أداء الفندق</p>
+      <h1>{{ 'misc.dashboardTitle' | translate }}</h1>
+      <p>{{ 'misc.dashboardSub' | translate }}</p>
     </div>
     <div class="header-actions">
 <div class="filter-pills-wrap">
@@ -17,10 +16,9 @@
     </button>
   </div>
 
-  <!-- Date picker — يظهر بس لما activeFilter === 'custom' -->
   <div class="date-range-picker" *ngIf="showDatePicker">
     <div class="date-field">
-      <label>من</label>
+      <label>{{ 'misc.from' | translate }}</label>
       <input type="date"
              [(ngModel)]="customDateFrom"
              [max]="customDateTo || ''"
@@ -28,7 +26,7 @@
     </div>
     <span class="date-sep">←</span>
     <div class="date-field">
-      <label>إلى</label>
+      <label>{{ 'misc.to' | translate }}</label>
       <input type="date"
              [(ngModel)]="customDateTo"
              [min]="customDateFrom || ''"
@@ -42,18 +40,17 @@
     <path d="M10 2v3h3M6 9l2 2 2-2M8 7v4" stroke="currentColor"
           stroke-width="1.4" stroke-linecap="round"/>
   </svg>
-  تنزيل تقرير
+  {{ 'misc.downloadReport' | translate }}
 </button>
       <button class="primary-btn" routerLink="/booking/new">
         <svg viewBox="0 0 16 16" fill="none" width="14" height="14">
           <path d="M8 2v12M2 8h12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
         </svg>
-        حجز جديد
+        {{ 'nav.newBooking' | translate }}
       </button>
     </div>
   </header>
 
-  <!-- ── STATS GRID ── -->
   <section class="stats-grid">
     <div class="stat-card" *ngFor="let stat of statsCards; let i = index" [style.--i]="i">
       <div class="stat-top">
@@ -80,14 +77,13 @@
     </div>
   </section>
 
-  <!-- ── COMPARISON BANNER ── -->
   <section class="comparison-row">
     <div class="comparison-card" *ngFor="let c of comparisons; let i = index" [style.--i]="i">
       <div class="cmp-period">{{ c.period }}</div>
       <div class="cmp-vals">
         <div>
           <div class="cmp-num">{{ c.current | number:'1.0-0' }} <span class="cmp-unit">{{ c.unit }}</span></div>
-          <div class="cmp-desc">الفترة الحالية</div>
+          <div class="cmp-desc">{{ 'dashboard.ui.cmpCurrent' | translate }}</div>
         </div>
         <div class="cmp-arrow" [class.better]="c.better">
           <svg viewBox="0 0 24 24" fill="none" width="20" height="20">
@@ -98,20 +94,18 @@
         </div>
         <div>
           <div class="cmp-num cmp-prev">{{ c.previous | number:'1.0-0' }} <span class="cmp-unit">{{ c.unit }}</span></div>
-          <div class="cmp-desc">الفترة السابقة</div>
+          <div class="cmp-desc">{{ 'dashboard.ui.cmpPrevious' | translate }}</div>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- ── MAIN CONTENT GRID ── -->
   <div class="content-grid">
 
-    <!-- Bookings by Status Breakdown -->
     <section class="card status-breakdown">
       <div class="card-header">
-        <h2>توزيع الحجوزات</h2>
-        <span class="badge-total">{{ totalBookings }} حجز</span>
+        <h2>{{ 'misc.distribution' | translate }}</h2>
+        <span class="badge-total">{{ 'dashboard.ui.bookingsBadge' | translate: { n: totalBookings } }}</span>
       </div>
       <div class="status-list">
         <div class="status-row" *ngFor="let s of statusBreakdown">
@@ -126,10 +120,9 @@
       </div>
     </section>
 
-    <!-- Revenue Breakdown — Manager only -->
     <section class="card revenue-card" *ngIf="isManager || isPartner">
       <div class="card-header">
-        <h2>تفاصيل الإيرادات</h2>
+        <h2>{{ 'misc.revenueDetails' | translate }}</h2>
       </div>
       <div class="revenue-rows">
         <div class="rev-row" *ngFor="let r of revenueBreakdown">
@@ -138,22 +131,21 @@
           </div>
           <div class="rev-info">
             <span class="rev-label">{{ r.label }}</span>
-            <span class="rev-pct">{{ r.pct | number:'1.0-0' }}% من الإجمالي</span>
+            <span class="rev-pct">{{ 'misc.percentOfTotal' | translate: { pct: (r.pct | number:'1.0-0') } }}</span>
           </div>
-          <span class="rev-amount">{{ r.amount | number:'1.0-0' }} <small>د.أ</small></span>
+          <span class="rev-amount">{{ r.amount | number:'1.0-0' }} <small>{{ 'misc.currency' | translate }}</small></span>
         </div>
       </div>
       <div class="rev-total">
-        <span>الإجمالي</span>
-        <strong>{{ totalRevenue | number:'1.0-0' }} د.أ</strong>
+        <span>{{ 'misc.total' | translate }}</span>
+        <strong>{{ totalRevenue | number:'1.0-0' }} {{ 'misc.currency' | translate }}</strong>
       </div>
     </section>
 
-    <!-- Chalets Status -->
     <section class="card chalets-card">
       <div class="card-header">
-        <h2>حالة الشاليهات</h2>
-        <span class="badge-total">{{ totalChalets }} شاليه</span>
+        <h2>{{ 'misc.chaletStatusTitle' | translate }}</h2>
+        <span class="badge-total">{{ 'dashboard.ui.chaletsBadge' | translate: { n: totalChalets } }}</span>
       </div>
       <div class="chalets-grid">
         <div class="chalet-item" *ngFor="let ch of chaletStatusList">
@@ -166,19 +158,18 @@
 
   </div>
 
-  <!-- ── RECENT BOOKINGS TABLE ── -->
   <section class="card bookings-table-card">
     <div class="card-header">
-      <h2>أحدث الحجوزات</h2>
+      <h2>{{ 'misc.recentBookings' | translate }}</h2>
       <div class="table-actions">
         <div class="search-wrap">
           <svg viewBox="0 0 18 18" fill="none" width="15" height="15">
             <circle cx="7.5" cy="7.5" r="5" stroke="currentColor" stroke-width="1.4"/>
             <path d="M11.5 11.5L16 16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
           </svg>
-          <input type="text" placeholder="بحث..." [(ngModel)]="searchTerm" (input)="filterBookings()" />
+          <input type="text" [placeholder]="'misc.searchPlaceholderShort' | translate" [(ngModel)]="searchTerm" (input)="filterBookings()" />
         </div>
-        <button class="link-btn" routerLink="/booking">عرض الكل ←</button>
+        <button class="link-btn" routerLink="/booking">{{ 'misc.viewAll' | translate }}</button>
       </div>
     </div>
     <div class="table-wrapper">
@@ -186,13 +177,12 @@
         <thead>
           <tr>
             <th>#</th>
-            <th>اسم النزيل</th>
-            <th>الشاليه</th>
-            <th>تاريخ الدخول</th>
-            <!-- عمود الإجمالي بس للمدير -->
-            <th *ngIf="isManager">الإجمالي</th>
-            <th>الفترة</th>
-            <th>الحالة</th>
+            <th>{{ 'misc.guestName' | translate }}</th>
+            <th>{{ 'misc.chalet' | translate }}</th>
+            <th>{{ 'misc.checkInDate' | translate }}</th>
+            <th *ngIf="isManager">{{ 'misc.totalPrice' | translate }}</th>
+            <th>{{ 'misc.period' | translate }}</th>
+            <th>{{ 'misc.status' | translate }}</th>
           </tr>
         </thead>
         <tbody>
@@ -207,10 +197,9 @@
                 </div>
               </div>
             </td>
-            <td>{{ b.chaletName || '—' }}</td>
+            <td>{{ b.chaletName || ('misc.emDash' | translate) }}</td>
             <td>{{ b.date | date:'d MMM yyyy' }}</td>
-            <!-- خلية الإجمالي بس للمدير -->
-            <td class="td-amount" *ngIf="isManager">{{ b.totalPrice | number:'1.0-0' }} د.أ</td>
+            <td class="td-amount" *ngIf="isManager">{{ b.totalPrice | number:'1.0-0' }} {{ 'misc.currency' | translate }}</td>
             <td>{{ getPeriodLabel(b.period) }}</td>
             <td>
               <span class="status-badge" [ngClass]="getStatusClass(b.status)">
@@ -219,23 +208,22 @@
             </td>
           </tr>
           <tr *ngIf="filteredBookings.length === 0">
-            <td [attr.colspan]="isManager ? 7 : 6" class="empty-row">لا توجد نتائج</td>
+            <td [attr.colspan]="isManager ? 7 : 6" class="empty-row">{{ 'misc.noTableResults' | translate }}</td>
           </tr>
         </tbody>
       </table>
     </div>
   </section>
 
-<!-- ── REPORT MODAL ── -->
 <div class="modal-backdrop" *ngIf="showReportModal" (click)="closeReportModal()">
   <div class="modal-box" (click)="$event.stopPropagation()">
     <div class="modal-header">
-      <h3>تنزيل تقرير شهري</h3>
+      <h3>{{ 'misc.reportModalTitle' | translate }}</h3>
       <button class="modal-close" (click)="closeReportModal()">✕</button>
     </div>
     <div class="modal-body">
       <div class="field-group">
-        <label>الشهر</label>
+        <label>{{ 'misc.month' | translate }}</label>
         <select [(ngModel)]="reportMonth">
           <option *ngFor="let m of monthNames; let i = index" [value]="i + 1">
             {{ m }}
@@ -243,7 +231,7 @@
         </select>
       </div>
       <div class="field-group">
-        <label>السنة</label>
+        <label>{{ 'misc.year' | translate }}</label>
         <select [(ngModel)]="reportYear">
           <option *ngFor="let y of availableYears" [value]="y">{{ y }}</option>
         </select>
@@ -255,17 +243,16 @@
           <path d="M8 2v8M5 7l3 3 3-3M3 13h10"
                 stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
         </svg>
-        تنزيل Excel
+        {{ 'misc.exportExcel' | translate }}
       </button>
-      <button class="ghost-btn" (click)="closeReportModal()">إلغاء</button>
+      <button class="ghost-btn" (click)="closeReportModal()">{{ 'misc.cancel' | translate }}</button>
     </div>
   </div>
 </div>
 </div>
 
-<!-- Loading template -->
 <ng-template #loadingTpl>
-  <div class="loading-wrap" dir="rtl">
+  <div class="loading-wrap">
     <div class="skeleton-header"></div>
     <div class="skeleton-grid">
       <div class="skeleton-card" *ngFor="let i of [1,2,3,4]"></div>

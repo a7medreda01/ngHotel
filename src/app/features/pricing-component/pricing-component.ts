@@ -1,13 +1,15 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, DestroyRef, OnInit, inject } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { forkJoin } from 'rxjs';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { Chalet, ChaletService, getAvailablePeriodsArray } from '../../service/chalet-service';
 import { Pricing, CreatePricingDto, PricingService } from '../../service/pricing-service';
 
 @Component({
   selector: 'app-pricing-component',
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, TranslatePipe],
 
   templateUrl: './pricing-component.html',
   styleUrl: './pricing-component.css',
@@ -40,34 +42,33 @@ export class PricingComponent implements OnInit {
     price: 0,
     dayType: 0,
   };
- 
-  // تسميات من الـ enums
-  readonly chaletTypeLabels: Record<string, string> = { Normal: 'عادي', Royal: 'رويال' };
-  readonly periodLabels: Record<string, string>     = { Morning: 'صباحي', Evening: 'مسائي', Full: 'يوم كامل' };
-  readonly dayTypeLabels: Record<string, string>    = { Weekday: 'يوم عادي', Weekend: 'عطلة', Holiday: 'إجازة رسمية' };
- 
+
   readonly chaletTypeOptions = [
-    { value: 0, label: 'عادي (Normal)' },
-    { value: 1, label: 'رويال (Royal)' },
+    { value: 0, labelKey: 'features.pricing.optChaletNormal' },
+    { value: 1, labelKey: 'features.pricing.optChaletRoyal' },
   ];
   readonly periodOptions = [
-    { value: 0, label: '🌅 صباحي' },
-    { value: 1, label: '🌇 مسائي' },
-    { value: 2, label: '🌞 يوم كامل' },
+    { value: 0, labelKey: 'features.pricing.optPeriodMorning' },
+    { value: 1, labelKey: 'features.pricing.optPeriodEvening' },
+    { value: 2, labelKey: 'features.pricing.optPeriodFull' },
   ];
   readonly dayTypeOptions = [
-    { value: 0, label: '📅 يوم عادي' },
-    { value: 1, label: '🏖️ عطلة' },
-    { value: 2, label: '🎉 إجازة رسمية' },
+    { value: 0, labelKey: 'features.pricing.optDayWeekday' },
+    { value: 1, labelKey: 'features.pricing.optDayWeekend' },
+    { value: 2, labelKey: 'features.pricing.optDayHoliday' },
   ];
- 
+
+  private readonly destroyRef = inject(DestroyRef);
+
   constructor(
     private pricingService: PricingService,
     private chaletService: ChaletService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private translate: TranslateService,
   ) {}
- 
+
   ngOnInit(): void {
+    this.translate.onLangChange.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => this.cdr.markForCheck());
     this.load();
   }
  
@@ -84,7 +85,7 @@ export class PricingComponent implements OnInit {
         this.cdr.detectChanges();
       },
       error: () => {
-        this.notify('فشل تحميل البيانات', 'error');
+        this.notify(this.translate.instant('features.pricing.loadFail'), 'error');
         this.loading = false;
         this.cdr.detectChanges();
       }
@@ -112,7 +113,7 @@ export class PricingComponent implements OnInit {
   closeModal(): void { this.showModal = false; }
  
   submit(): void {
-    if (this.form.price <= 0) { this.notify('يرجى إدخال سعر صحيح', 'error'); return; }
+    if (this.form.price <= 0) { this.notify(this.translate.instant('features.pricing.priceInvalid'), 'error'); return; }
     this.submitting = true;
     const dto: CreatePricingDto = {
       chaletType: this.form.chaletType,
@@ -128,12 +129,12 @@ export class PricingComponent implements OnInit {
       next: () => {
         this.submitting = false;
         this.showModal  = false;
-        this.notify(this.isEdit ? 'تم التعديل بنجاح' : 'تمت الإضافة بنجاح', 'success');
+        this.notify(this.translate.instant('features.pricing.saveOk'), 'success');
         this.load();
       },
       error: () => {
         this.submitting = false;
-        this.notify('حدث خطأ، يرجى المحاولة مرة أخرى', 'error');
+        this.notify(this.translate.instant('features.pricing.saveFail'), 'error');
       }
     });
   }
@@ -154,12 +155,12 @@ export class PricingComponent implements OnInit {
       next: () => {
         this.showDeleteModal = false;
         this.deleteTarget    = null;
-        this.notify('تم الحذف بنجاح', 'success');
+        this.notify(this.translate.instant('features.pricing.deleteOk'), 'success');
         this.load();
       },
       error: () => {
         this.showDeleteModal = false;
-        this.notify('فشل الحذف', 'error');
+        this.notify(this.translate.instant('features.pricing.deleteFail'), 'error');
       }
     });
   }
@@ -177,16 +178,38 @@ export class PricingComponent implements OnInit {
       error: () => {
         this.calcResult  = null;
         this.calcLoading = false;
-        this.notify('لم يتم العثور على سعر لهذه المعطيات', 'error');
+        this.notify(this.translate.instant('features.pricing.calcNotFound'), 'error');
         this.cdr.detectChanges();
       }
     });
   }
  
   // ── مساعدات عرض ──
-  getChaletTypeLabel(v: string): string  { return this.chaletTypeLabels[v] ?? v; }
-  getPeriodLabel(v: string): string      { return this.periodLabels[v]     ?? v; }
-  getDayTypeLabel(v: string): string     { return this.dayTypeLabels[v]    ?? v; }
+  getChaletTypeLabel(v: string): string {
+    return v === 'Royal'
+      ? this.translate.instant('misc.royalPlain')
+      : this.translate.instant('misc.normalPlain');
+  }
+
+  getPeriodLabel(v: string): string {
+    const key =
+      v === 'Morning' ? 'period.Morning' : v === 'Evening' ? 'period.Evening' : v === 'Full' ? 'period.2' : '';
+    return key ? this.translate.instant(key) : v;
+  }
+
+  getDayTypeLabel(v: string): string {
+    const map: Record<string, string> = {
+      Weekday: 'features.pricing.optDayWeekday',
+      Weekend: 'features.pricing.optDayWeekend',
+      Holiday: 'features.pricing.optDayHoliday',
+    };
+    const k = map[v];
+    return k ? this.translate.instant(k) : v;
+  }
+
+  getChaletStatusLabel(status: string): string {
+    return this.translate.instant(`chaletStatus.${status}`);
+  }
  
   getDayTypeClass(v: string): string {
     return v === 'Holiday' ? 'day-holiday' : v === 'Weekend' ? 'day-weekend' : 'day-weekday';
@@ -202,8 +225,9 @@ export class PricingComponent implements OnInit {
   }
  
   getPeriodsText(ch: Chalet): string {
-    const map: Record<number, string> = { 0: 'صباحي', 1: 'مسائي', 2: 'كامل' };
-    return getAvailablePeriodsArray(ch).map(p => map[p]).join(' | ');
+    return getAvailablePeriodsArray(ch)
+      .map((p) => this.translate.instant(`period.${p}`))
+      .join(' | ');
   }
  
   notify(msg: string, type: 'success' | 'error'): void {

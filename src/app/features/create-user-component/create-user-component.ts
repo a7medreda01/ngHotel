@@ -3,10 +3,11 @@ import { AuthService, CreateUserRequest, UserItem } from '../../service/Auth-ser
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-create-user-component',
-  imports: [CommonModule, FormsModule, RouterModule],
+  imports: [CommonModule, FormsModule, RouterModule, TranslatePipe],
   templateUrl: './create-user-component.html',
   styleUrl: './create-user-component.css',
 })
@@ -32,8 +33,12 @@ export class CreateUserComponent implements OnInit {
   deletingId: number | null = null;
   showDeleteConfirm = false;
   userToDelete: UserItem | null = null;
+  togglingId: number | null = null;
 
-  constructor(private auth: AuthService) {}
+  constructor(
+    private auth: AuthService,
+    private translate: TranslateService,
+  ) {}
 
   ngOnInit(): void {
     this.loadUsers();
@@ -49,7 +54,7 @@ export class CreateUserComponent implements OnInit {
         this.isLoadingUsers = false;
       },
       error: () => {
-        this.usersError = 'تعذّر تحميل قائمة المستخدمين';
+        this.usersError = this.translate.instant('features.createUser.usersLoadFail');
         this.isLoadingUsers = false;
       }
     });
@@ -78,7 +83,7 @@ export class CreateUserComponent implements OnInit {
       error: () => {
         this.deletingId = null;
         this.closeDeleteConfirm();
-        this.usersError = 'حدث خطأ أثناء الحذف، حاول مرة أخرى';
+        this.usersError = this.translate.instant('features.createUser.deleteFail');
       }
     });
   }
@@ -95,7 +100,7 @@ export class CreateUserComponent implements OnInit {
     this.auth.createUser(this.form).subscribe({
       next: () => {
         this.isLoading = false;
-        this.successMessage = `تم إنشاء حساب "${this.form.fullName}" بنجاح!`;
+        this.successMessage = this.translate.instant('features.createUser.createOk', { name: this.form.fullName });
         this.resetForm();
         // تحديث لحظي — إعادة تحميل القائمة
         this.loadUsers();
@@ -103,9 +108,9 @@ export class CreateUserComponent implements OnInit {
       error: (err) => {
         this.isLoading = false;
         if (err.status === 409) {
-          this.errorMessage = 'البريد الإلكتروني مستخدم بالفعل';
+          this.errorMessage = this.translate.instant('features.createUser.emailTaken');
         } else {
-          this.errorMessage = 'حدث خطأ أثناء إنشاء الحساب';
+          this.errorMessage = this.translate.instant('features.createUser.createFail');
         }
       }
     });
@@ -123,12 +128,13 @@ export class CreateUserComponent implements OnInit {
 
   // ─── Helpers ──────────────────────────────────────────
   getRoleLabel(role: string): string {
-    const map: Record<string, string> = {
-      Manager: 'مدير',
-      Employee: 'موظف',
-      Partner: 'شريك'
+    const keyMap: Record<string, string> = {
+      Manager: 'features.createUser.roleManager',
+      Employee: 'features.createUser.roleEmployee',
+      Partner: 'features.createUser.rolePartner',
     };
-    return map[role] ?? role;
+    const k = keyMap[role];
+    return k ? this.translate.instant(k) : role;
   }
 
   getRoleClass(role: string): string {
@@ -148,21 +154,18 @@ export class CreateUserComponent implements OnInit {
     };
     return map[role] ?? 'bi-person-fill';
   }
-  // في الـ properties
-togglingId: number | null = null;
 
-// ميثود جديدة
-toggleActive(user: UserItem): void {
-  this.togglingId = user.id;
-  this.auth.toggleActive(user.id).subscribe({
-    next: (res) => {
-      user.isActive = res.isActive; // تحديث لحظي بدون reload
-      this.togglingId = null;
-    },
-    error: (err) => {
-      this.togglingId = null;
-      this.usersError = err.error?.message || 'حدث خطأ أثناء تغيير حالة الحساب';
-    }
-  });
-}
+  toggleActive(user: UserItem): void {
+    this.togglingId = user.id;
+    this.auth.toggleActive(user.id).subscribe({
+      next: (res) => {
+        user.isActive = res.isActive;
+        this.togglingId = null;
+      },
+      error: (err) => {
+        this.togglingId = null;
+        this.usersError = err.error?.message || this.translate.instant('features.createUser.toggleFail');
+      }
+    });
+  }
 }

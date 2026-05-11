@@ -1,5 +1,5 @@
 <!-- login.component.html -->
-<div class="auth-page d-flex flex-column" dir="rtl">
+<div class="auth-page d-flex flex-column">
   <div class="auth-bg">
     <div class="bg-shape shape-1"></div>
     <div class="bg-shape shape-2"></div>
@@ -7,26 +7,22 @@
   </div>
 
   <div class="auth-card">
-    <!-- Logo / Brand -->
     <div class="auth-brand">
       <div class="brand-icon">
-        <!-- <i class="bi bi-building-fill"></i> -->
-         <img src="favicon.ico" alt="" class="img-fluid">
+        <img src="favicon.ico" alt="" class="img-fluid">
       </div>
-      <h1>مرحباً بك</h1>
-      <p>نظام إدارة اكواخ الغزال — تسجيل الدخول</p>
+      <h1>{{ 'auth.welcome' | translate }}</h1>
+      <p>{{ 'auth.loginSubtitle' | translate }}</p>
     </div>
 
-    <!-- Error -->
     <div class="alert-error" *ngIf="errorMessage">
       <i class="bi bi-exclamation-circle-fill"></i>
       {{ errorMessage }}
     </div>
 
-    <!-- Form -->
     <div class="auth-form">
       <div class="form-group">
-        <label>البريد الإلكتروني</label>
+        <label>{{ 'auth.email' | translate }}</label>
         <div class="input-wrapper">
           <i class="bi bi-envelope-fill input-icon"></i>
           <input
@@ -41,8 +37,8 @@
 
       <div class="form-group">
         <label>
-          كلمة المرور
-          <a routerLink="/forget-password" class="forgot-link">نسيت كلمة المرور؟</a>
+          {{ 'auth.password' | translate }}
+          <a routerLink="/forget-password" class="forgot-link">{{ 'auth.forgotPassword' | translate }}</a>
         </label>
         <div class="input-wrapper">
           <i class="bi bi-lock-fill input-icon"></i>
@@ -66,19 +62,18 @@
       >
         <span class="btn-spinner" *ngIf="isLoading"></span>
         <i class="bi bi-box-arrow-in-right" *ngIf="!isLoading"></i>
-        {{ isLoading ? 'جاري تسجيل الدخول...' : 'تسجيل الدخول' }}
+        {{ isLoading ? ('auth.loggingIn' | translate) : ('auth.login' | translate) }}
       </button>
     </div>
   </div>
-  <!-- Footer -->
-<div class="auth-footer">
-  تم التصميم بواسطة
-  <a
-    href="https://wa.me/201080225502"
-    target="_blank"
-    rel="noopener"
-  >
-    احمد رضا
-  </a>
-</div>
+  <div class="auth-footer">
+    {{ 'auth.footerDesigned' | translate }}
+    <a
+      href="https://wa.me/201080225502"
+      target="_blank"
+      rel="noopener"
+    >
+      {{ 'auth.designerName' | translate }}
+    </a>
+  </div>
 </div>

@@ -6,6 +6,7 @@ import { Subject, takeUntil } from 'rxjs';
 import { Bookings, BookingService, DashboardData } from '../../service/booking-service';
 import { AuthService } from '../../service/Auth-service';
 import * as XLSX from 'xlsx';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 // ── Types ──────────────────────────────────────
 type FilterPeriod = '7' | '30' | '90' | '365' | 'month' | 'custom';
@@ -40,7 +41,7 @@ interface Comparison {
 
 @Component({
   selector: 'app-dashboard',
-  imports: [CommonModule, RouterModule, FormsModule, DecimalPipe, DatePipe, SlicePipe],
+  imports: [CommonModule, RouterModule, FormsModule, DecimalPipe, DatePipe, SlicePipe, TranslatePipe],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.css',
 })
@@ -57,14 +58,16 @@ export class Dashboard implements OnInit, OnDestroy {
   customDateFrom = '';
   customDateTo = '';
   showDatePicker = false;
-  filters = [
-    { label: 'الشهر الحالي', value: 'month'  as FilterPeriod },
-    { label: 'آخر أسبوع',    value: '7'      as FilterPeriod },
-    { label: 'آخر شهر',      value: '30'     as FilterPeriod },
-    { label: 'آخر 90 يوم',   value: '90'     as FilterPeriod },
-    { label: 'آخر سنة',      value: '365'    as FilterPeriod },
-    { label: 'تاريخ محدد',   value: 'custom' as FilterPeriod },
-  ];
+  get filters(): { label: string; value: FilterPeriod }[] {
+    return [
+      { label: this.translate.instant('misc.filterCurrentMonth'), value: 'month' },
+      { label: this.translate.instant('misc.filterLastWeek'), value: '7' },
+      { label: this.translate.instant('misc.filterLastMonth'), value: '30' },
+      { label: this.translate.instant('misc.filterLast90'), value: '90' },
+      { label: this.translate.instant('misc.filterLastYear'), value: '365' },
+      { label: this.translate.instant('misc.filterCustomDate'), value: 'custom' },
+    ];
+  }
 
   statsCards: StatCard[] = [];
   statusBreakdown: StatusRow[] = [];
@@ -78,6 +81,7 @@ export class Dashboard implements OnInit, OnDestroy {
 
   // للـ Excel — يُحفظ عند أول استخدام
   private cachedExportBookings: Bookings[] = [];
+  private lastDashboardData: DashboardData | null = null;
 
   // ── Role helpers ─────────────────────────────
   get isManager(): boolean { return this.authService.isManager(); }
@@ -89,10 +93,9 @@ export class Dashboard implements OnInit, OnDestroy {
   reportMonth = new Date().getMonth() + 1;
   exportLoading = false;
 
-  readonly monthNames = [
-    'يناير','فبراير','مارس','أبريل','مايو','يونيو',
-    'يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر',
-  ];
+  get monthNames(): string[] {
+    return Array.from({ length: 12 }, (_, i) => this.translate.instant(`months.${i + 1}`));
+  }
 
   get availableYears(): number[] {
     const cur = new Date().getFullYear();
@@ -102,14 +105,23 @@ export class Dashboard implements OnInit, OnDestroy {
   constructor(
     private bookingService: BookingService,
     private cdr: ChangeDetectorRef,
-    private authService: AuthService
+    private authService: AuthService,
+    private translate: TranslateService
   ) {}
 
   // ══════════════════════════════════════════════════════════════════════════
   // Lifecycle
   // ══════════════════════════════════════════════════════════════════════════
 
-  ngOnInit(): void { this.loadDashboard(); }
+  ngOnInit(): void {
+    this.loadDashboard();
+    this.translate.onLangChange.pipe(takeUntil(this.destroy$)).subscribe(() => {
+      if (this.lastDashboardData) {
+        this.compute(this.lastDashboardData);
+        this.cdr.detectChanges();
+      }
+    });
+  }
 
   ngOnDestroy(): void {
     this.destroy$.next();
@@ -161,6 +173,7 @@ export class Dashboard implements OnInit, OnDestroy {
   // ══════════════════════════════════════════════════════════════════════════
 
   private compute(data: DashboardData): void {
+    this.lastDashboardData = data;
     const pctDiff = (cur: number, prev: number) =>
       prev === 0 ? 100 : +((cur - prev) / prev * 100).toFixed(1);
 
@@ -171,7 +184,8 @@ export class Dashboard implements OnInit, OnDestroy {
     // ── Stats Cards ───────────────────────────────
     const allCards: StatCard[] = [
       {
-        label: 'إجمالي الإيرادات', value: data.totalRevenue, unit: 'د.أ',
+        label: this.translate.instant('misc.totalRevenue'), value: data.totalRevenue,
+        unit: this.translate.instant('misc.currency'),
         icon: `<svg viewBox="0 0 20 20" fill="none" width="20" height="20">
                  <circle cx="10" cy="10" r="7" stroke="currentColor" stroke-width="1.5"/>
                  <path d="M10 6v8M7.5 8.5C7.5 7.4 8.6 7 10 7s2.5.7 2.5 1.5S11.3 10 10 10s-2.5.6-2.5 1.5S8.7 13 10 13s2.5-.4 2.5-1.5"
@@ -179,42 +193,42 @@ export class Dashboard implements OnInit, OnDestroy {
                </svg>`,
         color: '#e8834a',
         changePercent: Math.abs(pctDiff(data.totalRevenue, data.prevTotalRevenue)),
-        changeText: 'مقارنةً بالفترة السابقة',
+        changeText: this.translate.instant('misc.comparedToPrev'),
         trendUp: data.totalRevenue >= data.prevTotalRevenue,
         fillPct: Math.min(100, data.totalRevenue / Math.max(data.prevTotalRevenue, 1) * 70),
       },
       {
-        label: 'إجمالي الحجوزات', value: data.totalBookings,
+        label: this.translate.instant('misc.totalBookings'), value: data.totalBookings,
         icon: `<svg viewBox="0 0 20 20" fill="none" width="20" height="20">
                  <rect x="3" y="4" width="14" height="13" rx="2" stroke="currentColor" stroke-width="1.5"/>
                  <path d="M7 2v4M13 2v4M3 9h14" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
                </svg>`,
         color: '#3b82f6',
         changePercent: Math.abs(pctDiff(data.totalBookings, data.prevTotalBookings)),
-        changeText: 'مقارنةً بالفترة السابقة',
+        changeText: this.translate.instant('misc.comparedToPrev'),
         trendUp: data.totalBookings >= data.prevTotalBookings,
         fillPct: Math.min(100, data.totalBookings / Math.max(data.prevTotalBookings, 1) * 70),
       },
       {
-        label: 'حجوزات مؤكدة', value: data.confirmedBookings,
+        label: this.translate.instant('misc.confirmedBookings'), value: data.confirmedBookings,
         icon: `<svg viewBox="0 0 20 20" fill="none" width="20" height="20">
                  <circle cx="10" cy="10" r="7" stroke="currentColor" stroke-width="1.5"/>
                  <path d="M7 10l2 2 4-4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
                </svg>`,
         color: '#22c55e',
         changePercent: Math.abs(pctDiff(data.confirmedBookings, data.prevConfirmedBookings ?? 0)),
-        changeText: 'مقارنةً بالفترة السابقة',
+        changeText: this.translate.instant('misc.comparedToPrev'),
         trendUp: data.confirmedBookings >= (data.prevConfirmedBookings ?? 0),
         fillPct: data.totalBookings > 0 ? data.confirmedBookings / data.totalBookings * 100 : 0,
       },
       {
-        label: 'حجوزات منجزة', value: data.doneBookings,
+        label: this.translate.instant('misc.doneBookings'), value: data.doneBookings,
         icon: `<svg viewBox="0 0 20 20" fill="none" width="20" height="20">
                  <path d="M4 10l4 4 8-8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
                </svg>`,
         color: '#8b5cf6',
         changePercent: Math.abs(pctDiff(data.doneBookings, data.prevDoneBookings ?? 0)),
-        changeText: 'مقارنةً بالفترة السابقة',
+        changeText: this.translate.instant('misc.comparedToPrev'),
         trendUp: data.doneBookings >= (data.prevDoneBookings ?? 0),
         fillPct: data.totalBookings > 0 ? data.doneBookings / data.totalBookings * 100 : 0,
       },
@@ -225,17 +239,17 @@ export class Dashboard implements OnInit, OnDestroy {
     // ── Status Breakdown ──────────────────────────
     const total = data.totalBookings || 1;
     this.statusBreakdown = [
-      { label: 'مؤكدة',        count: data.confirmedBookings,  pct: data.confirmedBookings  / total * 100, color: '#22c55e' },
-      { label: 'منجزة',        count: data.doneBookings,       pct: data.doneBookings       / total * 100, color: '#8b5cf6' },
-      { label: 'قيد الانتظار', count: data.pendingBookings,    pct: data.pendingBookings    / total * 100, color: '#f59e0b' },
-      { label: 'ملغية',        count: data.cancelledBookings,  pct: data.cancelledBookings  / total * 100, color: '#ef4444' },
+      { label: this.translate.instant('misc.confirmedF'), count: data.confirmedBookings, pct: data.confirmedBookings / total * 100, color: '#22c55e' },
+      { label: this.translate.instant('misc.doneF'), count: data.doneBookings, pct: data.doneBookings / total * 100, color: '#8b5cf6' },
+      { label: this.translate.instant('misc.pendingF'), count: data.pendingBookings, pct: data.pendingBookings / total * 100, color: '#f59e0b' },
+      { label: this.translate.instant('misc.cancelledF'), count: data.cancelledBookings, pct: data.cancelledBookings / total * 100, color: '#ef4444' },
     ];
 
     // ── Revenue Breakdown ─────────────────────────
     const rev = data.totalRevenue || 1;
     this.revenueBreakdown = [
       {
-        label: 'إيرادات الشاليهات', amount: data.chaletRevenue,
+        label: this.translate.instant('misc.revenueChalets'), amount: data.chaletRevenue,
         pct: data.chaletRevenue / rev * 100,
         icon: `<svg viewBox="0 0 16 16" fill="none" width="16" height="16">
                  <rect x="1" y="5" width="14" height="9" rx="1" stroke="currentColor" stroke-width="1.3"/>
@@ -244,7 +258,7 @@ export class Dashboard implements OnInit, OnDestroy {
         bg: 'rgba(232,131,74,0.12)',
       },
       {
-        label: 'الإضافات', amount: data.extrasRevenue,
+        label: this.translate.instant('misc.revenueExtras'), amount: data.extrasRevenue,
         pct: data.extrasRevenue / rev * 100,
         icon: `<svg viewBox="0 0 16 16" fill="none" width="16" height="16">
                  <path d="M8 2v12M2 8h12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
@@ -252,7 +266,7 @@ export class Dashboard implements OnInit, OnDestroy {
         bg: 'rgba(59,130,246,0.12)',
       },
       {
-        label: 'الودائع المستلمة', amount: data.depositSum,
+        label: this.translate.instant('misc.revenueDeposits'), amount: data.depositSum,
         pct: data.depositSum / rev * 100,
         icon: `<svg viewBox="0 0 16 16" fill="none" width="16" height="16">
                  <circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.3"/>
@@ -265,20 +279,23 @@ export class Dashboard implements OnInit, OnDestroy {
     // ── Comparisons ───────────────────────────────
     const allComparisons: Comparison[] = [
       {
-        period: 'الإيرادات',
-        current: data.totalRevenue, previous: data.prevTotalRevenue, unit: 'د.أ',
+        period: this.translate.instant('misc.revenueWord'),
+        current: data.totalRevenue, previous: data.prevTotalRevenue,
+        unit: this.translate.instant('misc.currency'),
         diffPct: Math.abs(pctDiff(data.totalRevenue, data.prevTotalRevenue)),
         better: data.totalRevenue >= data.prevTotalRevenue,
       },
       {
-        period: 'الحجوزات',
-        current: data.totalBookings, previous: data.prevTotalBookings, unit: 'حجز',
+        period: this.translate.instant('misc.bookingsWordCap'),
+        current: data.totalBookings, previous: data.prevTotalBookings,
+        unit: this.translate.instant('misc.bookingsUnitPlural'),
         diffPct: Math.abs(pctDiff(data.totalBookings, data.prevTotalBookings)),
         better: data.totalBookings >= data.prevTotalBookings,
       },
       {
-        period: 'الإلغاءات',
-        current: data.cancelledBookings, previous: data.prevCancelledBookings, unit: 'إلغاء',
+        period: this.translate.instant('misc.cancellations'),
+        current: data.cancelledBookings, previous: data.prevCancelledBookings,
+        unit: this.translate.instant('misc.cancellationsUnit'),
         diffPct: Math.abs(pctDiff(data.cancelledBookings, data.prevCancelledBookings)),
         better: data.cancelledBookings <= data.prevCancelledBookings,
       },
@@ -322,16 +339,20 @@ export class Dashboard implements OnInit, OnDestroy {
   }
 
   getStatusLabel(status: string): string {
-    const map: Record<string, string> = {
-      Confirmed: 'مؤكدة', Done: 'منجزة',
-      Pending: 'قيد الانتظار', Cancelled: 'ملغية',
-    };
-    return map[status] ?? status;
+    const key =
+      status === 'Confirmed' ? 'status.ConfirmedF'
+      : status === 'Done' ? 'status.DoneF'
+      : status === 'Pending' ? 'status.Pending'
+      : status === 'Cancelled' ? 'status.CancelledF'
+      : `status.${status}`;
+    const t = this.translate.instant(key);
+    return t !== key ? t : status;
   }
 
   getPeriodLabel(period?: number): string {
-    const map: Record<number, string> = { 0: 'صباحي', 1: 'مسائي', 2: 'كامل' };
-    return period !== undefined ? (map[period] ?? '—') : '—';
+    if (period === undefined) return this.translate.instant('misc.emDash');
+    const t = this.translate.instant(`period.${period}`);
+    return t !== `period.${period}` ? t : this.translate.instant('misc.emDash');
   }
 
   private getChaletStatusClass(s: string): string {
@@ -342,8 +363,9 @@ export class Dashboard implements OnInit, OnDestroy {
   }
 
   private getChaletStatusLabel(s: string): string {
-    const m: Record<string, string> = { Available: 'متاح', Booked: 'محجوز', Maintenance: 'صيانة' };
-    return m[s] ?? s;
+    const key = `chaletStatus.${s}`;
+    const t = this.translate.instant(key);
+    return t !== key ? t : s;
   }
 
   // ══════════════════════════════════════════════════════════════════════════

@@ -10,6 +10,7 @@ import {
 } from '../../service/booking-service';
 import { ChaletService, Chalet } from '../../service/chalet-service';
 import { forkJoin } from 'rxjs';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -59,7 +60,7 @@ export interface SlotDetailItem extends SlotSummary {
 @Component({
   selector: 'app-booking-overview',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, TranslatePipe],
   templateUrl: './booking-overview.html',
   styleUrl: './booking-overview.css',
 })
@@ -91,20 +92,25 @@ export class BookingOverviewComponent implements OnInit, OnChanges {
 
   loading = true;
 
-  readonly periodLabels: Record<number, string> = { 0: '🌅 صباحي', 1: '🌇 مسائي', 2: '🌞 يوم كامل' };
-  readonly periodShort:  Record<number, string> = { 0: 'ص', 1: 'م', 2: 'ك' };
-  readonly typeLabels:   Record<number, string> = { 0: '🏠 عادي', 1: '👑 رويال' };
-  readonly monthNames = [
-    'يناير','فبراير','مارس','أبريل','مايو','يونيو',
-    'يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'
-  ];
-  readonly dayNames = ['الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'];
-
   constructor(
     private bookingService: BookingService,
     private chaletService: ChaletService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private translate: TranslateService
   ) {}
+
+  get dayNames(): string[] {
+    return [0, 1, 2, 3, 4, 5, 6].map(i => this.translate.instant(`weekdaysShort.${i}`));
+  }
+
+  getPeriodLabel(period: number): string {
+    const keys: Record<number, string> = {
+      0: 'misc.overviewPeriodMorning',
+      1: 'misc.overviewPeriodEvening',
+      2: 'misc.overviewPeriodFull',
+    };
+    return this.translate.instant(keys[period] ?? keys[0]);
+  }
 
   ngOnInit(): void {
     this.loadData();
@@ -475,15 +481,16 @@ requestNewBooking(chaletType: number, period: number): void {
     if (!dateStr) return '';
     const [y, m, d] = dateStr.split('-').map(Number);
     const date = new Date(y, m-1, d);
-    return `${this.dayNames[date.getDay()]} ${d} ${this.monthNames[m-1]} ${y}`;
+    const wk = this.translate.instant(`weekdays.${date.getDay()}`);
+    const mo = this.translate.instant(`months.${m}`);
+    return `${wk} ${d} ${mo} ${y}`;
   }
 
   getStatusLabel(s: string): string {
-    const map: Record<string,string> = {
-      Pending: 'قيد الانتظار', Confirmed: 'مؤكد',
-      Cancelled: 'ملغي', WaitingList: 'قائمة الانتظار', Done: 'تم الاستلام'
-    };
-    return map[s] ?? s;
+    if (!s) return '';
+    const key = `status.${s}`;
+    const t = this.translate.instant(key);
+    return t !== key ? t : s;
   }
 
   getStatusClass(s: string): string {

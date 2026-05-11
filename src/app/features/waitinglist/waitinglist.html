@@ -1,57 +1,55 @@
-<div class="wl-page" dir="rtl">
+﻿<div class="wl-page">
 
-  <!-- ══════════════ HEADER ══════════════ -->
   <div class="wl-header">
     <div class="header-title">
       <span class="header-icon"><i class="bi bi-hourglass-split"></i></span>
       <div>
-        <h1>قائمة الانتظار</h1>
-        <p class="header-sub">إدارة الحجوزات المعلّقة وتحويلها</p>
+        <h1>{{ 'features.waitinglist.pageTitle' | translate }}</h1>
+        <p class="header-sub">{{ 'features.waitinglist.pageSubtitle' | translate }}</p>
       </div>
     </div>
-    <button class="btn-refresh" (click)="loadData()" [disabled]="isLoadingData" title="تحديث">
+    <button class="btn-refresh" (click)="loadData()" [disabled]="isLoadingData"
+      [attr.title]="'misc.refresh' | translate">
       <i class="bi bi-arrow-clockwise" [class.spinning]="isLoadingData"></i>
-      {{ isLoadingData ? 'جاري التحميل...' : 'تحديث' }}
+      {{ isLoadingData ? ('features.waitinglist.loading' | translate) : ('features.waitinglist.refresh' | translate) }}
     </button>
   </div>
 
-  <!-- ══════════════ STATS CARDS ══════════════ -->
   <div class="stats-grid">
     <div class="stat-card stat-pending">
       <div class="stat-icon"><i class="bi bi-hourglass-split"></i></div>
       <div class="stat-info">
         <span class="stat-number">{{ pendingCount }}</span>
-        <span class="stat-label">قيد الانتظار</span>
+        <span class="stat-label">{{ 'features.waitinglist.statPending' | translate }}</span>
       </div>
     </div>
     <div class="stat-card stat-contacted">
       <div class="stat-icon"><i class="bi bi-telephone-fill"></i></div>
       <div class="stat-info">
         <span class="stat-number">{{ contactedCount }}</span>
-        <span class="stat-label">تم التواصل</span>
+        <span class="stat-label">{{ 'features.waitinglist.statContacted' | translate }}</span>
       </div>
     </div>
     <div class="stat-card stat-booked">
       <div class="stat-icon"><i class="bi bi-check-circle-fill"></i></div>
       <div class="stat-info">
         <span class="stat-number">{{ bookedCount }}</span>
-        <span class="stat-label">محجوز</span>
+        <span class="stat-label">{{ 'features.waitinglist.statBooked' | translate }}</span>
       </div>
     </div>
     <div class="stat-card stat-cancelled">
       <div class="stat-icon"><i class="bi bi-x-circle-fill"></i></div>
       <div class="stat-info">
         <span class="stat-number">{{ cancelledCount }}</span>
-        <span class="stat-label">ملغي</span>
+        <span class="stat-label">{{ 'features.waitinglist.statCancelled' | translate }}</span>
       </div>
     </div>
   </div>
 
-  <!-- ══════════════ SEARCH & FILTER ══════════════ -->
   <div class="toolbar">
     <div class="search-wrap">
       <i class="bi bi-search search-icon"></i>
-      <input class="search-input" type="text" placeholder="بحث بالاسم، الهاتف، أو الشاليه..."
+      <input class="search-input" type="text" [placeholder]="'features.waitinglist.searchPlaceholder' | translate"
         [(ngModel)]="searchQuery" (ngModelChange)="onSearchChange()" />
     </div>
     <div class="filter-wrap">
@@ -61,41 +59,37 @@
     </div>
   </div>
 
-  <!-- ══════════════ LOADING ══════════════ -->
   <div *ngIf="isLoadingData" class="state-box">
     <div class="spinner"></div>
-    <p>جاري التحميل...</p>
+    <p>{{ 'features.waitinglist.loading' | translate }}</p>
   </div>
 
-  <!-- ══════════════ ERROR ══════════════ -->
   <div *ngIf="!isLoadingData && errorMsg" class="state-box error-box">
     <i class="bi bi-exclamation-triangle-fill error-icon"></i>
     <p>{{ errorMsg }}</p>
-    <button class="btn-primary" (click)="loadData()">إعادة المحاولة</button>
+    <button class="btn-primary" (click)="loadData()">{{ 'features.waitinglist.retry' | translate }}</button>
   </div>
 
-  <!-- ══════════════ TABLE CONTAINER ══════════════ -->
   <div *ngIf="!isLoadingData && !errorMsg" class="table-container">
     <div class="table-header-row">
       <span class="table-count">
-        <i class="bi bi-list-ul"></i> {{ filteredItems.length }} سجل
+        <i class="bi bi-list-ul"></i> {{ 'features.waitinglist.recordsCount' | translate: { n: filteredItems.length } }}
       </span>
     </div>
 
-    <!-- Desktop Table -->
     <div class="table-wrapper">
       <table class="wl-table">
         <thead>
           <tr>
             <th>#</th>
-            <th>اسم العميل</th>
-            <th>الهاتف</th>
-            <th>الشاليه</th>
-            <th>التاريخ</th>
-            <th>الفترة</th>
-            <th>منذ</th>
-            <th>الحالة</th>
-            <th>الإجراءات</th>
+            <th>{{ 'misc.customerName' | translate }}</th>
+            <th>{{ 'misc.phone' | translate }}</th>
+            <th>{{ 'features.waitinglist.colChalet' | translate }}</th>
+            <th>{{ 'misc.date' | translate }}</th>
+            <th>{{ 'misc.period' | translate }}</th>
+            <th>{{ 'features.waitinglist.colSince' | translate }}</th>
+            <th>{{ 'misc.status' | translate }}</th>
+            <th>{{ 'misc.actions' | translate }}</th>
           </tr>
         </thead>
         <tbody>
@@ -135,7 +129,7 @@
             </td>
 
             <td>
-              <span class="period-badge">{{ periodArabic(item.period) }}</span>
+              <span class="period-badge">{{ periodLabel(item.period) }}</span>
             </td>
 
             <td>
@@ -147,23 +141,23 @@
 
             <td>
               <span class="badge" [ngClass]="statusClass(item.status)">
-                {{ WaitingStatusArabic[item.status] }}
+                {{ getWaitingStatusLabel(item.status) }}
               </span>
             </td>
 
             <td (click)="$event.stopPropagation()">
               <div class="action-btns">
-                <button class="btn-icon btn-edit" (click)="openDetails(item)" title="تعديل الحالة">
+                <button class="btn-icon btn-edit" (click)="openDetails(item)" [attr.title]="'features.waitinglist.titleEditStatus' | translate">
                   <i class="bi bi-pencil-fill"></i>
                 </button>
-                <button class="btn-icon btn-whatsapp" (click)="openWhatsApp(item.phone)" title="واتساب 1">
+                <button class="btn-icon btn-whatsapp" (click)="openWhatsApp(item.phone)" [attr.title]="'features.waitinglist.titleWhatsapp1' | translate">
                   <i class="bi bi-whatsapp"></i>
                 </button>
                 <button *ngIf="item.additionalPhone" class="btn-icon btn-whatsapp"
-                        (click)="openWhatsApp(item.additionalPhone!)" title="واتساب 2">
+                        (click)="openWhatsApp(item.additionalPhone!)" [attr.title]="'features.waitinglist.titleWhatsapp2' | translate">
                   <i class="bi bi-telephone-plus-fill"></i>
                 </button>
-                <button class="btn-icon btn-convert" (click)="openConvert(item, $event)" title="تحويل إلى حجز">
+                <button class="btn-icon btn-convert" (click)="openConvert(item, $event)" [attr.title]="'features.waitinglist.titleConvert' | translate">
                   <i class="bi bi-arrow-right-circle-fill"></i>
                 </button>
               </div>
@@ -174,7 +168,7 @@
             <td colspan="9" class="empty-row">
               <div class="empty-state">
                 <i class="bi bi-search empty-icon"></i>
-                <p>لا توجد نتائج مطابقة</p>
+                <p>{{ 'features.waitinglist.noResults' | translate }}</p>
               </div>
             </td>
           </tr>
@@ -182,7 +176,6 @@
       </table>
     </div>
 
-    <!-- Mobile Cards -->
     <div class="mobile-cards">
       <div *ngFor="let item of paginatedItems; let i = index"
            class="mobile-card" (click)="openDetails(item)">
@@ -201,7 +194,7 @@
             </div>
           </div>
           <span class="badge" [ngClass]="statusClass(item.status)">
-            {{ WaitingStatusArabic[item.status] }}
+            {{ getWaitingStatusLabel(item.status) }}
           </span>
         </div>
 
@@ -216,7 +209,7 @@
           </div>
           <div class="mc-detail-item">
             <i class="bi bi-clock mc-detail-icon"></i>
-            <span>{{ periodArabic(item.period) }}</span>
+            <span>{{ periodLabel(item.period) }}</span>
           </div>
           <div class="mc-detail-item">
             <i class="bi bi-hourglass mc-detail-icon"></i>
@@ -226,34 +219,33 @@
           </div>
         </div>
 
-        <div class="mc-notes" *ngIf="item.notes && item.notes !== 'لا يوجد ملاحظات'">
+        <div class="mc-notes" *ngIf="showMcNotes(item.notes)">
           <i class="bi bi-chat-left-text"></i> {{ item.notes }}
         </div>
 
         <div class="mc-actions" (click)="$event.stopPropagation()">
           <button class="btn-secondary" (click)="openDetails(item)">
-            <i class="bi bi-pencil-fill"></i> تعديل الحالة
+            <i class="bi bi-pencil-fill"></i> {{ 'features.waitinglist.btnEditStatus' | translate }}
           </button>
           <button class="btn-whatsapp-full" (click)="openWhatsApp(item.phone)">
-            <i class="bi bi-whatsapp"></i> واتساب 1
+            <i class="bi bi-whatsapp"></i> {{ 'features.waitinglist.btnWhatsapp1' | translate }}
           </button>
           <button *ngIf="item.additionalPhone" class="btn-whatsapp-full"
                   (click)="openWhatsApp(item.additionalPhone!)">
-            <i class="bi bi-whatsapp"></i> واتساب 2
+            <i class="bi bi-whatsapp"></i> {{ 'features.waitinglist.btnWhatsapp2' | translate }}
           </button>
           <button class="btn-primary" (click)="openConvert(item, $event)">
-            <i class="bi bi-arrow-right-circle-fill"></i> تحويل إلى حجز
+            <i class="bi bi-arrow-right-circle-fill"></i> {{ 'features.waitinglist.btnConvert' | translate }}
           </button>
         </div>
       </div>
 
       <div *ngIf="paginatedItems.length === 0" class="empty-state">
         <i class="bi bi-search empty-icon"></i>
-        <p>لا توجد نتائج مطابقة</p>
+        <p>{{ 'features.waitinglist.noResults' | translate }}</p>
       </div>
     </div>
 
-    <!-- Pagination -->
     <div class="pagination" *ngIf="totalPages > 1">
       <button class="page-btn" (click)="goToPage(currentPage - 1)" [disabled]="currentPage === 1">
         <i class="bi bi-chevron-right"></i>
@@ -266,7 +258,6 @@
     </div>
   </div>
 
-  <!-- ══════════════ DETAILS / STATUS MODAL ══════════════ -->
   <div class="modal-overlay" *ngIf="showDetailsModal" (click)="closeDetailsModal()">
     <div class="custom-modal" (click)="$event.stopPropagation()">
       <div class="modal-header">
@@ -275,8 +266,8 @@
             <i class="bi bi-pencil-fill"></i>
           </div>
           <div>
-            <h2 class="modal-title">تفاصيل الحجز</h2>
-            <p class="modal-sub">{{ selectedItem?.customerName }} — حجز #{{ selectedItem?.id }}</p>
+            <h2 class="modal-title">{{ 'features.waitinglist.modalDetailTitle' | translate }}</h2>
+            <p class="modal-sub">{{ selectedItem?.customerName }} — {{ 'features.waitinglist.bookingRef' | translate: { id: selectedItem?.id } }}</p>
           </div>
         </div>
         <button class="modal-close" (click)="closeDetailsModal()">
@@ -287,31 +278,31 @@
       <div class="modal-body" *ngIf="selectedItem">
         <div class="info-grid">
           <div class="info-item">
-            <span class="info-label"><i class="bi bi-person-fill"></i> اسم العميل</span>
+            <span class="info-label"><i class="bi bi-person-fill"></i> {{ 'features.waitinglist.labelCustomerName' | translate }}</span>
             <span class="info-value">{{ selectedItem.customerName }}</span>
           </div>
           <div class="info-item">
-            <span class="info-label"><i class="bi bi-telephone-fill"></i> الهاتف</span>
+            <span class="info-label"><i class="bi bi-telephone-fill"></i> {{ 'misc.phone' | translate }}</span>
             <span class="info-value">{{ selectedItem.phone }}</span>
           </div>
           <div class="info-item" *ngIf="selectedItem.additionalPhone">
-            <span class="info-label"><i class="bi bi-telephone-plus-fill"></i> هاتف إضافي</span>
+            <span class="info-label"><i class="bi bi-telephone-plus-fill"></i> {{ 'misc.additionalPhone' | translate }}</span>
             <span class="info-value">{{ selectedItem.additionalPhone }}</span>
           </div>
           <div class="info-item">
-            <span class="info-label"><i class="bi bi-house-fill"></i> الشاليه</span>
+            <span class="info-label"><i class="bi bi-house-fill"></i> {{ 'features.waitinglist.colChalet' | translate }}</span>
             <span class="info-value">{{ selectedItem.chaletName }}</span>
           </div>
           <div class="info-item">
-            <span class="info-label"><i class="bi bi-calendar3"></i> التاريخ</span>
+            <span class="info-label"><i class="bi bi-calendar3"></i> {{ 'misc.date' | translate }}</span>
             <span class="info-value">{{ formatDate(selectedItem.date) }}</span>
           </div>
           <div class="info-item">
-            <span class="info-label"><i class="bi bi-clock-fill"></i> الفترة</span>
-            <span class="info-value">{{ periodArabic(selectedItem.period) }}</span>
+            <span class="info-label"><i class="bi bi-clock-fill"></i> {{ 'misc.period' | translate }}</span>
+            <span class="info-value">{{ periodLabel(selectedItem.period) }}</span>
           </div>
           <div class="info-item">
-            <span class="info-label"><i class="bi bi-hourglass-split"></i> وقت الإنشاء</span>
+            <span class="info-label"><i class="bi bi-hourglass-split"></i> {{ 'features.waitinglist.labelCreatedAt' | translate }}</span>
             <span class="info-value">
               <span class="time-ago-badge" [ngClass]="getTimeAgoClass(selectedItem.createdAt)">
                 {{ timeAgo(selectedItem.createdAt) }}
@@ -320,22 +311,22 @@
             </span>
           </div>
           <div class="info-item">
-            <span class="info-label"><i class="bi bi-tag-fill"></i> الحالة الحالية</span>
+            <span class="info-label"><i class="bi bi-tag-fill"></i> {{ 'features.waitinglist.labelCurrentStatus' | translate }}</span>
             <span class="info-value">
               <span class="badge" [ngClass]="statusClass(selectedItem.status)">
-                {{ WaitingStatusArabic[selectedItem.status] }}
+                {{ getWaitingStatusLabel(selectedItem.status) }}
               </span>
             </span>
           </div>
         </div>
 
         <div class="info-item full-width" *ngIf="selectedItem.notes">
-          <span class="info-label"><i class="bi bi-chat-left-text-fill"></i> الملاحظات</span>
+          <span class="info-label"><i class="bi bi-chat-left-text-fill"></i> {{ 'misc.notes' | translate }}</span>
           <span class="info-value notes-text">{{ selectedItem.notes }}</span>
         </div>
 
         <div class="status-update-section">
-          <label class="field-label">تغيير الحالة إلى *</label>
+          <label class="field-label">{{ 'features.waitinglist.changeStatusTo' | translate }}</label>
           <div class="status-radio-group">
             <label *ngFor="let opt of statusOptions" class="status-radio"
                    [class.selected]="newStatusIndex === opt.value">
@@ -345,30 +336,29 @@
           </div>
           <div class="info-note">
             <i class="bi bi-info-circle-fill"></i>
-            سيتم حفظ الحالة وإغلاق النافذة فوراً
+            {{ 'features.waitinglist.saveStatusHint' | translate }}
           </div>
         </div>
       </div>
 
       <div class="modal-footer">
         <button class="btn-secondary" (click)="closeDetailsModal()">
-          <i class="bi bi-x-lg"></i> إلغاء
+          <i class="bi bi-x-lg"></i> {{ 'misc.cancel' | translate }}
         </button>
         <button class="btn-whatsapp-outline" (click)="openWhatsApp(selectedItem!.phone)">
-          <i class="bi bi-whatsapp"></i> واتساب 1
+          <i class="bi bi-whatsapp"></i> {{ 'features.waitinglist.btnWhatsapp1' | translate }}
         </button>
         <button *ngIf="selectedItem?.additionalPhone" class="btn-whatsapp-outline"
                 (click)="openWhatsApp(selectedItem!.additionalPhone!)">
-          <i class="bi bi-whatsapp"></i> واتساب 2
+          <i class="bi bi-whatsapp"></i> {{ 'features.waitinglist.btnWhatsapp2' | translate }}
         </button>
         <button class="btn-primary" (click)="saveStatus()">
-          <i class="bi bi-check-lg"></i> حفظ التغييرات
+          <i class="bi bi-check-lg"></i> {{ 'features.waitinglist.btnSaveChanges' | translate }}
         </button>
       </div>
     </div>
   </div>
 
-  <!-- ══════════════ CONVERT MODAL ══════════════ -->
   <div class="modal-overlay" *ngIf="showConvertModal" (click)="closeConvertModal()">
     <div class="custom-modal modal-sm" (click)="$event.stopPropagation()">
       <div class="modal-header">
@@ -377,8 +367,8 @@
             <i class="bi bi-arrow-right-circle-fill"></i>
           </div>
           <div>
-            <h2 class="modal-title">تأكيد التحويل</h2>
-            <p class="modal-sub">{{ convertItem?.customerName }} — حجز #{{ convertItem?.id }}</p>
+            <h2 class="modal-title">{{ 'features.waitinglist.convertTitle' | translate }}</h2>
+            <p class="modal-sub">{{ convertItem?.customerName }} — {{ 'features.waitinglist.bookingRef' | translate: { id: convertItem?.id } }}</p>
           </div>
         </div>
         <button class="modal-close" (click)="closeConvertModal()">
@@ -389,27 +379,27 @@
       <div class="modal-body" *ngIf="convertItem">
         <div class="convert-summary">
           <div class="convert-row">
-            <span><i class="bi bi-house-fill"></i> الشاليه</span>
+            <span><i class="bi bi-house-fill"></i> {{ 'features.waitinglist.colChalet' | translate }}</span>
             <strong>{{ convertItem.chaletName }}</strong>
           </div>
           <div class="convert-row">
-            <span><i class="bi bi-calendar3"></i> التاريخ</span>
+            <span><i class="bi bi-calendar3"></i> {{ 'misc.date' | translate }}</span>
             <strong>{{ formatDate(convertItem.date) }}</strong>
           </div>
           <div class="convert-row">
-            <span><i class="bi bi-clock-fill"></i> الفترة</span>
-            <strong>{{ periodArabic(convertItem.period) }}</strong>
+            <span><i class="bi bi-clock-fill"></i> {{ 'misc.period' | translate }}</span>
+            <strong>{{ periodLabel(convertItem.period) }}</strong>
           </div>
           <div class="convert-row">
-            <span><i class="bi bi-telephone-fill"></i> الهاتف</span>
+            <span><i class="bi bi-telephone-fill"></i> {{ 'misc.phone' | translate }}</span>
             <strong>{{ convertItem.phone }}</strong>
           </div>
           <div class="convert-row" *ngIf="convertItem.additionalPhone">
-            <span><i class="bi bi-telephone-plus-fill"></i> هاتف إضافي</span>
+            <span><i class="bi bi-telephone-plus-fill"></i> {{ 'misc.additionalPhone' | translate }}</span>
             <strong>{{ convertItem.additionalPhone }}</strong>
           </div>
           <div class="convert-row">
-            <span><i class="bi bi-hourglass-split"></i> منذ</span>
+            <span><i class="bi bi-hourglass-split"></i> {{ 'features.waitinglist.colSince' | translate }}</span>
             <strong>
               <span class="time-ago-badge" [ngClass]="getTimeAgoClass(convertItem.createdAt)">
                 {{ timeAgo(convertItem.createdAt) }}
@@ -419,30 +409,30 @@
         </div>
         <div class="convert-notice">
           <i class="bi bi-info-circle-fill"></i>
-          سيتم تحويل الحجز إلى <strong>مؤكد</strong>. ستظهر رسالة الـ API مباشرةً بعد التنفيذ.
+          {{ 'features.waitinglist.convertNoticeBefore' | translate }}
+          <strong>{{ 'status.Confirmed' | translate }}</strong>{{ 'features.waitinglist.convertNoticeAfter' | translate }}
         </div>
       </div>
 
       <div class="modal-footer">
         <button class="btn-secondary" (click)="closeConvertModal()">
-          <i class="bi bi-x-lg"></i> إلغاء
+          <i class="bi bi-x-lg"></i> {{ 'misc.cancel' | translate }}
         </button>
         <button *ngIf="convertItem?.phone" class="btn-whatsapp-outline"
                 (click)="openWhatsApp(convertItem!.phone)">
-          <i class="bi bi-whatsapp"></i> واتساب 1
+          <i class="bi bi-whatsapp"></i> {{ 'features.waitinglist.btnWhatsapp1' | translate }}
         </button>
         <button *ngIf="convertItem?.additionalPhone" class="btn-whatsapp-outline"
                 (click)="openWhatsApp(convertItem!.additionalPhone!)">
-          <i class="bi bi-whatsapp"></i> واتساب 2
+          <i class="bi bi-whatsapp"></i> {{ 'features.waitinglist.btnWhatsapp2' | translate }}
         </button>
         <button class="btn-primary btn-green" (click)="confirmConvert()">
-          <i class="bi bi-check-lg"></i> تأكيد التحويل
+          <i class="bi bi-check-lg"></i> {{ 'features.waitinglist.btnConfirmConvert' | translate }}
         </button>
       </div>
     </div>
   </div>
 
-  <!-- ══════════════ TOAST ══════════════ -->
   <div class="toast"
        [class.show]="toast.show"
        [class.toast-success]="toast.success"

@@ -2,14 +2,15 @@ import { ChangeDetectorRef, Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { AuthService } from '../../service/Auth-service';
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule],
+  imports: [CommonModule, FormsModule, RouterModule, TranslatePipe],
   templateUrl: './login-component.html',
-  styleUrls: ['./login-component.css']
+  styleUrls: ['./login-component.css'],
 })
 export class LoginComponent {
   email = '';
@@ -18,8 +19,12 @@ export class LoginComponent {
   isLoading = false;
   errorMessage = '';
 
-  constructor(private auth: AuthService, private router: Router,private cdr: ChangeDetectorRef) {
-    // Redirect if already logged in
+  constructor(
+    private auth: AuthService,
+    private router: Router,
+    private cdr: ChangeDetectorRef,
+    private translate: TranslateService,
+  ) {
     if (this.auth.isLoggedIn()) {
       this.router.navigate(['/dashboard']);
     }
@@ -42,14 +47,11 @@ export class LoginComponent {
         this.router.navigate(['/dashboard']);
       },
       error: (err) => {
-          this.isLoading = false;
-  // يقرأ الرسالة من الـ backend مباشرة
-  this.errorMessage =
-    err.error?.message ||
-    'حدث خطأ، يرجى المحاولة مرة أخرى';
-      }
+        this.isLoading = false;
+        this.errorMessage =
+          err.error?.message || this.translate.instant('auth.errorGeneric');
+      },
     });
-      this.cdr.detectChanges(); // ✅ تحديث UI فورًا
-
+    this.cdr.detectChanges();
   }
 }

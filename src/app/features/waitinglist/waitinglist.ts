@@ -1,76 +1,90 @@
-import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { WaitingListItem, WaitingStatus, WaitingListService, WaitingStatusArabic } from '../../service/waitinglist-service';
+import { WaitingListItem, WaitingStatus, WaitingListService } from '../../service/waitinglist-service';
 import { CommonModule } from '@angular/common';
 import { finalize } from 'rxjs';
+import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-waitinglist',
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, TranslatePipe],
   templateUrl: './waitinglist.html',
   styleUrl: './waitinglist.css',
 })
-export class Waitinglist implements OnInit {
+export class Waitinglist implements OnInit, OnDestroy {
+  private readonly destroy$ = new Subject<void>();
+
   items: WaitingListItem[] = [];
   filteredItems: WaitingListItem[] = [];
   paginatedItems: WaitingListItem[] = [];
- 
+
   isLoadingData = true;
   errorMsg = '';
- 
-  // Pagination
+
   currentPage = 1;
   pageSize = 6;
   totalPages = 1;
- 
-  // Search & Filter
+
   searchQuery = '';
   selectedStatusFilter: WaitingStatus | '' = '';
- 
-  // Modal: Details / Status update
+
   showDetailsModal = false;
   selectedItem: WaitingListItem | null = null;
-  newStatusIndex: number = 0;
- 
-  statusOptions: { label: string; value: number }[] = [
-    { label: 'قيد الانتظار', value: 0 },
-    { label: 'تم التواصل',   value: 1 },
-    { label: 'محجوز',        value: 2 },
-    { label: 'ملغي',         value: 3 },
-  ];
- 
-  // Modal: Convert to Booking
+  newStatusIndex = 0;
+
+  statusOptions: { label: string; value: number }[] = [];
+  filterOptions: { label: string; value: WaitingStatus | '' }[] = [];
+
   showConvertModal = false;
   convertItem: WaitingListItem | null = null;
- 
-  // Toast
+
   toast: { show: boolean; success: boolean; message: string } = {
     show: false, success: true, message: '',
   };
-  toastTimer: any;
- 
-  readonly WaitingStatusArabic = WaitingStatusArabic;
- 
-  filterOptions: { label: string; value: WaitingStatus | '' }[] = [
-    { label: 'كل الحالات',   value: '' },
-    { label: 'قيد الانتظار', value: 'Pending' },
-    { label: 'تم التواصل',   value: 'Contacted' },
-    { label: 'محجوز',        value: 'Booked' },
-    { label: 'ملغي',         value: 'Cancelled' },
-  ];
- 
+  toastTimer: ReturnType<typeof setTimeout> | undefined;
+
   constructor(
     private svc: WaitingListService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private translate: TranslateService,
   ) {}
- 
+
   ngOnInit(): void {
+    this.rebuildTranslatedLists();
+    this.translate.onLangChange
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(() => {
+        this.rebuildTranslatedLists();
+        this.cdr.markForCheck();
+      });
     this.loadData();
   }
- 
-  // ══════════════════════════════════════
-  // DATA LOADING
-  // ══════════════════════════════════════
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+    if (this.toastTimer) clearTimeout(this.toastTimer);
+  }
+
+  private rebuildTranslatedLists(): void {
+    const t = (k: string) => this.translate.instant(k);
+    this.filterOptions = [
+      { label: t('features.waitinglist.filterAll'), value: '' },
+      { label: t('features.waitinglist.statPending'), value: 'Pending' },
+      { label: t('features.waitinglist.statContacted'), value: 'Contacted' },
+      { label: t('features.waitinglist.statBooked'), value: 'Booked' },
+      { label: t('features.waitinglist.statCancelled'), value: 'Cancelled' },
+    ];
+    this.statusOptions = [
+      { label: t('features.waitinglist.statPending'), value: 0 },
+      { label: t('features.waitinglist.statContacted'), value: 1 },
+      { label: t('features.waitinglist.statBooked'), value: 2 },
+      { label: t('features.waitinglist.statCancelled'), value: 3 },
+    ];
+  }
+
   loadData(): void {
     this.isLoadingData = true;
     this.errorMsg = '';
@@ -85,14 +99,11 @@ export class Waitinglist implements OnInit {
           this.applyFilters();
         },
         error: () => {
-          this.errorMsg = 'تعذّر تحميل البيانات. تحقق من الاتصال بالخادم.';
+          this.errorMsg = this.translate.instant('features.waitinglist.loadError');
         },
       });
   }
- 
-  // ══════════════════════════════════════
-  // FILTER & PAGINATION
-  // ══════════════════════════════════════
+
   applyFilters(): void {
     let result = [...this.items];
     if (this.searchQuery.trim()) {
@@ -101,42 +112,37 @@ export class Waitinglist implements OnInit {
         (i) =>
           i.customerName.toLowerCase().includes(q) ||
           i.phone.includes(q) ||
-          i.chaletName.toLowerCase().includes(q)
+          i.chaletName.toLowerCase().includes(q),
       );
     }
     if (this.selectedStatusFilter) {
       result = result.filter((i) => i.status === this.selectedStatusFilter);
     }
-    result = result.sort((a, b) =>
-  +new Date(b.date) - +new Date(a.date)
-);
+    result = result.sort((a, b) => +new Date(b.date) - +new Date(a.date));
     this.filteredItems = result;
     this.totalPages = Math.max(1, Math.ceil(result.length / this.pageSize));
     if (this.currentPage > this.totalPages) this.currentPage = 1;
     this.paginate();
   }
- 
+
   paginate(): void {
     const start = (this.currentPage - 1) * this.pageSize;
     this.paginatedItems = this.filteredItems.slice(start, start + this.pageSize);
   }
- 
+
   goToPage(page: number): void {
     if (page < 1 || page > this.totalPages) return;
     this.currentPage = page;
     this.paginate();
   }
- 
+
   get pageNumbers(): number[] {
     return Array.from({ length: this.totalPages }, (_, i) => i + 1);
   }
- 
+
   onSearchChange(): void { this.currentPage = 1; this.applyFilters(); }
-  onFilterChange(): void  { this.currentPage = 1; this.applyFilters(); }
- 
-  // ══════════════════════════════════════
-  // DETAILS / STATUS MODAL
-  // ══════════════════════════════════════
+  onFilterChange(): void { this.currentPage = 1; this.applyFilters(); }
+
   openDetails(item: WaitingListItem): void {
     this.selectedItem = { ...item };
     const statusKeys: WaitingStatus[] = ['Pending', 'Contacted', 'Booked', 'Cancelled'];
@@ -144,84 +150,80 @@ export class Waitinglist implements OnInit {
     this.newStatusIndex = idx >= 0 ? idx : 0;
     this.showDetailsModal = true;
   }
- 
+
   closeDetailsModal(): void {
     this.showDetailsModal = false;
     this.selectedItem = null;
   }
- 
+
   saveStatus(): void {
     if (!this.selectedItem) return;
- 
-    const itemId      = this.selectedItem.id;
+
+    const itemId = this.selectedItem.id;
     const statusIndex = this.newStatusIndex;
     const statusKeys: WaitingStatus[] = ['Pending', 'Contacted', 'Booked', 'Cancelled'];
- 
-    // ✅ أغلق المودال فوراً — بدون انتظار الـ API
+
     this.closeDetailsModal();
     this.cdr.detectChanges();
- 
+
     this.svc.updateStatus(itemId, statusIndex)
       .pipe(finalize(() => this.cdr.detectChanges()))
       .subscribe({
         next: (res) => {
-          // تحديث الحالة في البيانات المحلية
           const idx = this.items.findIndex((i) => i.id === itemId);
           if (idx > -1) {
             this.items[idx] = { ...this.items[idx], status: statusKeys[statusIndex] };
           }
           this.applyFilters();
-          // عرض رسالة الـ API مباشرةً
           const text =
             (typeof res === 'string' ? res : null) ??
-            (res as any)?.message ??
-            'تم التحديث بنجاح';
+            (res as { message?: string })?.message ??
+            this.translate.instant('features.waitinglist.updatedOk');
           this.showToast(true, text);
         },
         error: (err) => {
           const errMsg =
             err?.error?.message ||
-            err?.error?.title  ||
-            err?.message       ||
-            'حدث خطأ أثناء تحديث الحالة';
+            err?.error?.title ||
+            err?.message ||
+            this.translate.instant('features.waitinglist.updateError');
           this.showToast(false, errMsg);
         },
       });
   }
- 
-  // ══════════════════════════════════════
-  // CONVERT TO BOOKING MODAL
-  // ══════════════════════════════════════
+
   openConvert(item: WaitingListItem, event: Event): void {
     event.stopPropagation();
     this.convertItem = item;
     this.showConvertModal = true;
   }
- 
+
   closeConvertModal(): void {
     this.showConvertModal = false;
     this.convertItem = null;
   }
- 
+
   confirmConvert(): void {
     if (!this.convertItem) return;
- 
+
     const itemId = this.convertItem.id;
- 
-    // ✅ أغلق المودال فوراً — بدون انتظار الـ API
+
     this.closeConvertModal();
     this.cdr.detectChanges();
- 
+
     this.svc.convertToBooking(itemId)
       .pipe(finalize(() => this.cdr.detectChanges()))
       .subscribe({
         next: (res) => {
-          const msg     = res?.message;
+          const msg = res?.message;
           const success = msg?.success ?? false;
-          const text    = msg?.message ?? (success ? 'تم التحويل بنجاح' : 'تعذّر التحويل');
- 
+          const text = msg?.message ??
+            (success
+              ? this.translate.instant('features.waitinglist.convertOk')
+              : this.translate.instant('features.waitinglist.convertFail'));
+
           this.showToast(success, text);
- 
+
           if (success) {
             const idx = this.items.findIndex((i) => i.id === itemId);
             if (idx > -1) {
@@ -231,26 +233,22 @@ export class Waitinglist implements OnInit {
           }
         },
         error: (err) => {
-          // بعض الـ APIs بترجع body حتى مع HTTP error
           const body = err?.error;
           if (body?.message?.message) {
             this.showToast(false, body.message.message);
           } else {
             const errMsg =
               err?.error?.title ||
-              err?.message      ||
-              'حدث خطأ أثناء التحويل';
+              err?.message ||
+              this.translate.instant('features.waitinglist.convertError');
             this.showToast(false, errMsg);
           }
         },
       });
   }
- 
-  // ══════════════════════════════════════
-  // TOAST
-  // ══════════════════════════════════════
+
   showToast(success: boolean, message: string): void {
-    clearTimeout(this.toastTimer);
+    if (this.toastTimer) clearTimeout(this.toastTimer);
     this.toast = { show: true, success, message };
     this.cdr.detectChanges();
     this.toastTimer = setTimeout(() => {
@@ -258,105 +256,111 @@ export class Waitinglist implements OnInit {
       this.cdr.detectChanges();
     }, 4500);
   }
- 
-  // ══════════════════════════════════════
-  // HELPERS
-  // ══════════════════════════════════════
+
   statusClass(status: WaitingStatus): string {
     const map: Record<WaitingStatus, string> = {
-      Pending:   'badge-pending',
+      Pending: 'badge-pending',
       Contacted: 'badge-contacted',
-      Booked:    'badge-booked',
+      Booked: 'badge-booked',
       Cancelled: 'badge-cancelled',
     };
     return map[status] ?? '';
   }
- 
-  periodArabic(period: string): string {
-    return period === 'Morning' ? 'صباحي' : 'مسائي';
+
+  getWaitingStatusLabel(status: WaitingStatus): string {
+    return this.translate.instant(`features.waitinglist.stat${status}` as string);
   }
- 
+
+  periodLabel(period: string): string {
+    const p = period === 'Evening' ? 'Evening' : 'Morning';
+    return this.translate.instant(`period.${p}`);
+  }
+
+  private dateLocale(): string {
+    const lang = this.translate.currentLang || 'ar';
+    if (lang === 'ar') return 'ar-EG';
+    if (lang === 'fr') return 'fr-FR';
+    return 'en-US';
+  }
+
+  timeAgo(dateStr: string | null | undefined): string {
+    if (!dateStr) return '—';
+
+    const normalized = dateStr.endsWith('Z') ? dateStr : dateStr + 'Z';
+    const date = new Date(normalized);
+    if (isNaN(date.getTime())) return '—';
+
+    const t = (k: string, params?: object) => this.translate.instant(k, params);
+    const diffMs = Date.now() - date.getTime();
+    const diffMin = Math.floor(diffMs / 60_000);
+    const diffHr = Math.floor(diffMin / 60);
+    const diffDay = Math.floor(diffHr / 24);
+
+    if (diffMs < 0) return t('misc.agoNow');
+    if (diffMin < 1) return t('misc.agoNow');
+    if (diffMin === 1) return t('misc.agoOneMinute');
+    if (diffMin < 60) return t('misc.agoMinutes', { n: diffMin });
+    if (diffHr === 1) return t('misc.agoOneHour');
+    if (diffHr < 24) return t('misc.agoHours', { n: diffHr });
+    if (diffDay === 1) return t('misc.agoOneDay');
+    if (diffDay < 7) return t('misc.agoDays', { n: diffDay });
+    if (diffDay < 30) return t('misc.agoWeeks', { n: Math.floor(diffDay / 7) });
+    if (diffDay < 365) return t('misc.agoMonths', { n: Math.floor(diffDay / 30) });
+    return t('misc.agoYears', { n: Math.floor(diffDay / 365) });
+  }
+
+  getTimeAgoClass(dateStr: string | null | undefined): string {
+    if (!dateStr) return '';
+
+    const normalized = dateStr.endsWith('Z') ? dateStr : dateStr + 'Z';
+    const date = new Date(normalized);
+    if (isNaN(date.getTime())) return '';
+
+    const diffHr = (Date.now() - date.getTime()) / 3_600_000;
+
+    if (diffHr < 1) return 'time-fresh';
+    if (diffHr < 3) return 'time-medium';
+    if (diffHr < 24) return 'time-old';
+    return 'time-urgent';
+  }
+
   formatDate(dateStr: string): string {
     const d = new Date(dateStr);
-    return d.toLocaleDateString('ar-EG', {
+    return d.toLocaleDateString(this.dateLocale(), {
       year: 'numeric', month: 'long', day: 'numeric',
     });
   }
- // ══════════════════════════════════════════════════════════
-// أضف الـ functions دي في waitinglist.component.ts
-// ══════════════════════════════════════════════════════════
 
-timeAgo(dateStr: string | null | undefined): string {
-  if (!dateStr) return '—';
+  formatDateTime(dateStr: string | null | undefined): string {
+    if (!dateStr) return '';
 
-  // ✅ normalize لـ UTC
-  const normalized = dateStr.endsWith('Z') ? dateStr : dateStr + 'Z';
-  const date = new Date(normalized);
-  if (isNaN(date.getTime())) return '—';
+    const normalized = dateStr.endsWith('Z') ? dateStr : dateStr + 'Z';
+    const date = new Date(normalized);
+    if (isNaN(date.getTime())) return '';
 
-  const diffMs  = Date.now() - date.getTime();
-  const diffMin = Math.floor(diffMs / 60_000);
-  const diffHr  = Math.floor(diffMin / 60);
-  const diffDay = Math.floor(diffHr / 24);
+    return new Intl.DateTimeFormat(this.dateLocale(), {
+      timeZone: 'Asia/Amman',
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: true,
+    }).format(date);
+  }
 
-  if (diffMs  < 0)    return 'الآن';
-  if (diffMin < 1)    return 'الآن';
-  if (diffMin === 1)  return 'منذ دقيقة';
-  if (diffMin < 60)   return `منذ ${diffMin} دقيقة`;
-  if (diffHr  === 1)  return 'منذ ساعة';
-  if (diffHr  < 24)   return `منذ ${diffHr} ساعة`;
-  if (diffDay === 1)  return 'منذ يوم';
-  if (diffDay < 7)    return `منذ ${diffDay} أيام`;
-  if (diffDay < 30)   return `منذ ${Math.floor(diffDay / 7)} أسابيع`;
-  if (diffDay < 365)  return `منذ ${Math.floor(diffDay / 30)} شهر`;
-  return `منذ ${Math.floor(diffDay / 365)} سنة`;
-}
+  openWhatsApp(phone: string | null | undefined): void {
+    if (!phone) return;
+    const clean = phone.replace(/\D/g, '');
+    window.open(`https://wa.me/${clean}`, '_blank');
+  }
 
-getTimeAgoClass(dateStr: string | null | undefined): string {
-  if (!dateStr) return '';
+  showMcNotes(notes: string | undefined): boolean {
+    return !!notes?.trim() && notes.trim() !== 'لا يوجد ملاحظات';
+  }
 
-  // ✅ normalize لـ UTC
-  const normalized = dateStr.endsWith('Z') ? dateStr : dateStr + 'Z';
-  const date = new Date(normalized);
-  if (isNaN(date.getTime())) return '';
-
-  const diffHr = (Date.now() - date.getTime()) / 3_600_000;
-
-  if (diffHr < 1)  return 'time-fresh';
-  if (diffHr < 3)  return 'time-medium';
-  if (diffHr < 24) return 'time-old';
-  return 'time-urgent';
-}
-
-formatDateTime(dateStr: string | null | undefined): string {
-  if (!dateStr) return '';
-
-  // ✅ normalize لـ UTC
-  const normalized = dateStr.endsWith('Z') ? dateStr : dateStr + 'Z';
-  const date = new Date(normalized);
-  if (isNaN(date.getTime())) return '';
-
-  return new Intl.DateTimeFormat('ar-EG', {
-    timeZone: 'Asia/Amman',  // ✅ توقيت الأردن
-    day:    '2-digit',
-    month:  'short',
-    year:   'numeric',
-    hour:   '2-digit',
-    minute: '2-digit',
-    hour12: true,
-  }).format(date);
-}
-
-
-openWhatsApp(phone: string | null | undefined): void {
-  if (!phone) return;
-  // شيل كل حاجة غير أرقام
-  const clean = phone.replace(/\D/g, '');
-  window.open(`https://wa.me/${clean}`, '_blank');
-}
-  get pendingCount():   number { return this.items.filter((i) => i.status === 'Pending').length;   }
+  get pendingCount(): number { return this.items.filter((i) => i.status === 'Pending').length; }
   get contactedCount(): number { return this.items.filter((i) => i.status === 'Contacted').length; }
-  get bookedCount():    number { return this.items.filter((i) => i.status === 'Booked').length;    }
+  get bookedCount(): number { return this.items.filter((i) => i.status === 'Booked').length; }
   get cancelledCount(): number { return this.items.filter((i) => i.status === 'Cancelled').length; }
 }
- 

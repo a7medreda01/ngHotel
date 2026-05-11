@@ -1,6 +1,5 @@
-<div class="partners-wrap" dir="rtl">
+﻿<div class="partners-wrap">
 
-  <!-- Toast -->
   <div class="pt-toast" [class.show]="showToast"
        [class.toast-success]="toastType==='success'"
        [class.toast-error]="toastType==='error'">
@@ -9,55 +8,49 @@
     {{ toast }}
   </div>
 
-  <!-- Header -->
   <div class="pt-header">
     <div class="pt-title">
       <i class="bi bi-briefcase-fill"></i>
       <div>
-        <h2>الشركاء</h2>
-        <p>نسب الرويالة وتوزيع الأكواخ</p>
+        <h2>{{ 'features.partners.pageTitle' | translate }}</h2>
+        <p>{{ 'features.partners.pageSub' | translate }}</p>
       </div>
     </div>
 
-    <!-- View toggle -->
     <div class="pt-view-toggle">
       <button [class.active]="viewMode==='byPartner'" (click)="viewMode='byPartner'">
-        <i class="bi bi-person-lines-fill"></i> حسب الشريك
+        <i class="bi bi-person-lines-fill"></i> {{ 'features.partners.byPartner' | translate }}
       </button>
       <button [class.active]="viewMode==='byChalet'" (click)="viewMode='byChalet'">
-        <i class="bi bi-house-fill"></i> حسب الكوخ
+        <i class="bi bi-house-fill"></i> {{ 'features.partners.byChalet' | translate }}
       </button>
     </div>
   </div>
 
-  <!-- Stats bar -->
   <div class="pt-stats-bar" *ngIf="!loading">
     <div class="pt-stat">
       <span class="pt-stat-val">{{ partnersOnlyCount }}</span>
-      <span class="pt-stat-lbl">شريك</span>
+      <span class="pt-stat-lbl">{{ 'features.partners.statPartner' | translate }}</span>
     </div>
     <div class="pt-stat-divider"></div>
     <div class="pt-stat">
       <span class="pt-stat-val">{{ totalChalets }}</span>
-      <span class="pt-stat-lbl">كوخ</span>
+      <span class="pt-stat-lbl">{{ 'features.partners.statChalet' | translate }}</span>
     </div>
     <div class="pt-stat-divider"></div>
     <div class="pt-stat">
       <span class="pt-stat-val">{{ partnerSummaries.length }}</span>
-      <span class="pt-stat-lbl">مستخدم مشارك</span>
+      <span class="pt-stat-lbl">{{ 'features.partners.statSharedUser' | translate }}</span>
     </div>
   </div>
 
-  <!-- Loading -->
   <div class="pt-loading" *ngIf="loading">
-    <i class="bi bi-hourglass-split spin"></i> جاري التحميل...
+    <i class="bi bi-hourglass-split spin"></i> {{ 'features.partners.loading' | translate }}
   </div>
 
-  <!-- ══ VIEW: BY PARTNER ══ -->
   <div class="pt-list" *ngIf="!loading && viewMode==='byPartner'">
     <div class="pt-partner-card" *ngFor="let p of partnerSummaries">
 
-      <!-- Card Header -->
       <div class="pt-card-head" (click)="togglePartner(p.userId)">
         <div class="pt-avatar" [class.avatar-manager]="p.role==='Manager'">
           {{ p.userName.charAt(0).toUpperCase() }}
@@ -70,10 +63,10 @@
               {{ getRoleLabel(p.role) }}
             </span>
             <span class="pt-card-chaletscount">
-              <i class="bi bi-house-fill"></i> {{ p.totalChalets }} كوخ
+              <i class="bi bi-house-fill"></i> {{ 'features.partners.chaletCount' | translate: { n: p.totalChalets } }}
             </span>
             <span class="pt-card-avgshare">
-              <i class="bi bi-pie-chart-fill"></i> متوسط {{ p.avgShare | number:'1.0-1' }}%
+              <i class="bi bi-pie-chart-fill"></i> {{ 'features.partners.avgLabel' | translate }} {{ p.avgShare | number:'1.0-1' }}%
             </span>
           </div>
         </div>
@@ -82,7 +75,6 @@
            [class.bi-chevron-down]="expandedPartnerId!==p.userId"></i>
       </div>
 
-      <!-- Expanded: Chalet list -->
       <div class="pt-chalets-list" *ngIf="expandedPartnerId===p.userId">
         <div class="pt-chalet-row" *ngFor="let c of p.chalets">
           <div class="pt-chalet-icon">
@@ -101,11 +93,9 @@
     </div>
   </div>
 
-  <!-- ══ VIEW: BY CHALET ══ -->
   <div class="pt-list" *ngIf="!loading && viewMode==='byChalet'">
     <div class="pt-chalet-card" *ngFor="let ch of chaletsWithPartners">
 
-      <!-- Card Header -->
       <div class="pt-card-head" (click)="toggleChalet(ch.chaletId)">
         <div class="pt-chalet-avatar">
           <i class="bi bi-house-fill"></i>
@@ -113,7 +103,7 @@
         <div class="pt-card-info">
           <span class="pt-card-name">{{ ch.chaletName }}</span>
           <span class="pt-card-chaletscount">
-            <i class="bi bi-people-fill"></i> {{ ch.partners.length }} شركاء
+            <i class="bi bi-people-fill"></i> {{ 'features.partners.partnersOnChalet' | translate: { n: ch.partners.length } }}
           </span>
         </div>
         <i class="bi pt-chevron"
@@ -121,7 +111,6 @@
            [class.bi-chevron-down]="expandedChaletId!==ch.chaletId"></i>
       </div>
 
-      <!-- Expanded: Partners of this chalet -->
       <div class="pt-chalets-list" *ngIf="expandedChaletId===ch.chaletId">
         <div class="pt-chalet-row" *ngFor="let p of ch.partners">
           <div class="pt-avatar sm" [class.avatar-manager]="inferRole(p)==='Manager'">

@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ChaletWithPartners, ChaletOwnerService, ChaletPartner } from '../../service/ChaletOwner-service';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 
 
@@ -16,7 +17,7 @@ interface PartnerSummary {
 
 @Component({
   selector: 'app-partners-component',
-  imports: [CommonModule,FormsModule],
+  imports: [CommonModule, FormsModule, TranslatePipe],
   templateUrl: './partners-component.html',
   styleUrl: './partners-component.css',
 })
@@ -38,7 +39,8 @@ export class PartnersComponent  implements OnInit {
 
   constructor(
     private chaletOwnerService: ChaletOwnerService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private translate: TranslateService
   ) {}
 
   ngOnInit(): void {
@@ -55,7 +57,7 @@ export class PartnersComponent  implements OnInit {
         this.cdr.detectChanges();
       },
       error: () => {
-        this.notify('فشل تحميل بيانات الشركاء', 'error');
+        this.notify(this.translate.instant('features.partners.loadFail'), 'error');
         this.loading = false;
         this.cdr.detectChanges();
       }
@@ -110,7 +112,9 @@ export class PartnersComponent  implements OnInit {
   }
 
   getRoleLabel(role: string): string {
-    return role === 'Manager' ? 'مدير' : 'شريك';
+    return role === 'Manager'
+      ? this.translate.instant('features.partners.roleManager')
+      : this.translate.instant('features.partners.rolePartner');
   }
 
   getRoleClass(role: string): string {

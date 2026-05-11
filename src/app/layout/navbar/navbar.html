@@ -1,11 +1,12 @@
 <!-- TOP NAVBAR — Desktop -->
-<nav class="top-nav" dir="rtl" [class.scrolled]="isScrolled">
+<nav class="top-nav" [class.scrolled]="isScrolled">
 
   <div class="nav-brand">
     <div class="brand-icon">
-      <i class="bi bi-building"></i>
+      <img *ngIf="projectBrand.brand.logoUrl as logo" [src]="logo" [alt]="projectBrand.brand.appName" class="brand-logo-img" />
+      <i *ngIf="!projectBrand.brand.logoUrl" [class]="projectBrand.brand.navbarIconClass"></i>
     </div>
-    <span class="brand-name">إدارة اكواخ الغزال</span>
+    <span class="brand-name">{{ projectBrand.brand.appName }}</span>
   </div>
 
   <ul class="nav-links">
@@ -14,26 +15,35 @@
          routerLinkActive="nav-active"
          class="nav-link-item">
         <i class="{{ item.icon }}"></i>
-        <span class="link-text">{{ item.label }}</span>
+        <span class="link-text">{{ item.labelKey | translate }}</span>
         <span class="link-dot"></span>
       </a>
     </li>
   </ul>
 
   <div class="nav-actions">
-    <!-- ✅ الإشعارات للمدير فقط -->
+    <div class="lang-switcher" role="group" [attr.aria-label]="'lang.choose' | translate">
+      <button type="button"
+              *ngFor="let opt of langOptions"
+              class="lang-btn"
+              [class.active]="language.currentCode() === opt.code"
+              (click)="setLang(opt.code)">
+        {{ opt.labelKey | translate }}
+      </button>
+    </div>
+
     <app-notification-component *ngIf="isManager"></app-notification-component>
 
     <button class="new-booking-btn" type="button" [routerLink]="'/booking/new'">
       <i class="bi bi-plus-lg"></i>
-      حجز جديد
+      {{ 'nav.newBooking' | translate }}
     </button>
   </div>
 
 </nav>
 
 <!-- BOTTOM NAVBAR — Mobile -->
-<nav class="bottom-nav" dir="rtl">
+<nav class="bottom-nav">
   <a *ngFor="let item of mobileNavItems; let i = index"
      [routerLink]="item.route"
      routerLinkActive="bn-active"
@@ -42,10 +52,9 @@
     <div class="bn-icon-wrap">
       <i class="{{ item.icon }}"></i>
     </div>
-    <span class="bn-label">{{ item.label }}</span>
+    <span class="bn-label">{{ item.labelKey | translate }}</span>
   </a>
 
-  <!-- ✅ زر الإشعارات في المحمول للمدير فقط -->
   <button *ngIf="isManager"
           class="bn-item bn-notif-btn"
           type="button"
@@ -54,15 +63,15 @@
       <i class="bi bi-bell-fill"></i>
       <span class="bn-badge" *ngIf="unreadCount > 0">{{ unreadCount > 9 ? '9+' : unreadCount }}</span>
     </div>
-    <span class="bn-label">إشعارات</span>
+    <span class="bn-label">{{ 'nav.notifications' | translate }}</span>
   </button>
 </nav>
 
-<!-- Mobile Notification Drawer — للمدير فقط -->
+<!-- Mobile Notification Drawer -->
 <ng-container *ngIf="isManager">
-  <div class="mobile-notif-drawer" [class.open]="showMobileNotif" dir="rtl">
+  <div class="mobile-notif-drawer" [class.open]="showMobileNotif">
     <div class="drawer-header">
-      <span class="drawer-title"><i class="bi bi-bell-fill"></i> الإشعارات</span>
+      <span class="drawer-title"><i class="bi bi-bell-fill"></i> {{ 'nav.notificationsTitle' | translate }}</span>
       <button class="drawer-close" (click)="toggleMobileNotif()"><i class="bi bi-x-lg"></i></button>
     </div>
     <div class="drawer-list">
@@ -86,13 +95,13 @@
       <ng-template #mobileEmpty>
         <div class="drawer-empty">
           <i class="bi bi-bell-slash"></i>
-          <p>لا توجد إشعارات</p>
+          <p>{{ 'nav.noNotifications' | translate }}</p>
         </div>
       </ng-template>
     </div>
     <div class="drawer-footer" *ngIf="unreadCount > 0">
       <button (click)="markAllRead()" class="drawer-mark-all">
-        <i class="bi bi-check2-all"></i> تحديد الكل كمقروء
+        <i class="bi bi-check2-all"></i> {{ 'nav.markAllRead' | translate }}
       </button>
     </div>
   </div>

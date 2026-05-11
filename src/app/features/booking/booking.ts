@@ -1,5 +1,6 @@
-import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
-import { forkJoin } from 'rxjs';
+import { ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
+import { forkJoin, Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 import {
   BookingExtra, Bookings, BookingService, Payment,
   CreateBookingDto, UpdateBookingDto, DoneBookingDto, AvailableChalet,
@@ -15,23 +16,32 @@ import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { AuthService } from '../../service/Auth-service';
-import { Router, ActivatedRoute, RouterLink } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 import html2canvas from 'html2canvas';
 import { JordanDatePipe } from '../../adds/pipes/jordan-date-pipe';
 import { BookingOverviewComponent, NewBookingRequest } from '../booking-overview/booking-overview';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
+import { LanguageService } from '../../service/language.service';
 
 @Component({
   selector: 'app-booking',
   standalone: true,
   imports: [
-    FormsModule, CommonModule,RouterLink,
-    MatDatepickerModule, MatFormFieldModule, MatInputModule, MatNativeDateModule,JordanDatePipe
-    ,BookingOverviewComponent
+    FormsModule,
+    CommonModule,
+    MatDatepickerModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatNativeDateModule,
+    JordanDatePipe,
+    BookingOverviewComponent,
+    TranslatePipe,
   ],
   templateUrl: './booking.html',
   styleUrl: './booking.css',
 })
-export class Booking implements OnInit {
+export class Booking implements OnInit, OnDestroy {
+  private readonly destroy$ = new Subject<void>();
 
   bookings: Bookings[] = [];
   filteredBookings: Bookings[] = [];
@@ -111,9 +121,9 @@ export class Booking implements OnInit {
   chaletCountMap: Record<string, number> = {};
 
   waitingDateFormatted = '';
-total      = 0;
-totalPages = 0;
-isLoading  = true;
+  total = 0;
+  totalPages = 0;
+  isLoading = true;
   // ─── Edit ───────────────────────────────────────────────────────────────
   editForm: UpdateBookingDto = {
     bookingId: 0, customerName: '', phone: '', payMoney: null, deposit: 0, removedExtraIds: []
@@ -154,11 +164,6 @@ isLoading  = true;
   notesBooking: Bookings | null = null;
   newNoteText = '';
   noteSending = false;
-  readonly periodLabels: Record<number, string> = { 0: 'صباحي', 1: 'مسائي', 2: 'يوم كامل' };
-  readonly statusLabels: Record<string, string> = {
-    Pending: 'قيد الانتظار', Confirmed: 'مؤكد',
-    Cancelled: 'ملغي', WaitingList: 'قائمة الانتظار', Done: 'تم الاستلام',
-  };
   readonly statusClasses: Record<string, string> = {
     Pending: 'badge-pending', Confirmed: 'badge-confirmed',
     Cancelled: 'badge-cancelled', WaitingList: 'badge-waiting', Done: 'badge-done',
@@ -171,8 +176,10 @@ isLoading  = true;
     private cdr: ChangeDetectorRef,
     public auth: AuthService,
     private router: Router,
-    private route: ActivatedRoute
-  ) { }
+    private route: ActivatedRoute,
+    private translate: TranslateService,
+    private language: LanguageService,
+  ) {}
 
   // ══════════════════════════════════════════════════════════════════════════
   // Lifecycle
@@ -187,7 +194,9 @@ ngOnInit(): void {
     chalets:  this.chaletService.getAll(),
     extras:   this.extrasService.getAll(),
     upcoming: this.bookingService.getUpcomingBookings(),
-  }).subscribe({
+  })
+    .pipe(takeUntil(this.destroy$))
+    .subscribe({
     next: ({ chalets, extras, upcoming }) => {
       this.chalets          = chalets;
       this.extras           = extras.filter((e: any) => e.isActive);
@@ -220,8 +229,11 @@ ngOnInit(): void {
         }
       });
     },
-    error: () => this.showNotification('فشل تحميل البيانات', 'error'),
+    error: () =>
+      this.showNotification(this.translate.instant('booking.toastLoadFail'), 'error'),
   });
+
+  this.translate.onLangChange.pipe(takeUntil(this.destroy$)).subscribe(() => this.cdr.markForCheck());
 }
 // عدّل loadBookings
 loadBookings(): void {
@@ -255,7 +267,7 @@ loadBookings(): void {
     },
     error: () => {
       this.isLoading = false;
-      this.showNotification('فشل تحميل الحجوزات', 'error');
+      this.showNotification(this.translate.instant('booking.toastBookingsLoadFail'), 'error');
       this.cdr.detectChanges();
     }
   });
@@ -481,14 +493,16 @@ get pageNumbers(): number[] {
 
   goToStep2(): void {
     if (this.newBooking.period < 0 || !this.isPeriodAvailableForType(this.newBooking.period)) {
-      this.showNotification('يرجى اختيار فترة متاحة', 'error'); return;
+      this.showNotification(this.translate.instant('booking.validationSelectPeriod'), 'error');
+      return;
     }
     this.addStep = 2; this.cdr.detectChanges();
   }
 
   goToStep3(): void {
     if (!this.newBooking.date) {
-      this.showNotification('يرجى اختيار التاريخ', 'error'); return;
+      this.showNotification(this.translate.instant('booking.validationSelectDate'), 'error');
+      return;
     }
     this.addStep = 3; this.cdr.detectChanges();
   }
@@ -608,7 +622,10 @@ get pageNumbers(): number[] {
   // ══════════════════════════════════════════════════════════════════════════
 
   addExtraToNewBooking(): void {
-    if (!this.addSelectedExtraId) { this.showNotification('يرجى اختيار إضافة', 'error'); return; }
+    if (!this.addSelectedExtraId) {
+      this.showNotification(this.translate.instant('booking.validationSelectExtra'), 'error');
+      return;
+    }
     const extra = this.extras.find(e => e.id === +this.addSelectedExtraId);
     if (!extra) return;
     const existing = this.addExtrasList.find(e => e.extraId === +this.addSelectedExtraId);
@@ -629,9 +646,18 @@ get pageNumbers(): number[] {
   // ══════════════════════════════════════════════════════════════════════════
 
   submitNewBooking(): void {
-    if (!this.newBooking.customerName?.trim()) { this.showNotification('يرجى إدخال اسم العميل', 'error'); return; }
-    if (!this.newBooking.phone?.trim()) { this.showNotification('يرجى إدخال رقم الهاتف', 'error'); return; }
-    if (!this.newBooking.date) { this.showNotification('يرجى اختيار التاريخ', 'error'); return; }
+    if (!this.newBooking.customerName?.trim()) {
+      this.showNotification(this.translate.instant('booking.validationCustomerName'), 'error');
+      return;
+    }
+    if (!this.newBooking.phone?.trim()) {
+      this.showNotification(this.translate.instant('booking.validationPhone'), 'error');
+      return;
+    }
+    if (!this.newBooking.date) {
+      this.showNotification(this.translate.instant('booking.validationSelectDate'), 'error');
+      return;
+    }
 
     const dto: CreateBookingDto = {
       customerName: this.newBooking.customerName.trim(),
@@ -650,10 +676,20 @@ get pageNumbers(): number[] {
       next: (res: any) => {
         const msg = this.extractMessage(res);
         const success = this.extractSuccess(res);
-        this.showNotification(msg || (success ? 'تم إضافة الحجز بنجاح ✓' : 'حدث خطأ'), success ? 'success' : 'error');
+        this.showNotification(
+          msg ||
+            (success
+              ? this.translate.instant('booking.toastBookingAdded')
+              : this.translate.instant('booking.toastGenericError')),
+          success ? 'success' : 'error',
+        );
         if (success) { this.closeAddModal(); this.loadBookings(); }
       },
-      error: err => this.showNotification(err?.error?.message || 'فشل إنشاء الحجز', 'error'),
+      error: (err) =>
+        this.showNotification(
+          err?.error?.message || this.translate.instant('booking.toastCreateFail'),
+          'error',
+        ),
     });
   }
 
@@ -722,7 +758,8 @@ openEditModal(booking: Bookings, fromPanel = false): void {
     this.bookingService.updateBooking(dto).subscribe({
       next: (res: any) => {
         this.editSaving = false;
-        const msg = this.extractMessage(res) || 'تم حفظ التعديلات بنجاح ✓';
+        const msg =
+          this.extractMessage(res) || this.translate.instant('booking.toastSaved');
         this.editMessage = msg;
         this.showNotification(msg, 'success');
         this.editForm.payMoney = 0;
@@ -732,7 +769,7 @@ openEditModal(booking: Bookings, fromPanel = false): void {
       },
       error: err => {
         this.editSaving = false;
-        const msg = err?.error?.message || 'فشل حفظ التعديلات';
+        const msg = err?.error?.message || this.translate.instant('booking.toastSaveFail');
         this.editMessage = msg;
         this.showNotification(msg, 'error');
         this.cdr.detectChanges();
@@ -748,12 +785,23 @@ openEditModal(booking: Bookings, fromPanel = false): void {
     ).subscribe({
       next: (res: any) => {
         this.editExtraAdding = false;
-        const isFail = typeof res === 'string'
-          ? res.includes('فشل') || res.includes('خطأ')
-          : (res?.success === false || res?.isSuccess === false);
+        const failAr = 'فشل';
+        const errAr = 'خطأ';
+        const failEn = this.translate.instant('booking.failKeyword');
+        const errEn = this.translate.instant('booking.errorKeyword');
+        const isFail =
+          typeof res === 'string'
+            ? res.includes(failAr) ||
+              res.includes(errAr) ||
+              res.includes(failEn) ||
+              res.includes(errEn)
+            : res?.success === false || res?.isSuccess === false;
         this.showNotification(
-          this.extractMessage(res) || (isFail ? 'فشل الإضافة' : 'تمت الإضافة بنجاح ✓'),
-          isFail ? 'error' : 'success'
+          this.extractMessage(res) ||
+            (isFail
+              ? this.translate.instant('booking.toastAddFail')
+              : this.translate.instant('booking.toastAddedOk')),
+          isFail ? 'error' : 'success',
         );
         if (!isFail) {
           this.editAddExtraId = 0;
@@ -775,7 +823,10 @@ openEditModal(booking: Bookings, fromPanel = false): void {
       },
       error: err => {
         this.editExtraAdding = false;
-        this.showNotification(err?.error?.message || 'فشل إضافة الخدمة', 'error');
+        this.showNotification(
+          err?.error?.message || this.translate.instant('booking.toastExtraFail'),
+          'error',
+        );
         this.cdr.detectChanges();
       },
     });
@@ -798,20 +849,27 @@ openEditModal(booking: Bookings, fromPanel = false): void {
   confirmDeposit(): void {
     if (!this.selectedBooking || this.depositSaving) return;
     if (!this.depositAmount || this.depositAmount <= 0) {
-      this.showNotification('يرجى إدخال مبلغ الديبوزت', 'error'); return;
+      this.showNotification(this.translate.instant('booking.validationDeposit'), 'error');
+      return;
     }
     this.depositSaving = true;
     this.bookingService.confirmBooking(this.selectedBooking.id, this.depositAmount).subscribe({
       next: (res: any) => {
         this.depositSaving = false;
         const success = this.extractSuccess(res);
-        this.showNotification(this.extractMessage(res) || 'تم تأكيد الحجز بنجاح ✓', success ? 'success' : 'error');
+        this.showNotification(
+          this.extractMessage(res) || this.translate.instant('booking.toastConfirmOk'),
+          success ? 'success' : 'error',
+        );
         if (success) { this.closeDepositModal(); this.showDetailPanel = false; this.loadBookings(); }
         this.cdr.detectChanges();
       },
       error: err => {
         this.depositSaving = false;
-        this.showNotification(err?.error?.message || 'فشل تأكيد الحجز', 'error');
+        this.showNotification(
+          err?.error?.message || this.translate.instant('booking.toastConfirmFail'),
+          'error',
+        );
         this.cdr.detectChanges();
       },
     });
@@ -834,7 +892,7 @@ openEditModal(booking: Bookings, fromPanel = false): void {
 
     // ✅ سبب الإلغاء إجباري
     if (!this.cancelReason?.trim()) {
-      this.showNotification('يرجى إدخال سبب الإلغاء', 'error');
+      this.showNotification(this.translate.instant('booking.validationCancelReason'), 'error');
       return;
     }
 
@@ -846,13 +904,19 @@ openEditModal(booking: Bookings, fromPanel = false): void {
         this.showDetailPanel = false;
         this.cancelTargetId = null;
         this.cancelReason = '';
-        this.showNotification(this.extractMessage(res) || 'تم إلغاء الحجز', 'success');
+        this.showNotification(
+          this.extractMessage(res) || this.translate.instant('booking.toastCancelled'),
+          'success',
+        );
         this.loadBookings();
         this.cdr.detectChanges();
       },
       error: err => {
         this.cancelSaving = false;
-        this.showNotification(err?.error?.message || 'فشل إلغاء الحجز', 'error');
+        this.showNotification(
+          err?.error?.message || this.translate.instant('booking.toastCancelFail'),
+          'error',
+        );
         this.cdr.detectChanges();
       },
     });
@@ -872,7 +936,7 @@ openEditModal(booking: Bookings, fromPanel = false): void {
     const today = this.formatDateLocal(new Date());
     const bookingDate = this.parseDateStringAsLocal(booking.date);
     if (bookingDate > today) {
-      this.showNotification('لا يمكن تسليم الكوخ قبل يوم الحجز', 'error');
+      this.showNotification(this.translate.instant('booking.validationDeliverDate'), 'error');
       return;
     }
     this.doneTargetId = id;
@@ -929,7 +993,8 @@ openEditModal(booking: Bookings, fromPanel = false): void {
   confirmDone(): void {
     if (!this.doneTargetId || this.doneSaving) return;
     if (!this.doneSelectedChaletId) {
-      this.showNotification('يرجى اختيار الكوخ', 'error'); return;
+      this.showNotification(this.translate.instant('booking.validationSelectChalet'), 'error');
+      return;
     }
     this.doneSaving = true;
     this.bookingService.markAsDone(this.doneTargetId, {
@@ -940,13 +1005,19 @@ openEditModal(booking: Bookings, fromPanel = false): void {
         this.showDoneConfirm = false;
         this.showDetailPanel = false;
         this.doneTargetId = null;
-        this.showNotification(this.extractMessage(res) || 'تم تسجيل الاستلام بنجاح ✓', 'success');
+        this.showNotification(
+          this.extractMessage(res) || this.translate.instant('booking.toastReceiveOk'),
+          'success',
+        );
         this.loadBookings();
         this.cdr.detectChanges();
       },
       error: err => {
         this.doneSaving = false;
-        this.showNotification(err?.error?.message || 'فشل تسجيل الاستلام', 'error');
+        this.showNotification(
+          err?.error?.message || this.translate.instant('booking.toastReceiveFail'),
+          'error',
+        );
         this.cdr.detectChanges();
       },
     });
@@ -1006,7 +1077,8 @@ openEditModal(booking: Bookings, fromPanel = false): void {
             ...(this.notesBooking.notes ?? []),
             {
               id: Date.now(), bookingId: this.notesBooking.id,
-              note: text, userName: 'أنت',
+              note: text,
+              userName: this.translate.instant('misc.you'),
               createdAt: new Date().toISOString()
             }
           ];
@@ -1018,7 +1090,7 @@ openEditModal(booking: Bookings, fromPanel = false): void {
       },
       error: () => {
         this.noteSending = false;
-        this.showNotification('فشل إرسال الملاحظة', 'error');
+        this.showNotification(this.translate.instant('booking.toastNoteFail'), 'error');
         this.cdr.detectChanges();
       }
     });
@@ -1056,15 +1128,30 @@ openEditModal(booking: Bookings, fromPanel = false): void {
     return `${String(day).padStart(2, '0')}/${String(month).padStart(2, '0')}/${year}`;
   }
 
-  getStatusLabel(s: string): string { return this.statusLabels[s] ?? s; }
-  getStatusClass(s: string): string { return this.statusClasses[s] ?? ''; }
-  getPeriodLabel(p: number | undefined): string { return p != null ? (this.periodLabels[p] ?? '-') : '-'; }
+  getStatusLabel(s: string): string {
+    const key = `status.${s}` as const;
+    const t = this.translate.instant(key);
+    return t !== key ? t : s;
+  }
+  getStatusClass(s: string): string {
+    return this.statusClasses[s] ?? '';
+  }
+  getPeriodLabel(p: number | undefined): string {
+    if (p == null) return '-';
+    const key = `period.${p}` as const;
+    const t = this.translate.instant(key);
+    return t !== key ? t : '-';
+  }
   getChaletName(id: number | null): string {
-    return id ? (this.chalets.find(c => c.id === id)?.name ?? `شاليه ${id}`) : '—';
+    if (!id) return '—';
+    const name = this.chalets.find((c) => c.id === id)?.name;
+    return name ?? this.translate.instant('misc.chaletNamed', { id });
   }
 
   getChaletTypeLabel(raw: any): string {
-    return normalizeChaletType(raw) === 1 ? '👑 رويال' : '🏠 عادي';
+    return normalizeChaletType(raw) === 1
+      ? this.translate.instant('misc.royal')
+      : this.translate.instant('misc.normal');
   }
 
   isRoyal(raw: any): boolean {
@@ -1234,12 +1321,14 @@ get endIndex():   number { return Math.min(this.currentPage * this.pageSize, thi
     const win = window.open('', '_blank', 'width=800,height=700');
     if (!win) return;
 
+    const rtl = this.language.isRtl();
+    const lang = this.translate.currentLang || 'ar';
     win.document.write(`
       <!DOCTYPE html>
-      <html dir="rtl" lang="ar">
+      <html dir="${rtl ? 'rtl' : 'ltr'}" lang="${lang}">
       <head>
         <meta charset="UTF-8" />
-        <title>سند قبض #${this.invoiceBooking?.id}</title>
+        <title>${this.translate.instant('misc.invoiceTitle', { id: this.invoiceBooking?.id })}</title>
         <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
         <style>
           * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -1247,7 +1336,7 @@ get endIndex():   number { return Math.min(this.currentPage * this.pageSize, thi
             font-family: 'Cairo', sans-serif;
             background: #fff;
             color: #1a1a2e;
-            direction: rtl;
+            direction: ${rtl ? 'rtl' : 'ltr'};
             padding: 32px;
             font-size: 14px;
           }
@@ -1261,7 +1350,7 @@ get endIndex():   number { return Math.min(this.currentPage * this.pageSize, thi
           }
           .inv-brand { font-size: 28px; font-weight: 900; color: #1a1a2e; letter-spacing: -1px; }
           .inv-brand span { color: #c9a84c; }
-          .inv-meta { text-align: left; }
+          .inv-meta { text-align: ${rtl ? 'left' : 'right'}; }
           .inv-meta .inv-num { font-size: 22px; font-weight: 900; color: #c9a84c; }
           .inv-meta .inv-date { font-size: 12px; color: #666; margin-top: 4px; }
           .inv-status {
@@ -1295,7 +1384,7 @@ get endIndex():   number { return Math.min(this.currentPage * this.pageSize, thi
             padding: 10px 14px;
             font-size: 12px;
             font-weight: 700;
-            text-align: right;
+            text-align: ${rtl ? 'right' : 'left'};
           }
           .inv-table td {
             padding: 10px 14px;
@@ -1354,12 +1443,13 @@ private async captureFixedWidthCanvas(sourceEl: HTMLElement): Promise<HTMLCanvas
   const clone = sourceEl.cloneNode(true) as HTMLElement;
 
   const container = document.createElement('div');
+  const dir = this.language.isRtl() ? 'rtl' : 'ltr';
   container.style.cssText = `
     position: fixed;
     top: -9999px;
     left: -9999px;
     width: 800px;
-    direction: rtl;
+    direction: ${dir};
     font-family: 'Cairo', sans-serif;
     background: #ffffff;
     z-index: -1;
@@ -1440,11 +1530,14 @@ async shareInvoice(): Promise<void> {
   // ✅ استخدم الـ blob الجاهز من prepareShareImage بدل ما تعمل capture جديد
   const blob = this.shareBlob;
   if (!blob) {
-    this.showNotification('الفاتورة لم تجهز بعد، انتظر لحظة', 'error');
+    this.showNotification(this.translate.instant('booking.toastInvoiceNotReady'), 'error');
     return;
   }
 
-  const file = new File([blob], `فاتورة-${this.invoiceBooking.id}.png`, {
+  const file = new File(
+    [blob],
+    this.translate.instant('misc.invoiceFile', { id: this.invoiceBooking.id }),
+    {
     type: 'image/png'
   });
 
@@ -1456,14 +1549,16 @@ async shareInvoice(): Promise<void> {
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `فاتورة-${this.invoiceBooking.id}.png`;
+      a.download = this.translate.instant('misc.invoiceFile', {
+        id: this.invoiceBooking.id,
+      });
       a.click();
       URL.revokeObjectURL(url);
-      this.showNotification('تم تنزيل الفاتورة ✓', 'success');
+      this.showNotification(this.translate.instant('booking.toastDownloaded'), 'success');
     }
   } catch (err: any) {
     if (err?.name !== 'AbortError') {
-      this.showNotification('فشل المشاركة', 'error');
+      this.showNotification(this.translate.instant('booking.toastShareFail'), 'error');
     }
   }
 }
@@ -1590,4 +1685,9 @@ onOverviewBookingDetail(bookingId: number): void {
     });
   }
 }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
 }

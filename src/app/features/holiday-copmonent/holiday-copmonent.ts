@@ -2,10 +2,11 @@ import { CommonModule } from '@angular/common';
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Holiday, HolidayService } from '../../service/holiday-service';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-holiday-copmonent',
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, TranslatePipe],
 
   templateUrl: './holiday-copmonent.html',
   styleUrl: './holiday-copmonent.css',
@@ -28,7 +29,8 @@ export class HolidayCopmonent implements OnInit {
  
   constructor(
     private holidayService: HolidayService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private translate: TranslateService
   ) {}
  
   ngOnInit(): void {
@@ -45,7 +47,7 @@ export class HolidayCopmonent implements OnInit {
         this.cdr.detectChanges();
       },
       error: () => {
-        this.notify('فشل تحميل الإجازات', 'error');
+        this.notify(this.translate.instant('features.holiday.loadFail'), 'error');
         this.loading = false;
         this.cdr.detectChanges();
       }
@@ -70,7 +72,7 @@ export class HolidayCopmonent implements OnInit {
  
   submit(): void {
     if (!this.form.name.trim() || !this.form.date) {
-      this.notify('يرجى ملء جميع الحقول', 'error');
+      this.notify(this.translate.instant('features.holiday.fillAll'), 'error');
       return;
     }
     this.submitting = true;
@@ -83,12 +85,17 @@ export class HolidayCopmonent implements OnInit {
       next: () => {
         this.submitting = false;
         this.showModal = false;
-        this.notify(this.isEdit ? 'تم التعديل بنجاح' : 'تمت الإضافة بنجاح', 'success');
+        this.notify(
+          this.isEdit
+            ? this.translate.instant('features.holiday.saveOkEdit')
+            : this.translate.instant('features.holiday.saveOkAdd'),
+          'success'
+        );
         this.load();
       },
       error: () => {
         this.submitting = false;
-        this.notify('حدث خطأ، يرجى المحاولة مرة أخرى', 'error');
+        this.notify(this.translate.instant('features.holiday.saveFail'), 'error');
       }
     });
   }
@@ -109,12 +116,12 @@ export class HolidayCopmonent implements OnInit {
       next: () => {
         this.showDeleteModal = false;
         this.deleteTarget = null;
-        this.notify('تم الحذف بنجاح', 'success');
+        this.notify(this.translate.instant('features.holiday.deleteOk'), 'success');
         this.load();
       },
       error: () => {
         this.showDeleteModal = false;
-        this.notify('فشل الحذف', 'error');
+        this.notify(this.translate.instant('features.holiday.deleteFail'), 'error');
       }
     });
   }
@@ -123,7 +130,9 @@ export class HolidayCopmonent implements OnInit {
     if (!d) return '';
     const part = d.split('T')[0];
     const [y, m, day] = part.split('-').map(Number);
-    return new Date(y, m - 1, day).toLocaleDateString('ar-EG', {
+    const lang = this.translate.currentLang || 'ar';
+    const loc = lang === 'ar' ? 'ar-EG' : lang === 'fr' ? 'fr-FR' : 'en-GB';
+    return new Date(y, m - 1, day).toLocaleDateString(loc, {
       year: 'numeric', month: 'long', day: 'numeric'
     });
   }

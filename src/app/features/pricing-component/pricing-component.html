@@ -1,4 +1,4 @@
-<div class="pricing-wrap" dir="rtl">
+﻿<div class="pricing-wrap">
 
     <!-- Toast -->
     <div class="pr-toast" [class.show]="showToast" [class.toast-success]="toastType==='success'"
@@ -13,19 +13,19 @@
         <div class="pr-title">
             <i class="bi bi-currency-dollar"></i>
             <div>
-                <h2>إدارة الأسعار</h2>
-                <p>تسعير الشاليهات حسب النوع والفترة واليوم</p>
+                <h2>{{ 'features.pricing.pageTitle' | translate }}</h2>
+                <p>{{ 'features.pricing.pageSub' | translate }}</p>
             </div>
         </div>
 
         <button class="pr-btn-add" (click)="openAdd()">
-            <i class="bi bi-plus-lg"></i> إضافة سعر
+            <i class="bi bi-plus-lg"></i> {{ 'features.pricing.addPrice' | translate }}
         </button>
     </div>
 
     <!-- Loading -->
     <div class="pr-loading" *ngIf="loading">
-        <i class="bi bi-hourglass-split spin"></i> جاري التحميل...
+        <i class="bi bi-hourglass-split spin"></i> {{ 'features.pricing.loading' | translate }}
     </div>
 
     <ng-container *ngIf="!loading">
@@ -33,7 +33,7 @@
         <!-- ══ Calculator ══ -->
         <div class="pr-calc-card">
             <div class="pr-calc-title">
-                <i class="bi bi-calculator-fill"></i> حاسبة السعر
+                <i class="bi bi-calculator-fill"></i> {{ 'features.pricing.calculator' | translate }}
             </div>
 
             <div class="pr-calc-body">
@@ -41,28 +41,28 @@
                 <div class="pr-calc-fields">
 
                     <div class="pr-select-group">
-                        <label>نوع الشاليه</label>
+                        <label>{{ 'features.pricing.chaletType' | translate }}</label>
                         <select [(ngModel)]="calcType" class="pr-select">
                             <option *ngFor="let o of chaletTypeOptions" [value]="o.value">
-                                {{ o.label }}
+                                {{ o.labelKey | translate }}
                             </option>
                         </select>
                     </div>
 
                     <div class="pr-select-group">
-                        <label>الفترة</label>
+                        <label>{{ 'features.pricing.period' | translate }}</label>
                         <select [(ngModel)]="calcPeriod" class="pr-select">
                             <option *ngFor="let o of periodOptions" [value]="o.value">
-                                {{ o.label }}
+                                {{ o.labelKey | translate }}
                             </option>
                         </select>
                     </div>
 
                     <div class="pr-select-group">
-                        <label>نوع اليوم</label>
+                        <label>{{ 'features.pricing.dayType' | translate }}</label>
                         <select [(ngModel)]="calcDayType" class="pr-select">
                             <option *ngFor="let o of dayTypeOptions" [value]="o.value">
-                                {{ o.label }}
+                                {{ o.labelKey | translate }}
                             </option>
                         </select>
                     </div>
@@ -70,15 +70,15 @@
                     <button class="pr-btn-calc" (click)="calculate()" [disabled]="calcLoading">
                         <i class="bi" [class.bi-search]="!calcLoading" [class.bi-hourglass-split]="calcLoading"></i>
 
-                        {{ calcLoading ? 'جاري...' : 'احسب' }}
+                        {{ calcLoading ? ('features.pricing.calcShort' | translate) : ('features.pricing.calc' | translate) }}
                     </button>
 
                 </div>
 
                 <div class="pr-calc-result" *ngIf="calcResult !== null">
-                    <span class="result-label">السعر المحسوب</span>
+                    <span class="result-label">{{ 'features.pricing.resultLabel' | translate }}</span>
                     <span class="result-value">
-                        {{ calcResult }} <small>د.أ</small>
+                        {{ calcResult }} <small>{{ 'misc.currency' | translate }}</small>
                     </span>
                 </div>
 
@@ -89,13 +89,13 @@
         <div class="pr-table-card">
 
             <div class="pr-table-header">
-                <h3><i class="bi bi-table"></i> جدول الأسعار</h3>
-                <span class="pr-count">{{ pricings.length }} سعر</span>
+                <h3><i class="bi bi-table"></i> {{ 'features.pricing.tableTitle' | translate }}</h3>
+                <span class="pr-count">{{ 'features.pricing.count' | translate: { n: pricings.length } }}</span>
             </div>
 
             <div class="pr-empty" *ngIf="pricings.length === 0">
                 <i class="bi bi-tag"></i>
-                <p>لا توجد أسعار مسجلة</p>
+                <p>{{ 'features.pricing.empty' | translate }}</p>
             </div>
 
             <div class="pr-table-wrapper" *ngIf="pricings.length > 0">
@@ -105,48 +105,48 @@
                     <thead>
                         <tr>
                             <th>#</th>
-                            <th>نوع الشاليه</th>
-                            <th>الفترة</th>
-                            <th>نوع اليوم</th>
-                            <th>السعر</th>
-                            <th>إجراءات</th>
+                            <th>{{ 'features.pricing.colChaletType' | translate }}</th>
+                            <th>{{ 'features.pricing.colPeriod' | translate }}</th>
+                            <th>{{ 'features.pricing.colDayType' | translate }}</th>
+                            <th>{{ 'features.pricing.colPrice' | translate }}</th>
+                            <th>{{ 'features.pricing.colActions' | translate }}</th>
                         </tr>
                     </thead>
 
                     <tbody>
                         <tr *ngFor="let p of pricings">
 
-                            <td class="pr-cell-id" data-label="#">
+                            <td class="pr-cell-id" [attr.data-label]="'#'">
                                 {{ p.id }}
                             </td>
 
-                            <td data-label="نوع الشاليه">
+                            <td [attr.data-label]="'features.pricing.colChaletType' | translate">
                                 <span class="pr-type-badge" [class.type-royal]="p.chaletType==='Royal'">
                                     {{ getChaletTypeLabel(p.chaletType) }}
                                 </span>
                             </td>
 
-                            <td data-label="الفترة">
+                            <td [attr.data-label]="'features.pricing.colPeriod' | translate">
                                 <span class="pr-period-badge" [ngClass]="getPeriodClass(p.period)">
                                     {{ getPeriodLabel(p.period) }}
                                 </span>
                             </td>
 
-                            <td data-label="نوع اليوم">
+                            <td [attr.data-label]="'features.pricing.colDayType' | translate">
                                 <span class="pr-day-badge" [ngClass]="getDayTypeClass(p.dayType)">
                                     {{ getDayTypeLabel(p.dayType) }}
                                 </span>
                             </td>
 
-                            <td data-label="السعر" class="pr-cell-price">
+                            <td [attr.data-label]="'features.pricing.colPrice' | translate" class="pr-cell-price">
                                 <div class=" d-flex flex-row justify-content-end">
                                     <strong >{{ p.price }}</strong>
-                                    <small class="m-1">د.أ</small>
+                                    <small class="m-1">{{ 'misc.currency' | translate }}</small>
                                 </div>
 
                             </td>
 
-                            <td data-label="إجراءات">
+                            <td [attr.data-label]="'features.pricing.colActions' | translate">
                                 <div class="pr-actions">
                                     <button class="pr-act-btn edit" (click)="openEdit(p)">
                                         <i class="bi bi-pencil-fill"></i>
@@ -170,7 +170,7 @@
         <div class="pr-chalets-card">
 
             <div class="pr-table-header">
-                <h3><i class="bi bi-house-fill"></i> الشاليهات والفترات المتاحة</h3>
+                <h3><i class="bi bi-house-fill"></i> {{ 'features.pricing.chaletPeriodsTitle' | translate }}</h3>
             </div>
 
             <div class="pr-chalets-grid">
@@ -185,7 +185,7 @@
                     <div class="pr-chalet-body">
                         <span class="pr-chalet-name">{{ c.name }}</span>
                         <span class="pr-chalet-type">
-                            {{ c.type === 'Royal' ? '👑 رويال' : '🏠 عادي' }}
+                            {{ c.type === 'Royal' ? ('features.chalet.royal' | translate) : ('features.chalet.normal' | translate) }}
                         </span>
                         <span class="pr-chalet-periods">
                             {{ getPeriodsText(c) }}
@@ -198,8 +198,7 @@
                         </span>
 
                         <span class="pr-status-label">
-                            {{ c.status==='Available' ? 'متاح' :
-                            c.status==='Booked' ? 'محجوز' : 'صيانة' }}
+                            {{ getChaletStatusLabel(c.status) }}
                         </span>
                     </div>
 
@@ -219,7 +218,7 @@
             <div class="pr-modal-header">
                 <i class="bi" [class.bi-plus-circle-fill]="!isEdit" [class.bi-pencil-fill]="isEdit"></i>
 
-                <h3>{{ isEdit ? 'تعديل السعر' : 'إضافة سعر جديد' }}</h3>
+                <h3>{{ isEdit ? ('features.pricing.modalEdit' | translate) : ('features.pricing.modalAdd' | translate) }}</h3>
 
                 <button class="pr-modal-close" (click)="closeModal()">
                     <i class="bi bi-x-lg"></i>
@@ -231,19 +230,19 @@
                 <div class="pr-form-row">
 
                     <div class="pr-form-group">
-                        <label>نوع الشاليه</label>
+                        <label>{{ 'features.pricing.chaletType' | translate }}</label>
                         <select [(ngModel)]="form.chaletType" class="pr-select">
                             <option *ngFor="let o of chaletTypeOptions" [value]="o.value">
-                                {{ o.label }}
+                                {{ o.labelKey | translate }}
                             </option>
                         </select>
                     </div>
 
                     <div class="pr-form-group">
-                        <label>الفترة</label>
+                        <label>{{ 'features.pricing.period' | translate }}</label>
                         <select [(ngModel)]="form.period" class="pr-select">
                             <option *ngFor="let o of periodOptions" [value]="o.value">
-                                {{ o.label }}
+                                {{ o.labelKey | translate }}
                             </option>
                         </select>
                     </div>
@@ -253,16 +252,16 @@
                 <div class="pr-form-row">
 
                     <div class="pr-form-group">
-                        <label>نوع اليوم</label>
+                        <label>{{ 'features.pricing.dayType' | translate }}</label>
                         <select [(ngModel)]="form.dayType" class="pr-select">
                             <option *ngFor="let o of dayTypeOptions" [value]="o.value">
-                                {{ o.label }}
+                                {{ o.labelKey | translate }}
                             </option>
                         </select>
                     </div>
 
                     <div class="pr-form-group">
-                        <label>السعر (د.أ)</label>
+                        <label>{{ 'features.pricing.priceLabel' | translate: { currency: ('misc.currency' | translate) } }}</label>
                         <input type="number" [(ngModel)]="form.price" class="pr-input" />
                     </div>
 
@@ -271,12 +270,12 @@
             </div>
 
             <div class="pr-modal-footer">
-                <button class="pr-btn-ghost" (click)="closeModal()">إلغاء</button>
+                <button class="pr-btn-ghost" (click)="closeModal()">{{ 'misc.cancel' | translate }}</button>
 
                 <button class="pr-btn-primary" (click)="submit()" [disabled]="submitting">
                     <i class="bi" [class.bi-check-lg]="!submitting" [class.bi-hourglass-split]="submitting"></i>
 
-                    {{ submitting ? 'جاري الحفظ...' : (isEdit ? 'حفظ التعديل' : 'إضافة') }}
+                    {{ submitting ? ('features.pricing.saving' | translate) : (isEdit ? ('features.pricing.saveEdit' | translate) : ('features.pricing.saveAdd' | translate)) }}
                 </button>
             </div>
 
@@ -291,19 +290,19 @@
 
             <div class="pr-modal-header danger">
                 <i class="bi bi-exclamation-triangle-fill"></i>
-                <h3>تأكيد الحذف</h3>
+                <h3>{{ 'features.pricing.deleteTitle' | translate }}</h3>
             </div>
 
             <div class="pr-modal-body">
                 <p class="pr-danger-text">
-                    هل تريد حذف هذا السعر؟
+                    {{ 'features.pricing.deleteMsg' | translate }}
                 </p>
             </div>
 
             <div class="pr-modal-footer">
-                <button class="pr-btn-ghost" (click)="cancelDelete()">تراجع</button>
+                <button class="pr-btn-ghost" (click)="cancelDelete()">{{ 'misc.back' | translate }}</button>
                 <button class="pr-btn-danger" (click)="doDelete()">
-                    <i class="bi bi-trash-fill"></i> حذف
+                    <i class="bi bi-trash-fill"></i> {{ 'misc.delete' | translate }}
                 </button>
             </div>
 

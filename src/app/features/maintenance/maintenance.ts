@@ -4,10 +4,11 @@ import { CommonModule } from '@angular/common';
 import { HttpClientModule } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { Chalet, ChaletService } from '../../service/chalet-service';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-maintenance',
-  imports: [CommonModule, FormsModule, HttpClientModule],
+  imports: [CommonModule, FormsModule, HttpClientModule, TranslatePipe],
   templateUrl: './maintenance.html',
   styleUrl: './maintenance.css',
 })
@@ -44,15 +45,16 @@ export class Maintenance implements OnInit {
   editForm: UpdateMaintenanceDto = { description: '', status: MaintenanceStatus.Open };
 
   statusOptions = [
-    { label: 'مفتوح', value: MaintenanceStatus.Open },
-    { label: 'قيد التنفيذ', value: MaintenanceStatus.InProgress },
-    { label: 'مغلق', value: MaintenanceStatus.Closed },
+    { labelKey: 'features.maintenance.open', value: MaintenanceStatus.Open },
+    { labelKey: 'features.maintenance.inProgress', value: MaintenanceStatus.InProgress },
+    { labelKey: 'features.maintenance.closed', value: MaintenanceStatus.Closed },
   ];
 
   constructor(
     private maintenanceService: MaintenanceService,
-    private chaletService: ChaletService
-    , private cdr: ChangeDetectorRef
+    private chaletService: ChaletService,
+    private cdr: ChangeDetectorRef,
+    private translate: TranslateService,
   ) { }
 
   ngOnInit(): void {
@@ -96,7 +98,7 @@ export class Maintenance implements OnInit {
 
       },
       error: () => {
-        this.errorMessage = 'حدث خطأ أثناء تحميل البيانات';
+        this.errorMessage = this.translate.instant('features.maintenance.loadError');
         this.isLoading = false;
         // Demo data for display
         this.requests = [
@@ -247,9 +249,9 @@ export class Maintenance implements OnInit {
 
   getStatusLabel(status?: string): string {
     switch (status) {
-      case 'Open': return 'مفتوح';
-      case 'InProgress': return 'قيد التنفيذ';
-      case 'Closed': return 'مغلق';
+      case 'Open': return this.translate.instant('features.maintenance.open');
+      case 'InProgress': return this.translate.instant('features.maintenance.inProgress');
+      case 'Closed': return this.translate.instant('features.maintenance.closed');
       default: return status || '';
     }
   }

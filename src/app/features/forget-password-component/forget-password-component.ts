@@ -3,10 +3,11 @@ import { AuthService } from '../../service/Auth-service';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-forget-password-component',
-  imports: [CommonModule, FormsModule, RouterModule],
+  imports: [CommonModule, FormsModule, RouterModule, TranslatePipe],
   templateUrl: './forget-password-component.html',
   styleUrl: './forget-password-component.css',
 })
@@ -16,7 +17,10 @@ export class ForgetPasswordComponent {
   successMessage = '';
   errorMessage = '';
  
-  constructor(private auth: AuthService) {}
+  constructor(
+    private auth: AuthService,
+    private translate: TranslateService
+  ) {}
  
   onSubmit(): void {
     if (!this.email || this.isLoading) return;
@@ -27,12 +31,12 @@ export class ForgetPasswordComponent {
     this.auth.forgetPassword({ email: this.email }).subscribe({
       next: (msg) => {
         this.isLoading = false;
-        this.successMessage = 'تم إرسال رابط إعادة التعيين إلى بريدك الإلكتروني إذا كان مسجلاً لدينا.';
+        this.successMessage = this.translate.instant('features.forget.success');
       },
       error: () => {
         this.isLoading = false;
         // API returns 200 even for wrong email, so error = network issue
-        this.errorMessage = 'حدث خطأ في الاتصال، يرجى المحاولة لاحقاً';
+        this.errorMessage = this.translate.instant('features.forget.error');
       }
     });
   }

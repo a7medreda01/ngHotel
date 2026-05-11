@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { BookingService } from '../../service/booking-service';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 interface CustomerEntry {
   name:          string;
@@ -12,7 +13,7 @@ interface CustomerEntry {
 
 @Component({
   selector: 'app-customers-component',
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, TranslatePipe],
   templateUrl: './customers-component.html',
   styleUrl: './customers-component.css',
 })
@@ -28,7 +29,8 @@ export class CustomersComponent implements OnInit {
 
   constructor(
     private bookingService: BookingService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private translate: TranslateService
   ) {}
 
   ngOnInit(): void { this.load(); }
@@ -49,7 +51,7 @@ export class CustomersComponent implements OnInit {
         this.cdr.detectChanges();
       },
       error: () => {
-        this.notify('فشل تحميل بيانات العملاء', 'error');
+        this.notify(this.translate.instant('features.customers.loadFail'), 'error');
         this.loading = false;
         this.cdr.detectChanges();
       }
@@ -70,7 +72,10 @@ export class CustomersComponent implements OnInit {
   exportCSV(): void {
     this.exporting = true;
     const rows = [
-      ['الاسم', 'رقم الهاتف'],
+      [
+        this.translate.instant('features.customers.csvName'),
+        this.translate.instant('features.customers.csvPhone'),
+      ],
       ...this.filtered.map(c => [c.name, c.phone])
     ];
     const csv  = rows.map(r => r.join(',')).join('\n');
@@ -81,7 +86,7 @@ export class CustomersComponent implements OnInit {
     a.click();
     URL.revokeObjectURL(url);
     this.exporting = false;
-    this.notify(`تم تصدير ${this.filtered.length} عميل بنجاح ✓`, 'success');
+    this.notify(this.translate.instant('features.customers.exportOk', { n: this.filtered.length }), 'success');
     this.cdr.detectChanges();
   }
 
@@ -92,7 +97,9 @@ export class CustomersComponent implements OnInit {
   formatDate(d: string): string {
     if (!d) return '-';
     const [y, m, day] = d.split('T')[0].split('-').map(Number);
-    return new Date(y, m - 1, day).toLocaleDateString('ar-EG', {
+    const lang = this.translate.currentLang || 'ar';
+    const loc = lang === 'ar' ? 'ar-EG' : lang === 'fr' ? 'fr-FR' : 'en-GB';
+    return new Date(y, m - 1, day).toLocaleDateString(loc, {
       year: 'numeric', month: 'short', day: 'numeric'
     });
   }
