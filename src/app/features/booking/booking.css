@@ -1951,3 +1951,29 @@ dp-btn-invoice {
     display: flex !important;
   }
 }
+.stat-clickable {
+  cursor: pointer;
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+.stat-clickable:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0,0,0,0.12);
+}
+.stat-deposits-hint {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 5px;
+  padding: 3px 8px;
+  background: rgba(139,92,246,0.12);
+  border: 1px solid rgba(139,92,246,0.25);
+  border-radius: 8px;
+  font-size: 10px;
+  font-weight: 700;
+  color: #6d28d9;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.stat-deposits-hint:hover {
+  background: rgba(139,92,246,0.22);
+}

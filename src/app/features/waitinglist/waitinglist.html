@@ -21,7 +21,7 @@
       <div class="stat-icon"><i class="bi bi-hourglass-split"></i></div>
       <div class="stat-info">
         <span class="stat-number">{{ pendingCount }}</span>
-        <span class="stat-label">قيد الانتظار</span>
+        <span class="stat-label">قائمة الانتظار</span>
       </div>
     </div>
     <div class="stat-card stat-contacted">
@@ -51,8 +51,12 @@
   <div class="toolbar">
     <div class="search-wrap">
       <i class="bi bi-search search-icon"></i>
-      <input class="search-input" type="text" placeholder="بحث بالاسم، الهاتف، أو الشاليه..."
-        [(ngModel)]="searchQuery" (ngModelChange)="onSearchChange()" />
+      <input
+        class="search-input"
+        type="text"
+        placeholder="بحث بالاسم أو الهاتف..."
+        [(ngModel)]="searchQuery"
+        (ngModelChange)="onSearchChange()" />
     </div>
     <div class="filter-wrap">
       <select class="filter-select" [(ngModel)]="selectedStatusFilter" (ngModelChange)="onFilterChange()">
@@ -78,7 +82,10 @@
   <div *ngIf="!isLoadingData && !errorMsg" class="table-container">
     <div class="table-header-row">
       <span class="table-count">
-        <i class="bi bi-list-ul"></i> {{ filteredItems.length }} سجل
+        <i class="bi bi-list-ul"></i> {{ totalCount }} سجل
+      </span>
+      <span style="font-size:11px;color:#8a9bb0;" *ngIf="totalCount > 0">
+        عرض {{ startIndex }}–{{ endIndex }}
       </span>
     </div>
 
@@ -99,8 +106,10 @@
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let item of paginatedItems; let i = index"
-              class="table-row" (click)="openDetails(item)">
+          <tr
+            *ngFor="let item of paginatedItems; let i = index"
+            class="table-row"
+            (click)="openDetails(item)">
             <td class="td-num">{{ (currentPage - 1) * pageSize + i + 1 }}</td>
 
             <td class="td-name">
@@ -139,7 +148,9 @@
             </td>
 
             <td>
-              <span class="time-ago-badge" [ngClass]="getTimeAgoClass(item.createdAt)" [title]="formatDateTime(item.createdAt)">
+              <span class="time-ago-badge"
+                    [ngClass]="getTimeAgoClass(item.createdAt)"
+                    [title]="formatDateTime(item.createdAt)">
                 <i class="bi bi-clock"></i>
                 {{ timeAgo(item.createdAt) }}
               </span>
@@ -184,8 +195,10 @@
 
     <!-- Mobile Cards -->
     <div class="mobile-cards">
-      <div *ngFor="let item of paginatedItems; let i = index"
-           class="mobile-card" (click)="openDetails(item)">
+      <div
+        *ngFor="let item of paginatedItems; let i = index"
+        class="mobile-card"
+        (click)="openDetails(item)">
         <div class="mc-top">
           <div class="avatar-cell">
             <div class="avatar">{{ item.customerName.charAt(0) }}</div>
@@ -234,12 +247,9 @@
           <button class="btn-secondary" (click)="openDetails(item)">
             <i class="bi bi-pencil-fill"></i> تعديل الحالة
           </button>
-          <!-- <button class="btn-whatsapp-full" (click)="openWhatsApp(item.phone)"> -->
-            <i class="bi bi-whatsapp btn-whatsapp-full" (click)="openWhatsApp(item.phone)"></i>
-          <!-- </button> -->
-          <!-- <button *ngIf="item.additionalPhone" class="btn-whatsapp-full"(click)="openWhatsApp(item.additionalPhone!)"> -->
-            <i *ngIf="item.additionalPhone" class="bi bi-whatsapp btn-whatsapp-full" (click)="openWhatsApp(item.additionalPhone!)"></i>
-          <!-- </button> -->
+          <i class="bi bi-whatsapp btn-whatsapp-full" (click)="openWhatsApp(item.phone)"></i>
+          <i *ngIf="item.additionalPhone" class="bi bi-whatsapp btn-whatsapp-full"
+             (click)="openWhatsApp(item.additionalPhone!)"></i>
           <button class="btn-primary" (click)="openConvert(item, $event)">
             <i class="bi bi-arrow-right-circle-fill"></i> تحويل إلى حجز
           </button>
@@ -252,18 +262,26 @@
       </div>
     </div>
 
-    <!-- Pagination -->
+    <!-- ══════════════ PAGINATION ══════════════ -->
     <div class="pagination" *ngIf="totalPages > 1">
       <button class="page-btn" (click)="goToPage(currentPage - 1)" [disabled]="currentPage === 1">
         <i class="bi bi-chevron-right"></i>
       </button>
-      <button class="page-btn" *ngFor="let p of pageNumbers"
-              [class.active]="p === currentPage" (click)="goToPage(p)">{{ p }}</button>
+
+      <ng-container *ngFor="let p of pageNumbers">
+        <button *ngIf="p !== -1"
+                class="page-btn"
+                [class.active]="p === currentPage"
+                (click)="goToPage(p)">{{ p }}</button>
+        <span *ngIf="p === -1" style="padding:0 4px;color:#8a9bb0;">…</span>
+      </ng-container>
+
       <button class="page-btn" (click)="goToPage(currentPage + 1)" [disabled]="currentPage === totalPages">
         <i class="bi bi-chevron-left"></i>
       </button>
     </div>
-  </div>
+
+  </div><!-- /table-container -->
 
   <!-- ══════════════ DETAILS / STATUS MODAL ══════════════ -->
   <div class="modal-overlay" *ngIf="showDetailsModal" (click)="closeDetailsModal()">

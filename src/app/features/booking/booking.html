@@ -92,20 +92,30 @@
         </div>
       </div>
     </div>
-    <div class="stat-card stat-revenue">
-      <div class="stat-icon"><i class="bi bi-cash-coin"></i></div>
-      <div class="stat-body">
-        <span class="stat-value">{{ todayRevenue }}</span>
-        <span class="stat-label">إيرادات اليوم (د.أ)</span>
-        <div class="stat-compare" *ngIf="showComparison">
-          <span [ngClass]="getDiffClass(todayRevenue, yesterdayRevenue)">
-            <i class="bi" [ngClass]="getDiffIcon(todayRevenue, yesterdayRevenue)"></i>
-            {{ getDiff(todayRevenue, yesterdayRevenue) >= 0 ? '+' : '' }}{{ getDiff(todayRevenue, yesterdayRevenue) }}
-            عن الأمس ({{ yesterdayRevenue }})
-          </span>
-        </div>
-      </div>
+<div class="stat-card stat-revenue stat-clickable" (click)="openTodayRevenueModal()">
+  <div class="stat-icon"><i class="bi bi-cash-coin"></i></div>
+  <div class="stat-body">
+    <span class="stat-value">{{ todayRevenue }}</span>
+    <span class="stat-label">
+      إيرادات اليوم (د.أ)
+      <i class="bi bi-box-arrow-up-right" style="font-size:10px;margin-right:4px;opacity:0.6;"></i>
+    </span>
+    <div class="stat-compare" *ngIf="showComparison">
+      <span [ngClass]="getDiffClass(todayRevenue, yesterdayRevenue)">
+        <i class="bi" [ngClass]="getDiffIcon(todayRevenue, yesterdayRevenue)"></i>
+        {{ getDiff(todayRevenue, yesterdayRevenue) >= 0 ? '+' : '' }}{{ getDiff(todayRevenue, yesterdayRevenue) }}
+        عن الأمس ({{ yesterdayRevenue }})
+      </span>
     </div>
+    <!-- ✅ العربونات للمدير فقط -->
+    <div class="stat-deposits-hint" *ngIf="auth.hasRole('Manager')"
+         (click)="$event.stopPropagation(); openTodayDepositsModal()">
+      <i class="bi bi-shield-lock-fill"></i>
+      عربونات: {{ todayDeposits }} د.أ
+      <i class="bi bi-box-arrow-up-right" style="font-size:9px;opacity:0.7;"></i>
+    </div>
+  </div>
+</div>
   </div>
 
   <!-- Filters -->
@@ -1766,6 +1776,110 @@
       <button class="btn-send-note" (click)="sendNote()" [disabled]="!newNoteText.trim() || noteSending">
         <i class="bi" [class.bi-send-fill]="!noteSending" [class.bi-hourglass-split]="noteSending"></i>
       </button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     TODAY REVENUE MODAL
+══════════════════════════════════════ -->
+<div class="modal-overlay" *ngIf="showTodayRevenueModal" (click)="closeTodayRevenueModal()">
+  <div class="custom-modal modal-sm" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <div class="modal-title-group">
+        <div class="modal-icon" style="background:linear-gradient(135deg,#0369a1,#0ea5e9)">
+          <i class="bi bi-cash-coin"></i>
+        </div>
+        <div>
+          <h2>دفعات اليوم</h2>
+          <p class="modal-sub">إجمالي: {{ todayRevenue }} د.أ</p>
+        </div>
+      </div>
+      <button class="modal-close" (click)="closeTodayRevenueModal()">
+        <i class="bi bi-x-lg"></i>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="empty-state-sm" *ngIf="todayRevenuePayments.length === 0"
+           style="text-align:center;padding:24px;">
+        <i class="bi bi-receipt" style="font-size:32px;color:#c5d0db;display:block;margin-bottom:8px;"></i>
+        لا توجد دفعات اليوم
+      </div>
+      <div *ngIf="todayRevenuePayments.length > 0">
+        <div class="payment-item" *ngFor="let p of todayRevenuePayments"
+             style="cursor:pointer;" (click)="closeTodayRevenueModal(); openPaymentsModal(getBookingById_local(getPaymentBookingId(p)))">
+          <div class="payment-item-left">
+            <div class="sbi-avatar" style="width:30px;height:30px;font-size:12px;background:linear-gradient(135deg,#2d6a9f,#1e3a5f);color:#fff;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+              {{ getPaymentCustomerName(p).charAt(0) }}
+            </div>
+            <div class="payment-item-meta">
+              <span style="font-size:12px;font-weight:700;color:#1e3a5f;">
+                {{ getPaymentCustomerName(p) }}
+              </span>
+              <span class="payment-date">{{ formatDateTime(p.createdAt) }}</span>
+              <span style="font-size:10px;color:#8a9bb0;">
+                حجز #{{ getPaymentBookingId(p) }} | {{ p.method }}
+              </span>
+            </div>
+          </div>
+          <strong class="payment-amount">{{ p.amount }} د.أ</strong>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-ghost" (click)="closeTodayRevenueModal()">إغلاق</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     TODAY DEPOSITS MODAL (Manager only)
+══════════════════════════════════════ -->
+<div class="modal-overlay" *ngIf="showTodayDepositsModal && auth.hasRole('Manager')"
+     (click)="closeTodayDepositsModal()">
+  <div class="custom-modal modal-sm" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <div class="modal-title-group">
+        <div class="modal-icon" style="background:linear-gradient(135deg,#6d28d9,#8b5cf6)">
+          <i class="bi bi-shield-lock-fill"></i>
+        </div>
+        <div>
+          <h2>عربونات اليوم</h2>
+          <p class="modal-sub">إجمالي: {{ todayDeposits }} د.أ</p>
+        </div>
+      </div>
+      <button class="modal-close" (click)="closeTodayDepositsModal()">
+        <i class="bi bi-x-lg"></i>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="empty-state-sm" *ngIf="todayDepositPayments.length === 0"
+           style="text-align:center;padding:24px;">
+        <i class="bi bi-safe" style="font-size:32px;color:#c5d0db;display:block;margin-bottom:8px;"></i>
+        لا توجد عربونات اليوم
+      </div>
+      <div *ngIf="todayDepositPayments.length > 0">
+        <div class="payment-item" *ngFor="let p of todayDepositPayments">
+          <div class="payment-item-left">
+            <div class="sbi-avatar" style="width:30px;height:30px;font-size:12px;background:linear-gradient(135deg,#6d28d9,#4c1d95);color:#fff;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+              {{ getPaymentCustomerName(p).charAt(0) }}
+            </div>
+            <div class="payment-item-meta">
+              <span style="font-size:12px;font-weight:700;color:#1e3a5f;">
+                {{ getPaymentCustomerName(p) }}
+              </span>
+              <span class="payment-date">{{ formatDateTime(p.createdAt) }}</span>
+              <span style="font-size:10px;color:#8a9bb0;">
+                حجز #{{ getPaymentBookingId(p) }} | {{ p.method }}
+              </span>
+            </div>
+          </div>
+          <strong class="payment-amount" style="color:#6d28d9;">{{ p.amount }} د.أ</strong>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-ghost" (click)="closeTodayDepositsModal()">إغلاق</button>
     </div>
   </div>
 </div>

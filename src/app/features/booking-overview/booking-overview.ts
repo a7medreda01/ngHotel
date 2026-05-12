@@ -10,6 +10,7 @@ import {
 } from '../../service/booking-service';
 import { ChaletService, Chalet } from '../../service/chalet-service';
 import { forkJoin } from 'rxjs';
+import { WaitingListItem, WaitingListService } from '../../service/waitinglist-service';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -88,6 +89,7 @@ export class BookingOverviewComponent implements OnInit, OnChanges {
 
   // expanded slot (to show bookings list)
   expandedSlotKey = '';
+waitingListItems: WaitingListItem[] = [];
 
   loading = true;
 
@@ -103,6 +105,8 @@ export class BookingOverviewComponent implements OnInit, OnChanges {
   constructor(
     private bookingService: BookingService,
     private chaletService: ChaletService,
+      private waitingListService: WaitingListService,
+
     private cdr: ChangeDetectorRef
   ) {}
 
@@ -136,27 +140,29 @@ open(): void {
 
   // ─── Data Loading ─────────────────────────────────────────────────────────
 
-  loadData(): void {
-    this.loading = true;
-    forkJoin({
-      upcoming: this.bookingService.getUpcomingBookings(),
-      chalets:  this.chaletService.getAll(),
-    }).subscribe({
-      next: ({ upcoming, chalets }) => {
-        this.upcomingBookings = upcoming?.data ?? [];
-        this.chalets = chalets;
-        this.buildChaletCountMap();
-        this.buildCalendar();
-        this.loading = false;
-        this.cdr.detectChanges();
-      },
-      error: () => {
-        this.loading = false;
-        this.buildCalendar();
-        this.cdr.detectChanges();
-      }
-    });
-  }
+ loadData(): void {
+  this.loading = true;
+  forkJoin({
+    upcoming: this.bookingService.getUpcomingBookings(),
+    chalets:  this.chaletService.getAll(),
+    waiting:  this.waitingListService.getAll(),
+  }).subscribe({
+    next: ({ upcoming, chalets, waiting }) => {
+      this.upcomingBookings = upcoming?.data ?? [];
+      this.chalets = chalets;
+      this.waitingListItems = waiting ?? [];
+      this.buildChaletCountMap();
+      this.buildCalendar();
+      this.loading = false;
+      this.cdr.detectChanges();
+    },
+    error: () => {
+      this.loading = false;
+      this.buildCalendar();
+      this.cdr.detectChanges();
+    }
+  });
+}
 
   buildChaletCountMap(): void {
     this.chaletCountMap = {};
@@ -385,32 +391,27 @@ open(): void {
 refreshing = false;
 refreshDay(): void {
   if (!this.selectedDay || this.refreshing) return;
-
   const selectedDate = this.selectedDay.dateStr;
-
   this.refreshing = true;
   this.expandedSlotKey = '';
 
   forkJoin({
     upcoming: this.bookingService.getUpcomingBookings(),
-    chalets: this.chaletService.getAll(),
+    chalets:  this.chaletService.getAll(),
+    waiting:  this.waitingListService.getAll(),
   }).subscribe({
-    next: ({ upcoming, chalets }) => {
+    next: ({ upcoming, chalets, waiting }) => {
       this.upcomingBookings = upcoming?.data ?? [];
       this.chalets = chalets;
-
+      this.waitingListItems = waiting ?? [];
       this.buildChaletCountMap();
       this.buildCalendar();
 
-      const found = this.weeks
-        .flat()
-        .find(d => d.dateStr === selectedDate);
-
+      const found = this.weeks.flat().find(d => d.dateStr === selectedDate);
       if (found) {
         this.selectedDay = found;
         this.buildDayDetail(found);
       }
-
       this.refreshing = false;
       this.cdr.detectChanges();
     },
@@ -544,5 +545,32 @@ getMonthStat(type: 'confirmed' | 'pending' | 'available'): number {
   if (type === 'pending')   return cells.reduce((s, c) => s + c.totalPending, 0);
 
   return cells.reduce((s, c) => s + c.totalAvailable, 0);
+}
+getWaitingCount(chaletType: number, period: number): number {
+  if (!this.selectedDay) return 0;
+  const dateStr = this.selectedDay.dateStr;
+
+  // period في WaitingListItem جاي كـ string ('Morning', 'Evening', 'Full')
+  const periodStrMap: Record<number, string[]> = {
+    0: ['morning', '0'],
+    1: ['evening', '1'],
+    2: ['full', '2'],
+  };
+  const periodStrs = periodStrMap[period] ?? [];
+
+  return this.waitingListItems.filter(w => {
+    const wDate = w.date?.split('T')[0] ?? '';
+    const wPeriod = (w.period ?? '').toString().toLowerCase();
+    const wType = w.chaletId; // مش عندنا chaletType مباشرة — هنشتغل بالـ chaletName أو نعمل normalize
+
+    // فلتر التاريخ والفترة
+    const dateMatch = wDate === dateStr;
+    const periodMatch = periodStrs.includes(wPeriod);
+
+    // لو WaitingListItem مفيهاش chaletType مباشرة، نعتمد على الـ status فقط
+    const statusMatch = w.status === 'Pending' || w.status === 'Contacted';
+
+    return dateMatch && periodMatch && statusMatch;
+  }).length;
 }
 }

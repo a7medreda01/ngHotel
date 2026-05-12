@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment.prod';
 
@@ -13,7 +13,7 @@ export const WaitingStatusEnum: Record<number, WaitingStatus> = {
 };
 
 export const WaitingStatusArabic: Record<WaitingStatus, string> = {
-  Pending: 'قيد الانتظار',
+  Pending: 'قائمة الانتظار',
   Contacted: 'تم التواصل',
   Booked: 'محجوز',
   Cancelled: 'ملغي',
@@ -33,7 +33,13 @@ export interface WaitingListItem {
     additionalPhone?: string;  // ← أضف السطر ده
 
 }
-
+export interface WaitingPagedResult {
+  data:       WaitingListItem[];
+  total:      number;
+  page:       number;
+  pageSize:   number;
+  totalPages: number;
+}
 export interface ConvertToBookingResponse {
   message: {
     success: boolean;
@@ -76,4 +82,18 @@ export class WaitingListService {
       null
     );
   }
+  getPaged(params: {
+  page:      number;
+  pageSize:  number;
+  search?:   string;
+}): Observable<WaitingPagedResult> {
+  let p = new HttpParams()
+    .set('page',     params.page)
+    .set('pageSize', params.pageSize);
+
+  if (params.search?.trim())
+    p = p.set('search', params.search.trim());
+
+  return this.http.get<WaitingPagedResult>(`${this.baseUrl}/paged`, { params: p });
+}
 }

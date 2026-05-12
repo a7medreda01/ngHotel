@@ -82,7 +82,7 @@
         <!-- Calendar Grid -->
         <div class="ov-grid" *ngIf="!loading">
           <!-- Day headers -->
-          <div class="ov-day-header" *ngFor="let d of dayNames">{{ d.slice(0,3) }}</div>
+          <div class="ov-day-header" *ngFor="let d of dayNames">{{ d }}</div>
 
           <!-- Cells -->
           <ng-container *ngFor="let week of weeks; trackBy: trackByWeek">
@@ -238,15 +238,18 @@
                 </button>
 
                 <!-- Waiting book button -->
-                <button class="slot-book-btn slot-book-wait" *ngIf="!selectedDay.isPast && slot.available === 0"
-                  (click)="$event.stopPropagation(); requestNewBooking(slot.chaletType, slot.period)"
-                  title="أضف للانتظار">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                    <circle cx="12" cy="12" r="10" />
-                    <polyline points="12 6 12 12 16 14" />
-                  </svg>
-                  انتظار
-                </button>
+<!-- Waiting book button -->
+<button class="slot-book-btn slot-book-wait" 
+  *ngIf="!selectedDay.isPast && slot.available === 0"
+  (click)="$event.stopPropagation(); requestNewBooking(slot.chaletType, slot.period)"
+  title="أضف للانتظار">
+  <span class="wait-count-badge" 
+        *ngIf="getWaitingCount(slot.chaletType, slot.period) > 0">
+    {{ getWaitingCount(slot.chaletType, slot.period) }}
+  </span>
+  انتظار
+
+</button>
 
                 <!-- Expand arrow -->
                 <span class="slot-arrow" [class.slot-arrow-open]="isSlotExpanded(slot)">

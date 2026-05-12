@@ -7,43 +7,45 @@
       <p>نظرة شاملة على أداء الفندق</p>
     </div>
     <div class="header-actions">
-<div class="filter-pills-wrap">
-  <div class="filter-pills">
-    <button *ngFor="let f of filters"
-            class="pill"
-            [class.active]="activeFilter === f.value"
-            (click)="setFilter(f.value)">
-      {{ f.label }}
-    </button>
-  </div>
+      <div class="filter-pills-wrap">
+        <div class="filter-pills">
+          <button *ngFor="let f of filters"
+                  class="pill"
+                  [class.active]="activeFilter === f.value"
+                  (click)="setFilter(f.value)">
+            {{ f.label }}
+          </button>
+        </div>
 
-  <!-- Date picker — يظهر بس لما activeFilter === 'custom' -->
-  <div class="date-range-picker" *ngIf="showDatePicker">
-    <div class="date-field">
-      <label>من</label>
-      <input type="date"
-             [(ngModel)]="customDateFrom"
-             [max]="customDateTo || ''"
-             (change)="applyCustomRange()" />
-    </div>
-    <span class="date-sep">←</span>
-    <div class="date-field">
-      <label>إلى</label>
-      <input type="date"
-             [(ngModel)]="customDateTo"
-             [min]="customDateFrom || ''"
-             (change)="applyCustomRange()" />
-    </div>
-  </div>
-</div>
+        <!-- Date picker — يظهر بس لما activeFilter === 'custom' -->
+        <div class="date-range-picker" *ngIf="showDatePicker">
+          <div class="date-field">
+            <label>من</label>
+            <input type="date"
+                   [(ngModel)]="customDateFrom"
+                   [max]="customDateTo || ''"
+                   (change)="applyCustomRange()" />
+          </div>
+          <span class="date-sep">←</span>
+          <div class="date-field">
+            <label>إلى</label>
+            <input type="date"
+                   [(ngModel)]="customDateTo"
+                   [min]="customDateFrom || ''"
+                   (change)="applyCustomRange()" />
+          </div>
+        </div>
+      </div>
+
       <button class="secondary-btn" (click)="openReportModal()" *ngIf="isManager || isPartner">
-  <svg viewBox="0 0 16 16" fill="none" width="14" height="14">
-    <path d="M3 2h7l3 3v9H3V2z" stroke="currentColor" stroke-width="1.5"/>
-    <path d="M10 2v3h3M6 9l2 2 2-2M8 7v4" stroke="currentColor"
-          stroke-width="1.4" stroke-linecap="round"/>
-  </svg>
-  تنزيل تقرير
-</button>
+        <svg viewBox="0 0 16 16" fill="none" width="14" height="14">
+          <path d="M3 2h7l3 3v9H3V2z" stroke="currentColor" stroke-width="1.5"/>
+          <path d="M10 2v3h3M6 9l2 2 2-2M8 7v4" stroke="currentColor"
+                stroke-width="1.4" stroke-linecap="round"/>
+        </svg>
+        تنزيل تقرير
+      </button>
+
       <button class="primary-btn" routerLink="/booking/new">
         <svg viewBox="0 0 16 16" fill="none" width="14" height="14">
           <path d="M8 2v12M2 8h12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
@@ -62,7 +64,7 @@
         </div>
         <div class="stat-trend" [class.up]="stat.trendUp" [class.down]="!stat.trendUp">
           <svg viewBox="0 0 12 12" fill="none" width="10" height="10">
-            <path *ngIf="stat.trendUp" d="M6 9V3M3 6l3-3 3 3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+            <path *ngIf="stat.trendUp"  d="M6 9V3M3 6l3-3 3 3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
             <path *ngIf="!stat.trendUp" d="M6 3v6M3 6l3 3 3-3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
           </svg>
           {{ stat.changePercent }}%
@@ -91,7 +93,7 @@
         </div>
         <div class="cmp-arrow" [class.better]="c.better">
           <svg viewBox="0 0 24 24" fill="none" width="20" height="20">
-            <path *ngIf="c.better" d="M12 19V5M5 12l7-7 7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            <path *ngIf="c.better"  d="M12 19V5M5 12l7-7 7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
             <path *ngIf="!c.better" d="M12 5v14M5 12l7 7 7-7" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
           </svg>
           {{ c.diffPct | number:'1.0-1' }}%
@@ -126,7 +128,7 @@
       </div>
     </section>
 
-    <!-- Revenue Breakdown — Manager only -->
+    <!-- Revenue Breakdown — Manager / Partner only -->
     <section class="card revenue-card" *ngIf="isManager || isPartner">
       <div class="card-header">
         <h2>تفاصيل الإيرادات</h2>
@@ -188,7 +190,7 @@
             <th>#</th>
             <th>اسم النزيل</th>
             <th>الشاليه</th>
-            <th>تاريخ الدخول</th>
+            <th>تاريخ الحجز</th>
             <!-- عمود الإجمالي بس للمدير -->
             <th *ngIf="isManager">الإجمالي</th>
             <th>الفترة</th>
@@ -226,41 +228,42 @@
     </div>
   </section>
 
-<!-- ── REPORT MODAL ── -->
-<div class="modal-backdrop" *ngIf="showReportModal" (click)="closeReportModal()">
-  <div class="modal-box" (click)="$event.stopPropagation()">
-    <div class="modal-header">
-      <h3>تنزيل تقرير شهري</h3>
-      <button class="modal-close" (click)="closeReportModal()">✕</button>
-    </div>
-    <div class="modal-body">
-      <div class="field-group">
-        <label>الشهر</label>
-        <select [(ngModel)]="reportMonth">
-          <option *ngFor="let m of monthNames; let i = index" [value]="i + 1">
-            {{ m }}
-          </option>
-        </select>
+  <!-- ── REPORT MODAL ── -->
+  <div class="modal-backdrop" *ngIf="showReportModal" (click)="closeReportModal()">
+    <div class="modal-box" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>تنزيل تقرير شهري</h3>
+        <button class="modal-close" (click)="closeReportModal()">✕</button>
       </div>
-      <div class="field-group">
-        <label>السنة</label>
-        <select [(ngModel)]="reportYear">
-          <option *ngFor="let y of availableYears" [value]="y">{{ y }}</option>
-        </select>
+      <div class="modal-body">
+        <div class="field-group">
+          <label>الشهر</label>
+          <select [(ngModel)]="reportMonth">
+            <option *ngFor="let m of monthNames; let i = index" [value]="i + 1">
+              {{ m }}
+            </option>
+          </select>
+        </div>
+        <div class="field-group">
+          <label>السنة</label>
+          <select [(ngModel)]="reportYear">
+            <option *ngFor="let y of availableYears" [value]="y">{{ y }}</option>
+          </select>
+        </div>
       </div>
-    </div>
-    <div class="modal-footer">
-      <button class="primary-btn" (click)="downloadMonthlyReport()">
-        <svg viewBox="0 0 16 16" fill="none" width="14" height="14">
-          <path d="M8 2v8M5 7l3 3 3-3M3 13h10"
-                stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
-        </svg>
-        تنزيل Excel
-      </button>
-      <button class="ghost-btn" (click)="closeReportModal()">إلغاء</button>
+      <div class="modal-footer">
+        <button class="primary-btn" (click)="downloadMonthlyReport()" [disabled]="exportLoading">
+          <svg viewBox="0 0 16 16" fill="none" width="14" height="14">
+            <path d="M8 2v8M5 7l3 3 3-3M3 13h10"
+                  stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+          </svg>
+          {{ exportLoading ? 'جاري التحميل...' : 'تنزيل Excel' }}
+        </button>
+        <button class="ghost-btn" (click)="closeReportModal()">إلغاء</button>
+      </div>
     </div>
   </div>
-</div>
+
 </div>
 
 <!-- Loading template -->
