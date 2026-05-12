@@ -3,6 +3,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { environment } from '../../environments/environment.prod';
+import { Booking } from '../features/booking/booking';
 
 // ─── DTOs ─────────────────────────────────────────────────────────────────────
 
@@ -372,5 +373,9 @@ getBookingsForExport(year: number, month: number): Observable<Bookings[]> {
 
   getCustomers(): Observable<CustomerDto[]> {
     return this.http.get<CustomerDto[]>(`${this.base}/Booking/customers`);
+  }
+  
+  getTodayBookings(): Observable<Bookings[]> {
+    return this.http.get<Bookings[]>(`${this.base}/Booking/today`);
   }
 }

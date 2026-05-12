@@ -200,7 +200,7 @@ export class Booking implements OnInit {
         this.upcomingLoaded   = true;
         this.buildBookingStatusMap();
         this.cdr.detectChanges();
-
+        this.loadTodayBookings();
         this.loadBookings();
 
         this.route.queryParams.subscribe(params => {
@@ -1137,10 +1137,19 @@ export class Booking implements OnInit {
     const y = new Date(); y.setDate(y.getDate() - 1); return this.getLocalDateStr(y);
   }
 
-  get todayBookings(): Bookings[] {
-    const today = this.getTodayStr();
-    return this.bookings.filter(b => this.getLocalDateStr(this.parseUTCDate(b.createdAt)) === today);
-  }
+todayBookings: Bookings[] = [];
+
+loadTodayBookings() {
+  this.bookingService.getTodayBookings().subscribe({
+    next: (res) => {
+      console.log('Today Bookings:', res);
+      this.todayBookings = res;
+    },
+    error: (err) => {
+      console.error(err);
+    }
+  });
+}
 
   get yesterdayBookings(): Bookings[] {
     const yesterday = this.getYesterdayStr();

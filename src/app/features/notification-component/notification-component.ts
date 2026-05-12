@@ -56,30 +56,17 @@ export class NotificationComponent implements OnInit, OnDestroy {
     this.notifService.loadNotifications();
   }
  
-formatTime(dateStr: string): string {
-  if (!dateStr) return '';
-
-  const normalized = dateStr.endsWith('Z') ? dateStr : dateStr + 'Z';
-  const date = new Date(normalized);
-
-  if (isNaN(date.getTime())) return '';
-
-  const diffMs = Date.now() - date.getTime(); // ✅ كلاهم UTC
-  const diffMin = Math.floor(diffMs / 60000);
-  const diffHr  = Math.floor(diffMin / 60);
-  const diffDay = Math.floor(diffHr / 24);
-
-  if (diffMin < 1)   return 'الآن';
-  if (diffMin < 60)  return `منذ ${diffMin} دقيقة`;
-  if (diffHr  < 24)  return `منذ ${diffHr} ساعة`;
-  if (diffDay === 1) return 'أمس';
-
-  return date.toLocaleDateString('ar-EG', {
-    timeZone: 'Asia/Amman',
-    day: 'numeric',
-    month: 'short'
-  });
-}
+  formatTime(dateStr: string): string {
+    if (!dateStr) return '';
+    const date = new Date(dateStr);
+    const now = new Date();
+    const diffMin = Math.floor((now.getTime() - date.getTime()) / 60000);
+    const diffHr = Math.floor(diffMin / 60);
+    if (diffMin < 1)  return 'الآن';
+    if (diffMin < 60) return `منذ ${diffMin} دقيقة`;
+    if (diffHr < 24)  return `منذ ${diffHr} ساعة`;
+    return date.toLocaleDateString('ar-EG', { day: 'numeric', month: 'short' });
+  }
   // إغلاق بـ Escape
   @HostListener('document:keydown.escape')
   onEscape(): void {
