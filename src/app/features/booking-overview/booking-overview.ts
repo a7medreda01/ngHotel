@@ -140,7 +140,7 @@ open(): void {
 
   // ─── Data Loading ─────────────────────────────────────────────────────────
 
- loadData(): void {
+loadData(): void {
   this.loading = true;
   forkJoin({
     upcoming: this.bookingService.getUpcomingBookings(),
@@ -151,9 +151,58 @@ open(): void {
       this.upcomingBookings = upcoming?.data ?? [];
       this.chalets = chalets;
       this.waitingListItems = waiting ?? [];
-      this.buildChaletCountMap();
-      this.buildCalendar();
+      this.buildChaletCountMap(); // ← هي اللي بتعمل buildCalendar جوّاها
       this.loading = false;
+
+      // ✅ لو في يوم مختار، أعد بناء الـ detail
+      if (this.selectedDay) {
+        // انتظر buildChaletCountMap تخلص (هي async)
+        // نحتفظ بالـ dateStr عشان نلاقي الـ cell الجديد
+        const prevDate    = this.selectedDay.dateStr;
+        const prevSlotKey = this.expandedSlotKey;
+
+        // بعد ما الـ chaletCountMap يتحدث وبتعمل buildCalendar
+        // نديه وقت صغير ثم نلاقي الـ cell الجديد
+        setTimeout(() => {
+          const flat  = this.weeks.flat();
+          const found = flat.find(d => d.dateStr === prevDate);
+          if (!found) return;
+
+          this.selectedDay = found;
+          this.buildDayDetail(found);
+
+          // ✅ لو في slot كان مفتوح، أعد تحميل الـ bookings فيه
+          if (prevSlotKey && this.dayDetail) {
+            const slot = this.dayDetail.slots.find(
+              s => `${s.chaletType}_${s.period}` === prevSlotKey
+            );
+            if (slot) {
+              this.expandedSlotKey = prevSlotKey; // أبقيه مفتوح
+              slot.loadingBookings = true;
+              this.cdr.detectChanges();
+
+              this.bookingService.getBookingsByTypeDatePeriod(
+                slot.chaletType, prevDate, slot.period
+              ).subscribe({
+                next: res => {
+                  slot.bookingsList = (res.data ?? [])
+                    .filter((b: any) => b.status !== 'Cancelled');
+                  slot.loadingBookings = false;
+                  this.cdr.detectChanges();
+                },
+                error: () => {
+                  slot.bookingsList = [];
+                  slot.loadingBookings = false;
+                  this.cdr.detectChanges();
+                }
+              });
+            }
+          }
+
+          this.cdr.detectChanges();
+        }, 100); // وقت كافي لـ buildChaletCountMap تخلص
+      }
+
       this.cdr.detectChanges();
     },
     error: () => {

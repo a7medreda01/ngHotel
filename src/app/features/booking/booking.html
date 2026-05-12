@@ -982,12 +982,22 @@
                     placeholder="اختياري" class="form-input phone-input" />
                 </div>
               </div>
-              <div class="form-group">
-                <label>خصم (د.أ)</label>
-                <input type="number" [(ngModel)]="newBooking.discountAmount"
-                  (ngModelChange)="validateDiscountNewBooking()" min="0" [max]="auth.hasRole('Manager') ? 999999 : 10"
-                  class="form-input" placeholder="ادخل الخصم" />
-              </div>
+<div class="form-group">
+  <label>خصم (د.أ)</label>
+
+  <input
+    type="number"
+    [(ngModel)]="newBooking.discountAmount"
+    (ngModelChange)="validateDiscountNewBooking()"
+    min="0"
+    [max]="auth.hasRole('Manager') ? 999999 : 10"
+    class="form-input"
+    placeholder="ادخل الخصم" />
+
+  <small *ngIf="!auth.hasRole('Manager')">
+    أقصى خصم للموظف: 10 د.أ
+  </small>
+</div>
               <div class="form-group">
                 <label>عدد الزوار</label>
                 <input type="number" [(ngModel)]="newBooking.numOfGuests" placeholder="العدد" class="form-input" />
@@ -1816,7 +1826,7 @@
               <span style="font-size:12px;font-weight:700;color:#1e3a5f;">
                 {{ getPaymentCustomerName(p) }}
               </span>
-              <span class="payment-date">{{ formatDateTime(p.createdAt) }}</span>
+              <span class="payment-date">{{ formatDateTime(p.createdAt | jordanDate ) }}</span>
               <span style="font-size:10px;color:#8a9bb0;">
                 حجز #{{ getPaymentBookingId(p) }} | {{ p.method }}
               </span>
@@ -1868,7 +1878,7 @@
               <span style="font-size:12px;font-weight:700;color:#1e3a5f;">
                 {{ getPaymentCustomerName(p) }}
               </span>
-              <span class="payment-date">{{ formatDateTime(p.createdAt) }}</span>
+              <span class="payment-date">{{ formatDateTime(p.createdAt | jordanDate )}}</span>
               <span style="font-size:10px;color:#8a9bb0;">
                 حجز #{{ getPaymentBookingId(p) }} | {{ p.method }}
               </span>

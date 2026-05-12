@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, ViewChild } from '@angular/core';
 import { forkJoin } from 'rxjs';
 import {
   BookingExtra, Bookings, BookingService, Payment,
@@ -668,6 +668,7 @@ export class Booking implements OnInit {
             next: r => {
               this.upcomingBookings = r?.data ?? [];
               this.buildBookingStatusMap();
+              this.refreshUpcoming();
               this.cdr.detectChanges();
             }
           });
@@ -754,6 +755,8 @@ export class Booking implements OnInit {
         this.editForm.payMoney = 0;
         this.showNotification(msg, 'success');
         this.loadBookings();
+              this.refreshUpcoming()
+
         this.cdr.detectChanges();
       },
       error: err => {
@@ -868,6 +871,8 @@ export class Booking implements OnInit {
         this.cancelTargetId    = null;
         this.cancelReason      = '';
         this.showNotification(this.extractMessage(res) || 'تم إلغاء الحجز', 'success');
+              this.refreshUpcoming()
+
         this.loadBookings();
         this.cdr.detectChanges();
       },
@@ -1160,38 +1165,57 @@ loadTodayBookings() {
   get todayPending():   number { return this.todayBookings.filter(b => b.status === 'Pending' || b.status === 'WaitingList').length; }
   get todayConfirmed(): number { return this.todayBookings.filter(b => b.status === 'Confirmed' || b.status === 'Done').length; }
 
-  get todayRevenue(): number {
-    const today = this.getTodayStr();
-    return this.bookings.flatMap(b => b.payments ?? [])
-      .filter(p => this.getLocalDateStr(this.parseUTCDate(p.createdAt)) === today && p.paymentReson === 1)
-      .reduce((sum, p) => sum + p.amount, 0);
-  }
+ get todayRevenue(): number {
+  const today = this.getTodayStr();
+  return this.upcomingBookings
+    .flatMap(b => b.payments ?? [])
+    .filter(p => {
+      const payDate = this.getLocalDateStr(this.parseUTCDate(p.createdAt));
+      return payDate === today && p.paymentReson === 1;
+    })
+    .reduce((sum, p) => sum + p.amount, 0);
+}
 
-  get todayDeposits(): number {
-    const today = this.getTodayStr();
-    return this.bookings.flatMap(b => b.payments ?? [])
-      .filter(p => this.getLocalDateStr(this.parseUTCDate(p.createdAt)) === today && p.paymentReson === 0)
-      .reduce((sum, p) => sum + p.amount, 0);
-  }
+get todayDeposits(): number {
+  const today = this.getTodayStr();
+  // console.log('Calculating today deposits for date:', this.upcomingBookings);
+  return this.upcomingBookings
+    .flatMap(b => b.payments ?? [])
+    .filter(p => {
+      const payDate = this.getLocalDateStr(this.parseUTCDate(p.createdAt));
+      return payDate === today && p.paymentReson === 0;
+    })
+    .reduce((sum, p) => sum + p.amount, 0);
+}
 
-  get todayRevenuePayments(): Payment[] {
-    const today = this.getTodayStr();
-    return this.bookings.flatMap(b =>
-      (b.payments ?? []).map(p => ({ ...p, _customerName: b.customerName, _bookingId: b.id }))
-    ).filter((p: any) =>
-      this.getLocalDateStr(this.parseUTCDate(p.createdAt)) === today && p.paymentReson === 1
-    ) as Payment[];
-  }
 
-  get todayDepositPayments(): Payment[] {
-    const today = this.getTodayStr();
-    return this.bookings.flatMap(b =>
-      (b.payments ?? []).map(p => ({ ...p, _customerName: b.customerName, _bookingId: b.id }))
-    ).filter((p: any) =>
-      this.getLocalDateStr(this.parseUTCDate(p.createdAt)) === today && p.paymentReson === 0
-    ) as Payment[];
-  }
+get todayRevenuePayments(): Payment[] {
+  const today = this.getTodayStr();
+  return this.upcomingBookings.flatMap(b =>
+    (b.payments ?? []).map(p => ({
+      ...p,
+      _customerName: b.customerName,
+      _bookingId: b.id
+    }))
+  ).filter(p => {
+    const payDate = this.getLocalDateStr(this.parseUTCDate((p as any).createdAt));
+    return payDate === today && p.paymentReson === 1;
+  }) as Payment[];
+}
 
+get todayDepositPayments(): Payment[] {
+  const today = this.getTodayStr();
+  return this.upcomingBookings.flatMap(b =>
+    (b.payments ?? []).map(p => ({
+      ...p,
+      _customerName: b.customerName,
+      _bookingId: b.id
+    }))
+  ).filter(p => {
+    const payDate = this.getLocalDateStr(this.parseUTCDate((p as any).createdAt));
+    return payDate === today && p.paymentReson === 0;
+  }) as Payment[];
+}
   get yesterdayTotal():     number { return this.yesterdayBookings.filter(b => b.status !== 'Cancelled').length; }
   get yesterdayPending():   number { return this.yesterdayBookings.filter(b => b.status === 'Pending' || b.status === 'WaitingList').length; }
   get yesterdayConfirmed(): number { return this.yesterdayBookings.filter(b => b.status === 'Confirmed' || b.status === 'Done').length; }
@@ -1360,50 +1384,66 @@ loadTodayBookings() {
       this.newBooking.discountAmount = 10;
   }
 
-  onOverviewNewBooking(params: NewBookingRequest): void {
-    const chaletType = +params.chaletType;
-    const period     = +params.period;
-    const date       = params.date as string;
+onOverviewNewBooking(params: NewBookingRequest): void {
+  const chaletType = +params.chaletType;
+  const period     = +params.period;
+  const date       = params.date as string;
 
-    this.addExtrasList       = [];
-    this.selectedCountryCode = '+962';
-    this.addSelectedExtraId  = 0;
-    this.addSelectedExtraQty = 1;
-    this.priceLoaded         = false;
-    this.basePrice           = 0;
+  this.addExtrasList       = [];
+  this.selectedCountryCode = '+962';
+  this.addSelectedExtraId  = 0;
+  this.addSelectedExtraQty = 1;
+  this.priceLoaded         = false;
+  this.basePrice           = 0;
+  this.isSubmitting        = false;
 
-    // ✅ reset الـ flag عند فتح المودال من الـ overview
-    this.isSubmitting = false;
+  this.newBooking = {
+    customerName: '', phone: '', additionalPhone: '',
+    discountAmount: 0, date, period, chaletType, numOfGuests: 1, extras: [], note: ''
+  };
 
-    this.newBooking = {
-      customerName: '', phone: '', additionalPhone: '',
-      discountAmount: 0, date, period, chaletType, numOfGuests: 1, extras: [], note: ''
-    };
+  this.calendarDate = new Date(date + 'T00:00:00');
 
-    this.calendarDate = new Date(date + 'T00:00:00');
-
-    [[chaletType, 0], [chaletType, 1], [chaletType, 2]].forEach(([t, p]) => {
-      this.bookingService.getChaletsByTypePeriod(t, p).subscribe({
-        next: list => { this.chaletCountMap[`${t}_${p}`] = list.length; this.cdr.detectChanges(); },
-        error: ()   => { this.chaletCountMap[`${t}_${p}`] = 0; }
-      });
-    });
-
-    const dayType = ([5, 6].includes(this.calendarDate.getDay())) ? 1 : 0;
-    this.bookingService.getBasePrice(chaletType, period, dayType).subscribe({
-      next: (res: any) => {
-        this.basePrice   = typeof res === 'number' ? res : (res?.price ?? 0);
-        this.priceLoaded = true;
-        this.cdr.detectChanges();
-      },
-      error: () => { this.basePrice = 0; this.cdr.detectChanges(); }
-    });
-
-    this.buildBookingStatusMap();
-    this.addStep      = 3;
-    this.showAddModal = true;
-    this.cdr.detectChanges();
-  }
+  // ✅ جلب أحدث بيانات قبل فتح المودال
+  forkJoin({
+    upcoming: this.bookingService.getUpcomingBookings(),
+    p0: this.bookingService.getChaletsByTypePeriod(chaletType, 0),
+    p1: this.bookingService.getChaletsByTypePeriod(chaletType, 1),
+    p2: this.bookingService.getChaletsByTypePeriod(chaletType, 2),
+    price: this.bookingService.getBasePrice(
+      chaletType, period,
+      ([5, 6].includes(this.calendarDate.getDay())) ? 1 : 0
+    ),
+  }).subscribe({
+    next: ({ upcoming, p0, p1, p2, price }) => {
+      // ✅ تحديث الـ upcomingBookings بأحدث بيانات
+      this.upcomingBookings = upcoming?.data ?? [];
+      
+      // ✅ تحديث chaletCountMap
+      this.chaletCountMap[`${chaletType}_0`] = p0.length;
+      this.chaletCountMap[`${chaletType}_1`] = p1.length;
+      this.chaletCountMap[`${chaletType}_2`] = p2.length;
+      
+      // ✅ إعادة بناء الـ map بعد التحديث
+      this.buildBookingStatusMap();
+      
+      // ✅ السعر
+      this.basePrice   = typeof price === 'number' ? price : (price?.price ?? 0);
+      this.priceLoaded = true;
+      
+      this.addStep      = 3;
+      this.showAddModal = true;
+      this.cdr.detectChanges();
+    },
+    error: () => {
+      // fallback — افتح المودال حتى لو في error
+      this.buildBookingStatusMap();
+      this.addStep      = 3;
+      this.showAddModal = true;
+      this.cdr.detectChanges();
+    }
+  });
+}
 
   onOverviewBookingDetail(bookingId: number): void {
     const found = this.bookings.find(b => b.id === bookingId);
@@ -1426,4 +1466,18 @@ loadTodayBookings() {
   getBookingById_local(id: number): Bookings {
     return this.bookings.find(b => b.id === id) ?? {} as Bookings;
   }
+  @ViewChild(BookingOverviewComponent) overviewRef!: BookingOverviewComponent;
+
+  private refreshUpcoming(): void {
+  this.bookingService.getUpcomingBookings().subscribe({
+    next: r => {
+      this.upcomingBookings = r?.data ?? [];
+      this.buildBookingStatusMap();
+      if (this.overviewRef?.showModal) {
+        this.overviewRef.loadData();
+      }
+      this.cdr.detectChanges();
+    }
+  });
+}
 }

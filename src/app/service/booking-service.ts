@@ -119,6 +119,8 @@ export interface UpcomingBooking {
   date:       string;
   period:     number;
   status:     string;
+  payments:    Payment[];
+  customerName:    string;
 }
 
 export interface Payment {
@@ -255,6 +257,8 @@ export class BookingService {
           ...b,
           chaletType: normalizeChaletType(b.chaletType),
           period:     normalizePeriod(b.period),
+                  customerName: b.customerName ?? '',
+        payments:     b.payments ?? [],
         })) as UpcomingBooking[],
       }))
     );

@@ -564,7 +564,7 @@ body.ov-modal-open {
 /* Progress Bar */
 .slot-progress {
   height: 3px;
-  background: #f0f5fb;
+  background: #129c29;
   display: flex;
   overflow: hidden;
   flex-shrink: 0;
@@ -946,6 +946,22 @@ body.ov-modal-open {
   font-size: 10px;
   font-weight: 800;
   color: #fff;
+  line-height: 1;
+  margin-right: 2px;
+}
+.wait-count-badge-co {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  background: rgba(231, 209, 86, 0.9);
+  border: 1px solid rgba(230, 203, 50, 0.5);
+  border-radius: 8px;
+  font-size: 10px;
+  font-weight: 800;
+  color: #ae7907;
   line-height: 1;
   margin-right: 2px;
 }

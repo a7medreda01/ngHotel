@@ -339,12 +339,15 @@ private getDateRange(): { dateFrom: string; dateTo: string } {
     // ✅ حساب الإيرادات الفعلية من المدفوعات (payments) خلال الفترة
     const { dateFrom, dateTo } = this.getDateRange();
     const fromDate = dateFrom ? new Date(dateFrom) : null;
-    const toDate   = dateTo   ? new Date(dateTo + 'T23:59:59') : null;
-
+const toDate = dateTo ? (() => {
+  const d = new Date(dateTo.split('T')[0] + 'T23:59:59');
+  return d;
+})() : null;
     const allPayments = (data.recentBookings ?? []).flatMap(b => b.payments ?? []);
     const paymentsInRange = allPayments.filter(p => {
       if (!fromDate || !toDate) return true;
       const pDate = new Date(p.createdAt);
+      
       return pDate >= fromDate && pDate <= toDate;
     });
 
@@ -353,7 +356,12 @@ private getDateRange(): { dateFrom: string; dateTo: string } {
     const depositActual       = paymentsInRange.filter(p => p.paymentReson === 0).reduce((s, p) => s + p.amount, 0);
     const priceActual         = paymentsInRange.filter(p => p.paymentReson === 1).reduce((s, p) => s + p.amount, 0);
 
-    const rev = Math.max(data.totalRevenue, 1);
+const calculatedTotal = data.chaletRevenue + data.extrasRevenue - (data.discountSum ?? 0);
+
+// واستخدمه في كل مكان
+this.totalRevenue = calculatedTotal;
+
+const rev = Math.max(data.chaletRevenue + data.extrasRevenue, 1);
     this.revenueBreakdown = [
       {
         label: 'إيرادات الشاليهات', amount: data.chaletRevenue,
@@ -381,15 +389,15 @@ private getDateRange(): { dateFrom: string; dateTo: string } {
                </svg>`,
         bg: 'rgba(239,68,68,0.12)',
       },
-      {
-        label: 'المستلم الفعلي (مدفوعات)', amount: totalActualReceived,
-        pct: totalActualReceived / rev * 100,
-        icon: `<svg viewBox="0 0 16 16" fill="none" width="16" height="16">
-                 <circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.3"/>
-                 <path d="M8 5v3l2 1.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
-               </svg>`,
-        bg: 'rgba(34,197,94,0.12)',
-      },
+      // {
+      //   label: 'المستلم الفعلي (مدفوعات)', amount: totalActualReceived,
+      //   pct: totalActualReceived / rev * 100,
+      //   icon: `<svg viewBox="0 0 16 16" fill="none" width="16" height="16">
+      //            <circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.3"/>
+      //            <path d="M8 5v3l2 1.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
+      //          </svg>`,
+      //   bg: 'rgba(34,197,94,0.12)',
+      // },
     ];
 
     // ── Comparisons ───────────────────────────────
