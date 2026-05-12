@@ -145,6 +145,7 @@ export interface DailyPaymentEntry {
   status:        number;
   transactionId: string;
   createdAt:     string;
+  customerName: string;
 }
 
 export interface DailyPaymentSummary {
@@ -263,7 +264,10 @@ export class BookingService {
       }))
     );
   }
-
+// في booking.service.ts — أضف بعد getDailyPayments()
+getDailyPaymentSummary(): Observable<DailyPaymentsResponse> {
+  return this.http.get<DailyPaymentsResponse>(`${this.base}/Payment/summary`);
+}
   getBookingsByTypeDatePeriod(
     chaletType: number,
     date:       string,

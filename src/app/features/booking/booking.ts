@@ -4,7 +4,9 @@ import {
   BookingExtra, Bookings, BookingService, Payment,
   CreateBookingDto, UpdateBookingDto, DoneBookingDto, AvailableChalet,
   ChaletByTypePeriod, UpcomingBooking,
-  normalizeChaletType, normalizePeriod
+  normalizeChaletType, normalizePeriod,
+  DailyPaymentsResponse,
+  DailyPaymentEntry
 } from '../../service/booking-service';
 import { ChaletService, Chalet } from '../../service/chalet-service';
 import { ExtrasService, Extra } from '../../service/extras-service';
@@ -225,6 +227,9 @@ export class Booking implements OnInit {
       },
       error: () => this.showNotification('فشل تحميل البيانات', 'error'),
     });
+    this.bookingService.getDailyPaymentSummary().subscribe(res => {
+  this.dailyPayments = res;
+});
   }
 
   loadBookings(): void {
@@ -1165,67 +1170,41 @@ loadTodayBookings() {
   get todayPending():   number { return this.todayBookings.filter(b => b.status === 'Pending' || b.status === 'WaitingList').length; }
   get todayConfirmed(): number { return this.todayBookings.filter(b => b.status === 'Confirmed' || b.status === 'Done').length; }
 
- get todayRevenue(): number {
-  const today = this.getTodayStr();
-  return this.upcomingBookings
-    .flatMap(b => b.payments ?? [])
-    .filter(p => {
-      const payDate = this.getLocalDateStr(this.parseUTCDate(p.createdAt));
-      return payDate === today && p.paymentReson === 1;
-    })
-    .reduce((sum, p) => sum + p.amount, 0);
+
+dailyPayments!: DailyPaymentsResponse;
+
+get todayRevenue(): number {
+  return this.dailyPayments?.today?.payments
+    ?.filter(p => p.paymentReson === 1)
+    ?.reduce((sum, p) => sum + p.amount, 0) ?? 0;
 }
 
 get todayDeposits(): number {
-  const today = this.getTodayStr();
-  // console.log('Calculating today deposits for date:', this.upcomingBookings);
-  return this.upcomingBookings
-    .flatMap(b => b.payments ?? [])
-    .filter(p => {
-      const payDate = this.getLocalDateStr(this.parseUTCDate(p.createdAt));
-      return payDate === today && p.paymentReson === 0;
-    })
-    .reduce((sum, p) => sum + p.amount, 0);
+  return this.dailyPayments?.today?.payments
+    ?.filter(p => p.paymentReson === 0)
+    ?.reduce((sum, p) => sum + p.amount, 0) ?? 0;
+}
+
+get todayRevenuePayments(): DailyPaymentEntry[] {
+  return this.dailyPayments?.today?.payments?.filter(p => p.paymentReson === 1) ?? [];
+}
+
+get todayDepositPayments(): DailyPaymentEntry[] {
+  return this.dailyPayments?.today?.payments?.filter(p => p.paymentReson === 0) ?? [];
+}
+
+get yesterdayRevenue(): number {
+  return this.dailyPayments?.yesterday?.payments
+    ?.filter(p => p.paymentReson === 1)
+    ?.reduce((sum, p) => sum + p.amount, 0) ?? 0;
 }
 
 
-get todayRevenuePayments(): Payment[] {
-  const today = this.getTodayStr();
-  return this.upcomingBookings.flatMap(b =>
-    (b.payments ?? []).map(p => ({
-      ...p,
-      _customerName: b.customerName,
-      _bookingId: b.id
-    }))
-  ).filter(p => {
-    const payDate = this.getLocalDateStr(this.parseUTCDate((p as any).createdAt));
-    return payDate === today && p.paymentReson === 1;
-  }) as Payment[];
-}
 
-get todayDepositPayments(): Payment[] {
-  const today = this.getTodayStr();
-  return this.upcomingBookings.flatMap(b =>
-    (b.payments ?? []).map(p => ({
-      ...p,
-      _customerName: b.customerName,
-      _bookingId: b.id
-    }))
-  ).filter(p => {
-    const payDate = this.getLocalDateStr(this.parseUTCDate((p as any).createdAt));
-    return payDate === today && p.paymentReson === 0;
-  }) as Payment[];
-}
   get yesterdayTotal():     number { return this.yesterdayBookings.filter(b => b.status !== 'Cancelled').length; }
   get yesterdayPending():   number { return this.yesterdayBookings.filter(b => b.status === 'Pending' || b.status === 'WaitingList').length; }
   get yesterdayConfirmed(): number { return this.yesterdayBookings.filter(b => b.status === 'Confirmed' || b.status === 'Done').length; }
 
-  get yesterdayRevenue(): number {
-    const yesterday = this.getYesterdayStr();
-    return this.bookings.flatMap(b => b.payments ?? [])
-      .filter(p => this.getLocalDateStr(this.parseUTCDate(p.createdAt)) === yesterday && p.paymentReson === 1)
-      .reduce((sum, p) => sum + p.amount, 0);
-  }
 
   getDiff(t: number, y: number):      number { return t - y; }
   getDiffClass(t: number, y: number): string {

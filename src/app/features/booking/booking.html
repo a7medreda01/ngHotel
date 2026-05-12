@@ -1820,15 +1820,15 @@
              style="cursor:pointer;" (click)="closeTodayRevenueModal(); openPaymentsModal(getBookingById_local(getPaymentBookingId(p)))">
           <div class="payment-item-left">
             <div class="sbi-avatar" style="width:30px;height:30px;font-size:12px;background:linear-gradient(135deg,#2d6a9f,#1e3a5f);color:#fff;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-              {{ getPaymentCustomerName(p).charAt(0) }}
+              {{ p.customerName.charAt(0) }}
             </div>
             <div class="payment-item-meta">
               <span style="font-size:12px;font-weight:700;color:#1e3a5f;">
-                {{ getPaymentCustomerName(p) }}
+                {{ p.customerName }}
               </span>
               <span class="payment-date">{{ formatDateTime(p.createdAt | jordanDate ) }}</span>
               <span style="font-size:10px;color:#8a9bb0;">
-                حجز #{{ getPaymentBookingId(p) }} | {{ p.method }}
+                حجز #{{ p.id }}
               </span>
             </div>
           </div>
@@ -1872,15 +1872,15 @@
         <div class="payment-item" *ngFor="let p of todayDepositPayments">
           <div class="payment-item-left">
             <div class="sbi-avatar" style="width:30px;height:30px;font-size:12px;background:linear-gradient(135deg,#6d28d9,#4c1d95);color:#fff;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-              {{ getPaymentCustomerName(p).charAt(0) }}
+              {{ p.customerName.charAt(0) }}
             </div>
             <div class="payment-item-meta">
               <span style="font-size:12px;font-weight:700;color:#1e3a5f;">
-                {{ getPaymentCustomerName(p) }}
+                {{ p.customerName }}
               </span>
               <span class="payment-date">{{ formatDateTime(p.createdAt | jordanDate )}}</span>
               <span style="font-size:10px;color:#8a9bb0;">
-                حجز #{{ getPaymentBookingId(p) }} | {{ p.method }}
+                حجز #{{ p.id }}
               </span>
             </div>
           </div>
