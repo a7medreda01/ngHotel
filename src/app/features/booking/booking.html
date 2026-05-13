@@ -410,7 +410,7 @@
             <div class="dp-row">
               <i class="bi bi-clock dp-icon"></i>
               <span class="dp-label">لحظة الحجز</span>
-              <span class="dp-val">{{ selectedBooking.createdAt | jordanDate}}</span>
+              <span class="dp-val">{{ formatDateTime(selectedBooking.createdAt | jordanDate) }}</span>
             </div>
           </div>
 

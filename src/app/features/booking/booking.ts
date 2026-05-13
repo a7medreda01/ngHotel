@@ -251,7 +251,7 @@ export class Booking implements OnInit {
         this.total            = res.total;
         this.totalPages       = res.totalPages;
         this.isLoading        = false;
-
+console.log('Loaded bookings:', res);
         this._buildPaymentsMapFromBookings();
 
         if (this.selectedBooking) {
@@ -1079,13 +1079,18 @@ export class Booking implements OnInit {
     return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
   }
 
-  formatDateTime(date: any): string {
-    if (!date) return '';
-    return new Intl.DateTimeFormat('en-GB', {
-      day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit', hour12: true,
-    }).format(new Date(date));
-  }
-
+// ✅ الحل
+formatDateTime(date: any): string {
+  if (!date) return '';
+  // لو مفيش Z في الآخر، أضفها عشان JavaScript يعرف إنه UTC
+  const normalized = typeof date === 'string' && !date.endsWith('Z')
+    ? date.replace(' ', 'T').split('.')[0] + 'Z'
+    : date;
+  return new Intl.DateTimeFormat('en-GB', {
+    day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit', hour12: true,
+    timeZone: 'Asia/Amman',  // ✅ عرض بتوقيت الأردن دايماً
+  }).format(new Date(normalized));
+}
   formatDate(d: string): string {
     if (!d) return '-';
     const [year, month, day] = d.split('T')[0].split('-').map(Number);
@@ -1137,10 +1142,10 @@ export class Booking implements OnInit {
     return date.toLocaleDateString('en-CA', { timeZone: 'Asia/Amman' });
   }
 
-  private parseUTCDate(dateStr: string): Date {
-    const normalized = dateStr.replace(' ', 'T').split('.')[0] + 'Z';
-    return new Date(normalized);
-  }
+private parseUTCDate(dateStr: string): Date {
+  const normalized = dateStr.replace(' ', 'T').split('.')[0] + 'Z'; // ✅ صح
+  return new Date(normalized);
+}
 
   private getTodayStr():     string { return this.getLocalDateStr(new Date()); }
   private getYesterdayStr(): string {

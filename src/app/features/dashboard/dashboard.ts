@@ -76,11 +76,9 @@ export class Dashboard implements OnInit, OnDestroy {
   totalRevenue  = 0;
   totalChalets  = 0;
 
-  // ── Role helpers ─────────────────────────────
   get isManager(): boolean { return this.authService.isManager(); }
   get isPartner(): boolean { return this.authService.hasRole('Partner'); }
 
-  // ── Report Modal ─────────────────────────────
   showReportModal = false;
   reportYear  = new Date().getFullYear();
   reportMonth = new Date().getMonth() + 1;
@@ -102,10 +100,6 @@ export class Dashboard implements OnInit, OnDestroy {
     private authService: AuthService
   ) {}
 
-  // ══════════════════════════════════════════════════════════════════════════
-  // Lifecycle
-  // ══════════════════════════════════════════════════════════════════════════
-
   ngOnInit(): void { this.loadDashboard(); }
 
   ngOnDestroy(): void {
@@ -114,122 +108,92 @@ export class Dashboard implements OnInit, OnDestroy {
   }
 
   // ══════════════════════════════════════════════════════════════════════════
-  // Load
+  // Date Range
   // ══════════════════════════════════════════════════════════════════════════
 
-  /**
-   * يحسب نطاق التاريخ للـ filter المختار ويبعته دايمًا كـ custom
-   * لضمان حساب صحيح في الـ backend
-   */
-private getDateRange(): { dateFrom: string; dateTo: string } {
-  const now = new Date();
+  private getDateRange(): { dateFrom: string; dateTo: string } {
+    const now = new Date();
 
-  // بداية اليوم
-  const startToday = new Date(now);
-  startToday.setHours(0, 0, 0, 0);
+    const endToday = new Date(now);
+    endToday.setHours(23, 59, 59, 999);
 
-  // نهاية اليوم
-  const endToday = new Date(now);
-  endToday.setHours(23, 59, 59, 999);
+    let from: Date;
+    let to: Date = endToday;
 
-  let from: Date;
-  let to: Date = endToday;
-
-  switch (this.activeFilter) {
-
-    // ✅ الشهر الحالي (من 1 الشهر → آخر يوم في الشهر)
-    case 'month': {
-      from = new Date(now.getFullYear(), now.getMonth(), 1);
-      from.setHours(0, 0, 0, 0);
-
-      to = new Date(now.getFullYear(), now.getMonth() + 1, 0);
-      to.setHours(23, 59, 59, 999);
-      break;
+    switch (this.activeFilter) {
+      case 'month': {
+        from = new Date(now.getFullYear(), now.getMonth(), 1);
+        from.setHours(0, 0, 0, 0);
+        to = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+        to.setHours(23, 59, 59, 999);
+        break;
+      }
+      case '7': {
+        from = new Date(now);
+        from.setDate(now.getDate() - 6);
+        from.setHours(0, 0, 0, 0);
+        break;
+      }
+      case '30': {
+        from = new Date(now);
+        from.setDate(now.getDate() - 29);
+        from.setHours(0, 0, 0, 0);
+        break;
+      }
+      case '90': {
+        from = new Date(now);
+        from.setDate(now.getDate() - 89);
+        from.setHours(0, 0, 0, 0);
+        break;
+      }
+      case '365': {
+        from = new Date(now);
+        from.setDate(now.getDate() - 364);
+        from.setHours(0, 0, 0, 0);
+        break;
+      }
+      case 'custom': {
+        const customFrom = new Date(this.customDateFrom);
+        customFrom.setHours(0, 0, 0, 0);
+        const customTo = new Date(this.customDateTo);
+        customTo.setHours(23, 59, 59, 999);
+        return {
+          dateFrom: this.toIsoDate(customFrom),
+          dateTo:   this.toIsoDate(customTo),
+        };
+      }
+      default: {
+        from = new Date(now);
+        from.setDate(now.getDate() - 29);
+        from.setHours(0, 0, 0, 0);
+      }
     }
 
-    // ✅ آخر 7 أيام من النهاردة
-    case '7': {
-      from = new Date(now);
-      from.setDate(now.getDate() - 6);
-      from.setHours(0, 0, 0, 0);
-      break;
-    }
-
-    // ✅ آخر 30 يوم من النهاردة
-    case '30': {
-      from = new Date(now);
-      from.setDate(now.getDate() - 29);
-      from.setHours(0, 0, 0, 0);
-      break;
-    }
-
-    // ✅ آخر 90 يوم من النهاردة
-    case '90': {
-      from = new Date(now);
-      from.setDate(now.getDate() - 89);
-      from.setHours(0, 0, 0, 0);
-      break;
-    }
-
-    // ✅ آخر سنة
-    case '365': {
-      from = new Date(now);
-      from.setDate(now.getDate() - 364);
-      from.setHours(0, 0, 0, 0);
-      break;
-    }
-
-    // ✅ تاريخ مخصص
-    case 'custom': {
-      const customFrom = new Date(this.customDateFrom);
-      customFrom.setHours(0, 0, 0, 0);
-
-      const customTo = new Date(this.customDateTo);
-      customTo.setHours(23, 59, 59, 999);
-
-      return {
-        dateFrom: this.toIsoDate(customFrom),
-        dateTo: this.toIsoDate(customTo),
-      };
-    }
-
-    default: {
-      from = new Date(now);
-      from.setDate(now.getDate() - 29);
-      from.setHours(0, 0, 0, 0);
-    }
+    return {
+      dateFrom: this.toIsoDate(from),
+      dateTo:   this.toIsoDate(to),
+    };
   }
-
-  console.log('Filter:', this.activeFilter);
-  console.log('From:', from);
-  console.log('To:', to);
-
-  return {
-    dateFrom: this.toIsoDate(from),
-    dateTo: this.toIsoDate(to),
-  };
-}
 
   private toIsoDate(d: Date): string {
-  const y = d.getFullYear();
-  const m = String(d.getMonth() + 1).padStart(2, '0');
-  const day = String(d.getDate()).padStart(2, '0');
-  const h = String(d.getHours()).padStart(2, '0');
-  const min = String(d.getMinutes()).padStart(2, '0');
-  const s = String(d.getSeconds()).padStart(2, '0');
-
-  return `${y}-${m}-${day}T${h}:${min}:${s}`;
+    const y   = d.getFullYear();
+    const m   = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    const h   = String(d.getHours()).padStart(2, '0');
+    const min = String(d.getMinutes()).padStart(2, '0');
+    const s   = String(d.getSeconds()).padStart(2, '0');
+    return `${y}-${m}-${day}T${h}:${min}:${s}`;
   }
+
+  // ══════════════════════════════════════════════════════════════════════════
+  // Load
+  // ══════════════════════════════════════════════════════════════════════════
 
   loadDashboard(): void {
     this.loading = true;
     const { dateFrom, dateTo } = this.getDateRange();
 
-    this.bookingService.getDashboard({
-      filter:   'custom',   // دايمًا custom لضمان صحة الحساب في الـ backend
-      dateFrom,
-      dateTo,
-    })
+    this.bookingService.getDashboard({ filter: 'custom', dateFrom, dateTo })
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: data => {
@@ -261,6 +225,7 @@ private getDateRange(): { dateFrom: string; dateTo: string } {
 
   // ══════════════════════════════════════════════════════════════════════════
   // Compute
+  // ✅ الإصلاح: حساب الإيرادات مرة واحدة فقط في البداية واستخدامه في كل مكان
   // ══════════════════════════════════════════════════════════════════════════
 
   private compute(data: DashboardData): void {
@@ -268,23 +233,30 @@ private getDateRange(): { dateFrom: string; dateTo: string } {
       prev === 0 ? 100 : +((cur - prev) / prev * 100).toFixed(1);
 
     this.totalBookings = data.totalBookings;
-    this.totalRevenue  = data.totalRevenue;
     this.totalChalets  = data.chalets.length;
+
+    // ✅ مصدر واحد للإيرادات — محسوبة مرة واحدة هنا فقط
+    // chaletRevenue + extrasRevenue - discountSum = الإجمالي الصحيح
+    const totalRevenue = data.chaletRevenue + data.extrasRevenue - (data.discountSum ?? 0);
+    this.totalRevenue  = totalRevenue;
 
     // ── Stats Cards ───────────────────────────────
     const allCards: StatCard[] = [
       {
-        label: 'إجمالي الإيرادات', value: data.totalRevenue, unit: 'د.أ',
+        label: 'إجمالي الإيرادات',
+        // ✅ نفس الرقم المحسوب أعلاه
+        value: totalRevenue,
+        unit:  'د.أ',
         icon: `<svg viewBox="0 0 20 20" fill="none" width="20" height="20">
                  <circle cx="10" cy="10" r="7" stroke="currentColor" stroke-width="1.5"/>
                  <path d="M10 6v8M7.5 8.5C7.5 7.4 8.6 7 10 7s2.5.7 2.5 1.5S11.3 10 10 10s-2.5.6-2.5 1.5S8.7 13 10 13s2.5-.4 2.5-1.5"
                        stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
                </svg>`,
         color: '#e8834a',
-        changePercent: Math.abs(pctDiff(data.totalRevenue, data.prevTotalRevenue)),
+        changePercent: Math.abs(pctDiff(totalRevenue, data.prevTotalRevenue)),
         changeText: 'مقارنةً بالفترة السابقة',
-        trendUp: data.totalRevenue >= data.prevTotalRevenue,
-        fillPct: Math.min(100, data.totalRevenue / Math.max(data.prevTotalRevenue, 1) * 70),
+        trendUp: totalRevenue >= data.prevTotalRevenue,
+        fillPct: Math.min(100, totalRevenue / Math.max(data.prevTotalRevenue, 1) * 70),
       },
       {
         label: 'إجمالي الحجوزات', value: data.totalBookings,
@@ -311,7 +283,6 @@ private getDateRange(): { dateFrom: string; dateTo: string } {
         fillPct: data.totalBookings > 0 ? data.confirmedBookings / data.totalBookings * 100 : 0,
       },
       {
-        // ✅ تغيير "منجزة" → "مستلمة"
         label: 'حجوزات مستلمة', value: data.doneBookings,
         icon: `<svg viewBox="0 0 20 20" fill="none" width="20" height="20">
                  <path d="M4 10l4 4 8-8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
@@ -329,43 +300,20 @@ private getDateRange(): { dateFrom: string; dateTo: string } {
     // ── Status Breakdown ──────────────────────────
     const total = data.totalBookings || 1;
     this.statusBreakdown = [
-      { label: 'مؤكدة',        count: data.confirmedBookings,  pct: data.confirmedBookings  / total * 100, color: '#22c55e' },
-      { label: 'مستلمة',       count: data.doneBookings,       pct: data.doneBookings       / total * 100, color: '#8b5cf6' }, // ✅
-      { label: 'قيد الانتظار', count: data.pendingBookings,    pct: data.pendingBookings    / total * 100, color: '#f59e0b' },
-      { label: 'ملغية',        count: data.cancelledBookings,  pct: data.cancelledBookings  / total * 100, color: '#ef4444' },
+      { label: 'مؤكدة',        count: data.confirmedBookings, pct: data.confirmedBookings / total * 100, color: '#22c55e' },
+      { label: 'مستلمة',       count: data.doneBookings,      pct: data.doneBookings      / total * 100, color: '#8b5cf6' },
+      { label: 'قيد الانتظار', count: data.pendingBookings,   pct: data.pendingBookings   / total * 100, color: '#f59e0b' },
+      { label: 'ملغية',        count: data.cancelledBookings, pct: data.cancelledBookings / total * 100, color: '#ef4444' },
     ];
 
     // ── Revenue Breakdown ─────────────────────────
-    // ✅ حساب الإيرادات الفعلية من المدفوعات (payments) خلال الفترة
-    const { dateFrom, dateTo } = this.getDateRange();
-    const fromDate = dateFrom ? new Date(dateFrom) : null;
-const toDate = dateTo ? (() => {
-  const d = new Date(dateTo.split('T')[0] + 'T23:59:59');
-  return d;
-})() : null;
-    const allPayments = (data.recentBookings ?? []).flatMap(b => b.payments ?? []);
-    const paymentsInRange = allPayments.filter(p => {
-      if (!fromDate || !toDate) return true;
-      const pDate = new Date(p.createdAt);
-      
-      return pDate >= fromDate && pDate <= toDate;
-    });
+    // ✅ القاسم المشترك = chaletRevenue + extrasRevenue (قبل الخصم) لحساب النسب بشكل صحيح
+    const grossRev = Math.max(data.chaletRevenue + data.extrasRevenue, 1);
 
-    // إجمالي المدفوعات الفعلية (deposit + price payments)
-    const totalActualReceived = paymentsInRange.reduce((s, p) => s + (p.amount ?? 0), 0);
-    const depositActual       = paymentsInRange.filter(p => p.paymentReson === 0).reduce((s, p) => s + p.amount, 0);
-    const priceActual         = paymentsInRange.filter(p => p.paymentReson === 1).reduce((s, p) => s + p.amount, 0);
-
-const calculatedTotal = data.chaletRevenue + data.extrasRevenue - (data.discountSum ?? 0);
-
-// واستخدمه في كل مكان
-this.totalRevenue = calculatedTotal;
-
-const rev = Math.max(data.chaletRevenue + data.extrasRevenue, 1);
     this.revenueBreakdown = [
       {
         label: 'إيرادات الشاليهات', amount: data.chaletRevenue,
-        pct: data.chaletRevenue / rev * 100,
+        pct: data.chaletRevenue / grossRev * 100,
         icon: `<svg viewBox="0 0 16 16" fill="none" width="16" height="16">
                  <rect x="1" y="5" width="14" height="9" rx="1" stroke="currentColor" stroke-width="1.3"/>
                  <path d="M8 1l-7 4h14L8 1z" stroke="currentColor" stroke-width="1.2"/>
@@ -374,7 +322,7 @@ const rev = Math.max(data.chaletRevenue + data.extrasRevenue, 1);
       },
       {
         label: 'الإضافات', amount: data.extrasRevenue,
-        pct: data.extrasRevenue / rev * 100,
+        pct: data.extrasRevenue / grossRev * 100,
         icon: `<svg viewBox="0 0 16 16" fill="none" width="16" height="16">
                  <path d="M8 2v12M2 8h12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
                </svg>`,
@@ -382,43 +330,37 @@ const rev = Math.max(data.chaletRevenue + data.extrasRevenue, 1);
       },
       {
         label: 'الخصومات', amount: data.discountSum ?? 0,
-        pct: (data.discountSum ?? 0) / rev * 100,
+        pct: (data.discountSum ?? 0) / grossRev * 100,
         icon: `<svg viewBox="0 0 16 16" fill="none" width="16" height="16">
                  <path d="M2 14L14 2M5 3a2 2 0 110 4 2 2 0 010-4zm6 6a2 2 0 110 4 2 2 0 010-4z"
                        stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
                </svg>`,
         bg: 'rgba(239,68,68,0.12)',
       },
-      // {
-      //   label: 'المستلم الفعلي (مدفوعات)', amount: totalActualReceived,
-      //   pct: totalActualReceived / rev * 100,
-      //   icon: `<svg viewBox="0 0 16 16" fill="none" width="16" height="16">
-      //            <circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.3"/>
-      //            <path d="M8 5v3l2 1.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
-      //          </svg>`,
-      //   bg: 'rgba(34,197,94,0.12)',
-      // },
     ];
 
     // ── Comparisons ───────────────────────────────
+    // ✅ نفس totalRevenue المحسوب أعلاه
     const allComparisons: Comparison[] = [
       {
-        period: 'الإيرادات',
-        current: data.totalRevenue, previous: data.prevTotalRevenue, unit: 'د.أ',
-        diffPct: Math.abs(pctDiff(data.totalRevenue, data.prevTotalRevenue)),
-        better: data.totalRevenue >= data.prevTotalRevenue,
+        period:  'الإيرادات',
+        current: totalRevenue,
+        previous: data.prevTotalRevenue,
+        unit: 'د.أ',
+        diffPct: Math.abs(pctDiff(totalRevenue, data.prevTotalRevenue)),
+        better:  totalRevenue >= data.prevTotalRevenue,
       },
       {
-        period: 'الحجوزات',
+        period:  'الحجوزات',
         current: data.totalBookings, previous: data.prevTotalBookings, unit: 'حجز',
         diffPct: Math.abs(pctDiff(data.totalBookings, data.prevTotalBookings)),
-        better: data.totalBookings >= data.prevTotalBookings,
+        better:  data.totalBookings >= data.prevTotalBookings,
       },
       {
-        period: 'الإلغاءات',
+        period:  'الإلغاءات',
         current: data.cancelledBookings, previous: data.prevCancelledBookings, unit: 'إلغاء',
         diffPct: Math.abs(pctDiff(data.cancelledBookings, data.prevCancelledBookings)),
-        better: data.cancelledBookings <= data.prevCancelledBookings,
+        better:  data.cancelledBookings <= data.prevCancelledBookings,
       },
     ];
 
@@ -461,7 +403,7 @@ const rev = Math.max(data.chaletRevenue + data.extrasRevenue, 1);
 
   getStatusLabel(status: string): string {
     const map: Record<string, string> = {
-      Confirmed: 'مؤكدة', Done: 'مستلمة',   // ✅ تغيير منجزة → مستلمة
+      Confirmed: 'مؤكدة', Done: 'مستلمة',
       Pending: 'قيد الانتظار', Cancelled: 'ملغية',
     };
     return map[status] ?? status;
@@ -524,7 +466,7 @@ const rev = Math.max(data.chaletRevenue + data.extrasRevenue, 1);
 
     const periodMap: Record<number, string> = { 0: 'صباحي', 1: 'مسائي', 2: 'كامل' };
     const statusMap: Record<string, string> = {
-      Confirmed: 'مؤكدة', Done: 'مستلمة',   // ✅ تغيير
+      Confirmed: 'مؤكدة', Done: 'مستلمة',
       Pending: 'قيد الانتظار', Cancelled: 'ملغية',
     };
 
@@ -544,31 +486,22 @@ const rev = Math.max(data.chaletRevenue + data.extrasRevenue, 1);
       XLSX.utils.book_append_sheet(wb, ws, sheetName);
     };
 
-    // ════════════════════════════════════════════════════════════════
-    // ✅ SHEET 1 — الملخص العام
-    // الحجوزات (مؤكدة/انتظار/ملغي/مستلمة) حسب createdAt
-    // الحجوزات المستلمة (المستلم فعلياً في الشهر) حسب date
-    // ════════════════════════════════════════════════════════════════
-
-    // حجوزات أُنشئت خلال الشهر (حسب createdAt)
     const createdInMonth = monthBookings.filter(b => {
       const d = new Date(b.createdAt);
       return d >= from && d <= to;
     });
 
-    // حجوزات تاريخ الاستلام (date) خلال الشهر — المستلمة فعلياً
     const receivedInMonth = monthBookings.filter(b => {
       const d = new Date(b.date);
-      return d >= from && d <= to && (b.status === 'Done');
+      return d >= from && d <= to && b.status === 'Done';
     });
 
-    const confirmedDone  = monthBookings.filter(b => b.status === 'Confirmed' || b.status === 'Done');
-    const totalRev       = confirmedDone.reduce((s, b) => s + (b.totalPrice  ?? 0), 0);
-    const chaletRev      = confirmedDone.reduce((s, b) => s + (b.chaletPrice ?? 0), 0);
-    const extrasRev      = confirmedDone.reduce((s, b) => s + (b.extrasTotal ?? 0), 0);
-    const discountSum    = monthBookings.reduce((s, b) => s + (b.discountAmount ?? 0), 0);
+    const confirmedDone = monthBookings.filter(b => b.status === 'Confirmed' || b.status === 'Done');
+    const chaletRev     = confirmedDone.reduce((s, b) => s + (b.chaletPrice ?? 0), 0);
+    const extrasRev     = confirmedDone.reduce((s, b) => s + (b.extrasTotal ?? 0), 0);
+    const discountSum   = monthBookings.reduce((s, b) => s + (b.discountAmount ?? 0), 0);
+    const totalRev      = chaletRev + extrasRev - discountSum;
 
-    // ✅ الإيراد الفعلي من المدفوعات خلال الشهر (حسب createdAt للـ payment)
     const allPayments = monthBookings.flatMap(b => (b.payments ?? []).map(p => ({ ...p, bookingId: b.id })));
     const paymentsInMonth = allPayments.filter(p => {
       const d = new Date(p.createdAt);
@@ -581,65 +514,54 @@ const rev = Math.max(data.chaletRevenue + data.extrasRevenue, 1);
     const countCreatedByStatus = (st: string) => createdInMonth.filter(b => b.status === st).length;
 
     addSheet([
-      // ── حجوزات أُنشئت خلال الشهر (createdAt) ──
       { 'البيان': '═══ الحجوزات المُنشأة خلال الشهر (حسب تاريخ الإنشاء) ═══', 'القيمة': '', 'الوحدة': '' },
-      { 'البيان': 'إجمالي الحجوزات المُنشأة',   'القيمة': createdInMonth.length,               'الوحدة': 'حجز' },
-      { 'البيان': 'حجوزات مؤكدة',               'القيمة': countCreatedByStatus('Confirmed'),   'الوحدة': 'حجز' },
-      { 'البيان': 'قيد الانتظار',               'القيمة': countCreatedByStatus('Pending'),     'الوحدة': 'حجز' },
-      { 'البيان': 'ملغية',                      'القيمة': countCreatedByStatus('Cancelled'),   'الوحدة': 'حجز' },
-      { 'البيان': 'مستلمة',                     'القيمة': countCreatedByStatus('Done'),        'الوحدة': 'حجز' },
-      // ── حجوزات مستلمة في الشهر (date) ──
+      { 'البيان': 'إجمالي الحجوزات المُنشأة',    'القيمة': createdInMonth.length,             'الوحدة': 'حجز' },
+      { 'البيان': 'حجوزات مؤكدة',                'القيمة': countCreatedByStatus('Confirmed'), 'الوحدة': 'حجز' },
+      { 'البيان': 'قيد الانتظار',                'القيمة': countCreatedByStatus('Pending'),   'الوحدة': 'حجز' },
+      { 'البيان': 'ملغية',                       'القيمة': countCreatedByStatus('Cancelled'), 'الوحدة': 'حجز' },
+      { 'البيان': 'مستلمة',                      'القيمة': countCreatedByStatus('Done'),      'الوحدة': 'حجز' },
       { 'البيان': '═══ الحجوزات المُستلمة في الشهر (حسب تاريخ الحجز) ═══', 'القيمة': '', 'الوحدة': '' },
-      { 'البيان': 'حجوزات مستلمة فعلياً',       'القيمة': receivedInMonth.length,              'الوحدة': 'حجز' },
-      // ── الإيرادات ──
+      { 'البيان': 'حجوزات مستلمة فعلياً',        'القيمة': receivedInMonth.length,            'الوحدة': 'حجز' },
       { 'البيان': '═══ الإيرادات ═══', 'القيمة': '', 'الوحدة': '' },
-      { 'البيان': 'إيرادات الشاليهات',           'القيمة': chaletRev,                           'الوحدة': 'د.أ' },
-      { 'البيان': 'إيرادات الإضافات',            'القيمة': extrasRev,                           'الوحدة': 'د.أ' },
-      { 'البيان': 'إجمالي الخصومات',             'القيمة': discountSum,                         'الوحدة': 'د.أ' },
-      { 'البيان': 'إجمالي الإيرادات (بعد الخصم)','القيمة': totalRev,                            'الوحدة': 'د.أ' },
-      // ── المدفوعات الفعلية خلال الشهر (حسب createdAt) ──
+      { 'البيان': 'إيرادات الشاليهات',            'القيمة': chaletRev,                         'الوحدة': 'د.أ' },
+      { 'البيان': 'إيرادات الإضافات',             'القيمة': extrasRev,                         'الوحدة': 'د.أ' },
+      { 'البيان': 'إجمالي الخصومات',              'القيمة': discountSum,                       'الوحدة': 'د.أ' },
+      { 'البيان': 'إجمالي الإيرادات (بعد الخصم)', 'القيمة': totalRev,                          'الوحدة': 'د.أ' },
       { 'البيان': '═══ المدفوعات المُستلمة خلال الشهر (حسب تاريخ الدفع) ═══', 'القيمة': '', 'الوحدة': '' },
-      { 'البيان': 'عربونات مستلمة',              'القيمة': depositInMonth,                      'الوحدة': 'د.أ' },
-      { 'البيان': 'دفعات تسوية مستلمة',          'القيمة': priceInMonth,                        'الوحدة': 'د.أ' },
-      { 'البيان': 'إجمالي المستلم الفعلي',       'القيمة': totalReceived,                       'الوحدة': 'د.أ' },
+      { 'البيان': 'عربونات مستلمة',               'القيمة': depositInMonth,                    'الوحدة': 'د.أ' },
+      { 'البيان': 'دفعات تسوية مستلمة',           'القيمة': priceInMonth,                      'الوحدة': 'د.أ' },
+      { 'البيان': 'إجمالي المستلم الفعلي',        'القيمة': totalReceived,                     'الوحدة': 'د.أ' },
     ], 'الملخص العام');
 
-    // ════════════════════════════════════════════════════════════════
-    // ✅ SHEET 2 — تفاصيل الحجوزات (مع إجمالي المدفوع والمتبقي)
-    // ════════════════════════════════════════════════════════════════
     addSheet(monthBookings.map((b, idx) => {
-      const totalPaid      = (b.payments ?? []).reduce((s, p) => s + p.amount, 0);
-      const remaining      = (b.totalPrice ?? 0) - totalPaid;
-
+      const totalPaid = (b.payments ?? []).reduce((s, p) => s + p.amount, 0);
+      const remaining = (b.totalPrice ?? 0) - totalPaid;
       return {
-        '#':                     idx + 1,
-        'رقم الفاتورة':          getInvoiceNumber(b),
-        'رقم الحجز':             b.id,
-        'اسم النزيل':            b.customerName,
-        'الهاتف':                b.phone,
-        'هاتف إضافي':            b.additionalPhone ?? '—',
-        'الشاليه':               b.chaletName ?? '—',
-        'تاريخ الحجز (الاستلام)':new Date(b.date).toLocaleDateString('ar-EG'),
-        'تاريخ الإنشاء':         new Date(b.createdAt).toLocaleDateString('ar-EG'),
-        'الفترة':                periodMap[b.period ?? 2] ?? '—',
-        'عدد الضيوف':            b.numOfGuests ?? '—',
-        'أنشئ بواسطة':           b.createdBy ?? '—',
-        'سعر الشاليه':           b.chaletPrice ?? 0,
-        'إجمالي الإضافات':       b.extrasTotal ?? 0,
-        'الخصم':                 b.discountAmount ?? 0,
-        'الإجمالي قبل الخصم':   b.price ?? 0,         // ✅ عنوان واضح
-        'الإجمالي بعد الخصم':   b.totalPrice ?? 0,    // ✅ عنوان واضح
-        'إجمالي المدفوع':        totalPaid,            // ✅ جديد
-        'المتبقي':               remaining > 0 ? remaining : 0, // ✅ جديد
-        'الحالة':                statusMap[b.status] ?? b.status,
-        'الإضافات (تفصيل)':     (b.extras ?? []).map(e => `${e.extraName ?? '—'} × ${e.quantity} = ${e.total} د.أ`).join(' | ') || '—',
-        'الملاحظات':             (b.notes  ?? []).map(n => `[${n.userName}]: ${n.note}`).join(' | ') || '—',
+        '#':                      idx + 1,
+        'رقم الفاتورة':           getInvoiceNumber(b),
+        'رقم الحجز':              b.id,
+        'اسم النزيل':             b.customerName,
+        'الهاتف':                 b.phone,
+        'هاتف إضافي':             b.additionalPhone ?? '—',
+        'الشاليه':                b.chaletName ?? '—',
+        'تاريخ الحجز (الاستلام)': new Date(b.date).toLocaleDateString('ar-EG'),
+        'تاريخ الإنشاء':          new Date(b.createdAt).toLocaleDateString('ar-EG'),
+        'الفترة':                 periodMap[b.period ?? 2] ?? '—',
+        'عدد الضيوف':             b.numOfGuests ?? '—',
+        'أنشئ بواسطة':            b.createdBy ?? '—',
+        'سعر الشاليه':            b.chaletPrice ?? 0,
+        'إجمالي الإضافات':        b.extrasTotal ?? 0,
+        'الخصم':                  b.discountAmount ?? 0,
+        'الإجمالي قبل الخصم':    b.price ?? 0,
+        'الإجمالي بعد الخصم':    b.totalPrice ?? 0,
+        'إجمالي المدفوع':         totalPaid,
+        'المتبقي':                remaining > 0 ? remaining : 0,
+        'الحالة':                 statusMap[b.status] ?? b.status,
+        'الإضافات (تفصيل)':      (b.extras ?? []).map(e => `${e.extraName ?? '—'} × ${e.quantity} = ${e.total} د.أ`).join(' | ') || '—',
+        'الملاحظات':              (b.notes  ?? []).map(n => `[${n.userName}]: ${n.note}`).join(' | ') || '—',
       };
     }), 'تفاصيل الحجوزات');
 
-    // ════════════════════════════════════════════════════════════════
-    // SHEET 3 — الإضافات التفصيلية
-    // ════════════════════════════════════════════════════════════════
     const extrasRows: object[] = [];
     monthBookings.forEach(b => {
       (b.extras ?? []).forEach(e => {
@@ -660,9 +582,6 @@ const rev = Math.max(data.chaletRevenue + data.extrasRevenue, 1);
     });
     addSheet(extrasRows, 'الإضافات التفصيلية');
 
-    // ════════════════════════════════════════════════════════════════
-    // SHEET 4 — إحصائيات الأكواخ
-    // ════════════════════════════════════════════════════════════════
     const chaletNamesSet = [...new Set(monthBookings.map(b => b.chaletName ?? '—'))];
     addSheet(chaletNamesSet.map(name => {
       const cb     = monthBookings.filter(b => (b.chaletName ?? '—') === name);
@@ -680,7 +599,7 @@ const rev = Math.max(data.chaletRevenue + data.extrasRevenue, 1);
         'اسم الكوخ':        name,
         'إجمالي الحجوزات':  cb.length,
         'مؤكدة':            cb.filter(b => b.status === 'Confirmed').length,
-        'مستلمة':           cb.filter(b => b.status === 'Done').length,       // ✅
+        'مستلمة':           cb.filter(b => b.status === 'Done').length,
         'قيد الانتظار':     cb.filter(b => b.status === 'Pending').length,
         'ملغية':            cb.filter(b => b.status === 'Cancelled').length,
         'إيرادات الشاليه':  cbDone.reduce((s, b) => s + (b.chaletPrice ?? 0), 0),
@@ -691,21 +610,9 @@ const rev = Math.max(data.chaletRevenue + data.extrasRevenue, 1);
       };
     }), 'إحصائيات الأكواخ');
 
-    // ════════════════════════════════════════════════════════════════
-    // ✅ SHEET 5 — إحصائيات الموظفين
-    // إجمالي الحجوزات + مؤكدة: حسب createdAt
-    // مستلمة: حسب date
-    // + عدد الخصومات + قيد الانتظار
-    // ════════════════════════════════════════════════════════════════
     const employeeMap: Record<string, {
-      total: number;           // مُنشأة في الشهر (createdAt)
-      confirmed: number;       // مؤكدة مُنشأة في الشهر (createdAt)
-      done: number;            // مستلمة تاريخها في الشهر (date)
-      pending: number;         // قيد الانتظار (createdAt)
-      cancelled: number;       // ملغية
-      revenue: number;         // إيرادات (مؤكدة + مستلمة)
-      discountCount: number;   // ✅ عدد الحجوزات التي عليها خصم
-      discountAmount: number;  // إجمالي الخصومات
+      total: number; confirmed: number; done: number; pending: number;
+      cancelled: number; revenue: number; discountCount: number; discountAmount: number;
     }> = {};
 
     monthBookings.forEach(b => {
@@ -716,11 +623,9 @@ const rev = Math.max(data.chaletRevenue + data.extrasRevenue, 1);
           cancelled: 0, revenue: 0, discountCount: 0, discountAmount: 0,
         };
       }
-
-      const createdAt = new Date(b.createdAt);
+      const createdAt   = new Date(b.createdAt);
       const bookingDate = new Date(b.date);
 
-      // إجمالي الحجوزات + مؤكدة + انتظار + ملغية: حسب createdAt
       if (createdAt >= from && createdAt <= to) {
         employeeMap[emp].total++;
         if (b.status === 'Confirmed') employeeMap[emp].confirmed++;
@@ -731,8 +636,6 @@ const rev = Math.max(data.chaletRevenue + data.extrasRevenue, 1);
           employeeMap[emp].discountAmount += b.discountAmount ?? 0;
         }
       }
-
-      // مستلمة: حسب date
       if (bookingDate >= from && bookingDate <= to && b.status === 'Done') {
         employeeMap[emp].done++;
         employeeMap[emp].revenue += b.totalPrice ?? 0;
@@ -740,27 +643,24 @@ const rev = Math.max(data.chaletRevenue + data.extrasRevenue, 1);
     });
 
     addSheet(Object.entries(employeeMap).map(([name, v]) => ({
-      'اسم الموظف':           name,
+      'اسم الموظف':              name,
       'إجمالي الحجوزات (مُنشأة)': v.total,
-      'مؤكدة':                v.confirmed,
-      'مستلمة':               v.done,                // ✅
-      'قيد الانتظار':         v.pending,             // ✅ جديد
-      'ملغية':                v.cancelled,
-      'عدد حجوزات بخصم':     v.discountCount,       // ✅ جديد
-      'إجمالي الخصومات':      v.discountAmount,
-      'الإيرادات المحققة':    v.revenue,
+      'مؤكدة':                   v.confirmed,
+      'مستلمة':                  v.done,
+      'قيد الانتظار':            v.pending,
+      'ملغية':                   v.cancelled,
+      'عدد حجوزات بخصم':        v.discountCount,
+      'إجمالي الخصومات':         v.discountAmount,
+      'الإيرادات المحققة':       v.revenue,
     })), 'إحصائيات الموظفين');
 
-    // ════════════════════════════════════════════════════════════════
-    // SHEET 6 — ملخص الإضافات
-    // ════════════════════════════════════════════════════════════════
     const allExtrasMap: Record<string, { qty: number; revenue: number; bookings: number }> = {};
     monthBookings.forEach(b => {
       (b.extras ?? []).forEach(e => {
         const key = e.extraName ?? '—';
         if (!allExtrasMap[key]) allExtrasMap[key] = { qty: 0, revenue: 0, bookings: 0 };
-        allExtrasMap[key].qty      += e.quantity;
-        allExtrasMap[key].revenue  += e.total;
+        allExtrasMap[key].qty     += e.quantity;
+        allExtrasMap[key].revenue += e.total;
         allExtrasMap[key].bookings += 1;
       });
     });
@@ -776,50 +676,43 @@ const rev = Math.max(data.chaletRevenue + data.extrasRevenue, 1);
       'ملخص الإضافات'
     );
 
-    // ════════════════════════════════════════════════════════════════
-    // ✅ SHEET 7 — تقرير المدفوعات خلال الشهر (حسب createdAt)
-    // ════════════════════════════════════════════════════════════════
     const paymentRows: object[] = [];
     monthBookings.forEach(b => {
       (b.payments ?? []).forEach(p => {
         const pDate = new Date(p.createdAt);
-        if (pDate < from || pDate > to) return;   // ✅ فلتر حسب createdAt
+        if (pDate < from || pDate > to) return;
         paymentRows.push({
-          'رقم الفاتورة':   getInvoiceNumber(b),
-          'رقم الحجز':      b.id,
-          'اسم النزيل':     b.customerName,
-          'الهاتف':         b.phone,
-          'الشاليه':        b.chaletName ?? '—',
-          'تاريخ الحجز':    new Date(b.date).toLocaleDateString('ar-EG'),
-          'تاريخ الدفع':    pDate.toLocaleDateString('ar-EG'),
-          'وقت الدفع':      pDate.toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' }),
-          'نوع الدفعة':     p.paymentReson === 0 ? 'عربون' : 'دفعة تسوية',
-          'مبلغ الدفعة':    p.amount,
-          'طريقة الدفع':    p.method ?? '—',
-          'رقم المعاملة':   p.transactionId ?? '—',
-          'حالة الدفع':     p.status ?? '—',
-          'حالة الحجز':     statusMap[b.status] ?? b.status,
-          'إجمالي الحجز':   b.totalPrice ?? 0,
+          'رقم الفاتورة':  getInvoiceNumber(b),
+          'رقم الحجز':     b.id,
+          'اسم النزيل':    b.customerName,
+          'الهاتف':        b.phone,
+          'الشاليه':       b.chaletName ?? '—',
+          'تاريخ الحجز':   new Date(b.date).toLocaleDateString('ar-EG'),
+          'تاريخ الدفع':   pDate.toLocaleDateString('ar-EG'),
+          'وقت الدفع':     pDate.toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' }),
+          'نوع الدفعة':    p.paymentReson === 0 ? 'عربون' : 'دفعة تسوية',
+          'مبلغ الدفعة':   p.amount,
+          'طريقة الدفع':   p.method ?? '—',
+          'رقم المعاملة':  p.transactionId ?? '—',
+          'حالة الدفع':    p.status ?? '—',
+          'حالة الحجز':    statusMap[b.status] ?? b.status,
+          'إجمالي الحجز':  b.totalPrice ?? 0,
         });
       });
     });
 
-    // إضافة صف الإجمالي
     if (paymentRows.length > 0) {
       const totalDepositsRow   = (paymentRows as any[]).filter(r => r['نوع الدفعة'] === 'عربون').reduce((s, r) => s + (r['مبلغ الدفعة'] ?? 0), 0);
       const totalPricePayments = (paymentRows as any[]).filter(r => r['نوع الدفعة'] === 'دفعة تسوية').reduce((s, r) => s + (r['مبلغ الدفعة'] ?? 0), 0);
       const grandTotal         = (paymentRows as any[]).reduce((s, r) => s + (r['مبلغ الدفعة'] ?? 0), 0);
       paymentRows.push(
-        { 'رقم الفاتورة': '───', 'رقم الحجز': '', 'اسم النزيل': 'إجمالي العربونات',      'الهاتف': '', 'الشاليه': '', 'تاريخ الحجز': '', 'تاريخ الدفع': '', 'وقت الدفع': '', 'نوع الدفعة': 'عربون',          'مبلغ الدفعة': totalDepositsRow,   'طريقة الدفع': '', 'رقم المعاملة': '', 'حالة الدفع': '', 'حالة الحجز': '', 'إجمالي الحجز': '' },
-        { 'رقم الفاتورة': '───', 'رقم الحجز': '', 'اسم النزيل': 'إجمالي دفعات التسوية', 'الهاتف': '', 'الشاليه': '', 'تاريخ الحجز': '', 'تاريخ الدفع': '', 'وقت الدفع': '', 'نوع الدفعة': 'دفعة تسوية',    'مبلغ الدفعة': totalPricePayments, 'طريقة الدفع': '', 'رقم المعاملة': '', 'حالة الدفع': '', 'حالة الحجز': '', 'إجمالي الحجز': '' },
-        { 'رقم الفاتورة': '═══', 'رقم الحجز': '', 'اسم النزيل': 'الإجمالي الكلي',        'الهاتف': '', 'الشاليه': '', 'تاريخ الحجز': '', 'تاريخ الدفع': '', 'وقت الدفع': '', 'نوع الدفعة': '',               'مبلغ الدفعة': grandTotal,          'طريقة الدفع': '', 'رقم المعاملة': '', 'حالة الدفع': '', 'حالة الحجز': '', 'إجمالي الحجز': '' },
+        { 'رقم الفاتورة': '───', 'رقم الحجز': '', 'اسم النزيل': 'إجمالي العربونات',      'الهاتف': '', 'الشاليه': '', 'تاريخ الحجز': '', 'تاريخ الدفع': '', 'وقت الدفع': '', 'نوع الدفعة': 'عربون',       'مبلغ الدفعة': totalDepositsRow,   'طريقة الدفع': '', 'رقم المعاملة': '', 'حالة الدفع': '', 'حالة الحجز': '', 'إجمالي الحجز': '' },
+        { 'رقم الفاتورة': '───', 'رقم الحجز': '', 'اسم النزيل': 'إجمالي دفعات التسوية', 'الهاتف': '', 'الشاليه': '', 'تاريخ الحجز': '', 'تاريخ الدفع': '', 'وقت الدفع': '', 'نوع الدفعة': 'دفعة تسوية', 'مبلغ الدفعة': totalPricePayments, 'طريقة الدفع': '', 'رقم المعاملة': '', 'حالة الدفع': '', 'حالة الحجز': '', 'إجمالي الحجز': '' },
+        { 'رقم الفاتورة': '═══', 'رقم الحجز': '', 'اسم النزيل': 'الإجمالي الكلي',       'الهاتف': '', 'الشاليه': '', 'تاريخ الحجز': '', 'تاريخ الدفع': '', 'وقت الدفع': '', 'نوع الدفعة': '',            'مبلغ الدفعة': grandTotal,          'طريقة الدفع': '', 'رقم المعاملة': '', 'حالة الدفع': '', 'حالة الحجز': '', 'إجمالي الحجز': '' },
       );
     }
     addSheet(paymentRows, 'تقرير المدفوعات');
 
-    // ════════════════════════════════════════════════════════════════
-    // SHEET 8 — تقرير الديبوزتات (للمدير فقط)
-    // ════════════════════════════════════════════════════════════════
     if (this.isManager) {
       const depositRows: object[] = [];
       monthBookings.forEach(b => {
@@ -828,21 +721,21 @@ const rev = Math.max(data.chaletRevenue + data.extrasRevenue, 1);
           if (pDate < from || pDate > to) return;
           if (p.paymentReson !== 0) return;
           depositRows.push({
-            'رقم الفاتورة':         getInvoiceNumber(b),
-            'رقم الحجز':            b.id,
-            'اسم النزيل':           b.customerName,
-            'الهاتف':               b.phone,
-            'الشاليه':              b.chaletName ?? '—',
-            'تاريخ الحجز':          new Date(b.date).toLocaleDateString('ar-EG'),
-            'تاريخ الديبوزت':       pDate.toLocaleDateString('ar-EG'),
-            'وقت الديبوزت':         pDate.toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' }),
-            'مبلغ الديبوزت':        p.amount,
-            'طريقة الدفع':          p.method ?? '—',
-            'رقم المعاملة':         p.transactionId ?? '—',
-            'حالة الدفع':           p.status ?? '—',
-            'حالة الحجز':           statusMap[b.status] ?? b.status,
-            'إجمالي الحجز':         b.totalPrice ?? 0,
-            'المتبقي بعد الديبوزت': (b.totalPrice ?? 0) - p.amount,
+            'رقم الفاتورة':          getInvoiceNumber(b),
+            'رقم الحجز':             b.id,
+            'اسم النزيل':            b.customerName,
+            'الهاتف':                b.phone,
+            'الشاليه':               b.chaletName ?? '—',
+            'تاريخ الحجز':           new Date(b.date).toLocaleDateString('ar-EG'),
+            'تاريخ الديبوزت':        pDate.toLocaleDateString('ar-EG'),
+            'وقت الديبوزت':          pDate.toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' }),
+            'مبلغ الديبوزت':         p.amount,
+            'طريقة الدفع':           p.method ?? '—',
+            'رقم المعاملة':          p.transactionId ?? '—',
+            'حالة الدفع':            p.status ?? '—',
+            'حالة الحجز':            statusMap[b.status] ?? b.status,
+            'إجمالي الحجز':          b.totalPrice ?? 0,
+            'المتبقي بعد الديبوزت':  (b.totalPrice ?? 0) - p.amount,
           });
         });
       });
