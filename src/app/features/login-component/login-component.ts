@@ -29,27 +29,26 @@ export class LoginComponent {
     this.showPassword = !this.showPassword;
   }
 
-  onSubmit(): void {
-    if (!this.email || !this.password) return;
-    if (this.isLoading) return;
+onSubmit(): void {
+  if (!this.email || !this.password) return;
+  if (this.isLoading) return;
 
-    this.isLoading = true;
-    this.errorMessage = '';
+  this.isLoading = true;
+  this.errorMessage = '';
+  this.cdr.detectChanges(); // ✅ هنا عشان يظهر الـ loading فوراً
 
-    this.auth.login({ email: this.email, password: this.password }).subscribe({
-      next: () => {
-        this.isLoading = false;
-        this.router.navigate(['/dashboard']);
-      },
-      error: (err) => {
-          this.isLoading = false;
-  // يقرأ الرسالة من الـ backend مباشرة
-  this.errorMessage =
-    err.error?.message ||
-    'حدث خطأ، يرجى المحاولة مرة أخرى';
-      }
-    });
-      this.cdr.detectChanges(); // ✅ تحديث UI فورًا
-
-  }
+  this.auth.login({ email: this.email, password: this.password }).subscribe({
+    next: () => {
+      this.isLoading = false;
+      this.cdr.detectChanges(); // ✅ هنا
+      this.router.navigate(['/dashboard']);
+    },
+    error: (err) => {
+      this.isLoading = false;
+      this.errorMessage =
+        err.error?.message || 'حدث خطأ، يرجى المحاولة مرة أخرى';
+      this.cdr.detectChanges(); // ✅ هنا عشان يظهر الـ error فوراً
+    }
+  });
+}
 }

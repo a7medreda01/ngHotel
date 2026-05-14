@@ -1929,9 +1929,9 @@ dp-btn-invoice {
 }
 
 .notes-badge-lg {
-  position: absolute;
+  position: relative;
   top: 6px;
-  left: 8px;
+  /* left: 8px; */
   background: #185FA5;
   color: #fff;
   font-size: 10px;

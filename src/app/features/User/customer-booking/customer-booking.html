@@ -1,0 +1,535 @@
+<!-- ═══════════════════════════════════════════════════════════
+     CUSTOMER BOOKING COMPONENT — Angular Template
+     ═══════════════════════════════════════════════════════════ -->
+
+<!-- ── TOAST ── -->
+<div class="cb-toast" [class.show]="showToast" [class.cb-toast--error]="toastType === 'error'">
+  <i class="bi" [class.bi-check-circle-fill]="toastType==='success'" [class.bi-x-circle-fill]="toastType==='error'"></i>
+  {{ toastMessage }}
+</div>
+
+<!-- ══════════════════════════════════════════════════════════
+     REGISTRATION SCREEN
+══════════════════════════════════════════════════════════ -->
+<div class="cb-register-screen" *ngIf="!isRegistered">
+  <div class="cb-register-card">
+    <div class="cb-register-brand">
+      <span class="cb-brand-icon">🏡</span>
+      <h1>أهلاً بك</h1>
+      <p>أدخل بياناتك للبدء في الحجز</p>
+    </div>
+
+    <div class="cb-field-group">
+      <label>الاسم الكريم</label>
+      <div class="cb-input-wrap">
+        <i class="bi bi-person-fill cb-input-icon"></i>
+        <input type="text" [(ngModel)]="regName" placeholder="اسمك الكامل" class="cb-input" />
+      </div>
+    </div>
+
+    <div class="cb-field-group">
+      <label>رقم الجوال</label>
+      <div class="cb-phone-row">
+        <select [(ngModel)]="selectedCountryCode" class="cb-select-code">
+          <option *ngFor="let c of countryCodes" [value]="c.value">{{ c.label }}</option>
+        </select>
+        <div class="cb-input-wrap flex-1">
+          <i class="bi bi-telephone-fill cb-input-icon"></i>
+          <input type="tel" [(ngModel)]="regPhone" placeholder="رقم الجوال" class="cb-input" />
+        </div>
+      </div>
+    </div>
+
+    <p class="cb-reg-error" *ngIf="regError">
+      <i class="bi bi-exclamation-triangle-fill"></i> {{ regError }}
+    </p>
+
+    <button class="cb-btn-primary w-100" (click)="register()">
+      <i class="bi bi-arrow-left-circle-fill"></i> دخول وابدأ الحجز
+    </button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════
+     MAIN APP (after registration)
+══════════════════════════════════════════════════════════ -->
+<div class="cb-app" *ngIf="isRegistered">
+
+  <!-- ── TOP HEADER ── -->
+  <header class="cb-header">
+    <div class="cb-header-inner">
+      <div class="cb-header-brand">
+        <span class="cb-brand-icon">🏡</span>
+        <span class="cb-brand-name">الكوخ</span>
+      </div>
+      <div class="cb-header-user">
+        <span class="cb-user-greeting">أهلاً، <strong>{{ savedName }}</strong></span>
+        <button class="cb-btn-ghost cb-logout" (click)="logout()" title="خروج">
+          <i class="bi bi-box-arrow-right"></i>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ── BOTTOM NAV (mobile) ── -->
+  <nav class="cb-bottom-nav">
+    <button [class.active]="currentView==='home'" (click)="currentView='home'">
+      <i class="bi bi-house-fill"></i><span>الرئيسية</span>
+    </button>
+    <button class="cb-nav-book-btn" (click)="startBooking()">
+      <i class="bi bi-plus-lg"></i><span>حجز جديد</span>
+    </button>
+    <button [class.active]="currentView==='mybookings'" (click)="currentView='mybookings'; openMyBookings()">
+      <i class="bi bi-calendar2-check-fill"></i><span>حجوزاتي</span>
+    </button>
+  </nav>
+
+  <!-- ════════════════════ HOME VIEW ════════════════════ -->
+  <main class="cb-content" *ngIf="currentView==='home'">
+
+    <!-- Hero -->
+    <section class="cb-hero">
+      <div class="cb-hero-text">
+        <h2>استمتع بوقتك 🌿</h2>
+        <p>اختر كوخك المفضل واحجز بكل سهولة</p>
+      </div>
+      <button class="cb-btn-primary cb-hero-btn" (click)="startBooking()">
+        <i class="bi bi-calendar-plus-fill"></i> احجز الآن
+      </button>
+    </section>
+
+    <!-- Chalet Type Cards -->
+    <section class="cb-section">
+      <h3 class="cb-section-title">أنواع الأكواخ</h3>
+      <div class="cb-chalets-grid">
+
+        <!-- Normal -->
+        <div class="cb-chalet-card" (click)="selectedChaletType=0; startBooking()">
+          <div class="cb-chalet-img-wrap">
+            <img [src]="getChaletImage(0) || 'assets/chalet-normal.jpg'" alt="كوخ عادي"
+                 onerror="this.src='https://placehold.co/400x220/2d5a27/fff?text=كوخ+عادي'" />
+            <span class="cb-chalet-badge">🏠 عادي</span>
+          </div>
+          <div class="cb-chalet-body">
+            <h4>الكوخ العادي</h4>
+            <p>تجربة هادئة ومريحة بأسعار مناسبة</p>
+            <div class="cb-avail-pills">
+              <span class="cb-pill" *ngFor="let p of [0,1,2]">
+                <i class="bi bi-sun-fill" *ngIf="p===0  && getChaletCount(0,p) > 0"></i>
+                <i class="bi bi-sunset-fill" *ngIf="p===1  && getChaletCount(1,p) > 0" ></i>
+                <i class="bi bi-brightness-high-fill" *ngIf="p===2 && getChaletCount(2,p) > 0"></i>
+                {{ periodLabels[p] }}
+                <!-- <strong [class.text-danger]="getChaletCount(0,p)===0">
+                  ({{ getChaletCount(0,p) }})
+                </strong> -->
+              </span>
+            </div>
+            <button class="cb-btn-primary w-100 mt-2">احجز الآن</button>
+          </div>
+        </div>
+
+        <!-- Royal -->
+        <div class="cb-chalet-card cb-chalet-royal" (click)="selectedChaletType=1; startBooking()">
+          <div class="cb-chalet-img-wrap">
+            <img [src]="getChaletImage(1) || 'assets/chalet-royal.jpg'" alt="كوخ رويال"
+                 onerror="this.src='https://placehold.co/400x220/7c4a03/fff?text=كوخ+رويال'" />
+            <span class="cb-chalet-badge cb-badge-royal">👑 رويال</span>
+          </div>
+          <div class="cb-chalet-body">
+            <h4>الكوخ الرويال</h4>
+            <p>فخامة وخصوصية لتجربة لا تُنسى</p>
+            <div class="cb-avail-pills">
+              <span class="cb-pill" *ngFor="let p of [0,1,2]">
+                <i class="bi bi-sun-fill" *ngIf="p===0 && getChaletCount(0,p) > 0"></i>
+                <i class="bi bi-sunset-fill" *ngIf="p===1 && getChaletCount(1,p) > 0"></i>
+                <i class="bi bi-brightness-high-fill" *ngIf="p===2  && getChaletCount(2,p) > 0"></i>
+                {{ periodLabels[p] }}
+                <strong [class.text-danger]="getChaletCount(1,p)===0">
+                  <!-- ({{ getChaletCount(1,p) }}) -->
+                </strong>
+              </span>
+            </div>
+            <button class="cb-btn-primary w-100 mt-2">احجز الآن</button>
+          </div>
+        </div>
+
+      </div>
+    </section>
+  </main>
+
+  <!-- ════════════════════ BOOKING FLOW VIEW ════════════════════ -->
+  <main class="cb-content" *ngIf="currentView==='book'">
+
+    <!-- Progress Bar -->
+    <div class="cb-progress-wrap">
+      <div class="cb-progress-bar">
+        <div class="cb-progress-fill" [style.width.%]="bookStep * 25"></div>
+      </div>
+      <div class="cb-progress-steps">
+        <span [class.done]="bookStep>1" [class.active]="bookStep===1">
+          <i class="bi bi-house"></i>
+        </span>
+        <span [class.done]="bookStep>2" [class.active]="bookStep===2">
+          <i class="bi bi-clock"></i>
+        </span>
+        <span [class.done]="bookStep>3" [class.active]="bookStep===3">
+          <i class="bi bi-calendar3"></i>
+        </span>
+        <span [class.done]="bookStep>4" [class.active]="bookStep===4">
+          <i class="bi bi-list-check"></i>
+        </span>
+      </div>
+      <div class="cb-step-labels">
+        <span>النوع</span><span>الفترة</span><span>التاريخ</span><span>التفاصيل</span>
+      </div>
+    </div>
+
+    <!-- ── STEP 1: Chalet Type ── -->
+    <div class="cb-step-panel" *ngIf="bookStep===1">
+      <h3 class="cb-step-title">اختر نوع الكوخ</h3>
+      <div class="cb-type-cards">
+
+        <div class="cb-type-card" [class.selected]="selectedChaletType===0"
+             (click)="selectedChaletType=0; onChaletTypeChange()">
+          <div class="cb-type-img">
+            <img [src]="getChaletImage(0)" alt="عادي"
+                 onerror="this.src='https://placehold.co/340x180/2d5a27/fff?text=🏠'" />
+          </div>
+          <div class="cb-type-info">
+            <span class="cb-type-icon">🏠</span>
+            <h4>الكوخ العادي</h4>
+            <p>أجواء هادئة ومريحة</p>
+            <!-- <span class="cb-type-count">{{ getTotalForType(0) }} وحدة متاحة</span> -->
+          </div>
+          <i class="bi bi-check-circle-fill cb-check-icon" *ngIf="selectedChaletType===0"></i>
+        </div>
+
+        <div class="cb-type-card cb-type-royal" [class.selected]="selectedChaletType===1"
+             (click)="selectedChaletType=1; onChaletTypeChange()">
+          <div class="cb-type-img">
+            <img [src]="getChaletImage(1)" alt="رويال"
+                 onerror="this.src='https://placehold.co/340x180/7c4a03/fff?text=👑'" />
+          </div>
+          <div class="cb-type-info">
+            <span class="cb-type-icon">👑</span>
+            <h4>الكوخ الرويال</h4>
+            <p>فخامة وخصوصية تامة</p>
+            <!-- <span class="cb-type-count">{{ getTotalForType(1) }} وحدة متاحة</span> -->
+          </div>
+          <i class="bi bi-check-circle-fill cb-check-icon" *ngIf="selectedChaletType===1"></i>
+        </div>
+
+      </div>
+
+      <button class="cb-btn-primary w-100 mt-4" (click)="bookStep=2">
+        التالي <i class="bi bi-arrow-left"></i>
+      </button>
+    </div>
+
+    <!-- ── STEP 2: Period ── -->
+    <div class="cb-step-panel" *ngIf="bookStep===2">
+      <button class="cb-back-btn" (click)="bookStep=1"><i class="bi bi-arrow-right"></i> رجوع</button>
+      <h3 class="cb-step-title">اختر الفترة الزمنية</h3>
+
+      <div class="cb-loading-spinner" *ngIf="loadingChaletsForType">
+        <div class="spinner-border text-success"></div>
+        <span>جاري تحميل الفترات...</span>
+      </div>
+
+      <div class="cb-periods-list" *ngIf="!loadingChaletsForType">
+        <div class="cb-period-card"
+             *ngFor="let p of [0,1,2]"
+             [class.selected]="selectedPeriod===p"
+             [class.disabled]="!isPeriodAvailable(p)"
+             (click)="selectPeriod(p)">
+          <div class="cb-period-icon">
+            <span *ngIf="p===0">🌅</span>
+            <span *ngIf="p===1">🌇</span>
+            <span *ngIf="p===2">🌞</span>
+          </div>
+          <div class="cb-period-text">
+            <strong>{{ periodLabels[p] }}</strong>
+            <span class="cb-period-sub" *ngIf="p===0  && getChaletCount(0,p) > 0">من الصباح حتى الظهر</span>
+            <span class="cb-period-sub" *ngIf="p===1 && getChaletCount(1,p) > 0">من الظهر حتى المساء</span>
+            <span class="cb-period-sub" *ngIf="p===2 && getChaletCount(2,p) > 0">يوم كامل (صباحاً ومساءً)</span>
+          </div>
+          <div class="cb-period-avail">
+            <span class="cb-pill-sm"
+                  [class.avail]="getChaletCount(selectedChaletType,p)>0"
+                  [class.unavail]="getChaletCount(selectedChaletType,p)===0">
+              <!-- {{ getChaletCount(selectedChaletType, p) }} متاح -->
+               متاح
+            </span>
+          </div>
+          <i class="bi bi-check-circle-fill cb-check-icon" *ngIf="selectedPeriod===p"></i>
+        </div>
+      </div>
+
+      <button class="cb-btn-primary w-100 mt-4" (click)="goToStep(3)" [disabled]="selectedPeriod<0">
+        التالي <i class="bi bi-arrow-left"></i>
+      </button>
+    </div>
+
+    <!-- ── STEP 3: Calendar ── -->
+    <div class="cb-step-panel" *ngIf="bookStep===3">
+      <button class="cb-back-btn" (click)="bookStep=2"><i class="bi bi-arrow-right"></i> رجوع</button>
+      <h3 class="cb-step-title">اختر التاريخ</h3>
+
+      <!-- Legend -->
+      <div class="cb-cal-legend">
+        <span><i class="cb-dot dot-available"></i> متاح</span>
+        <!-- <span><i class="cb-dot dot-partial"></i> جزئي</span> -->
+        <span><i class="cb-dot dot-pending"></i> انتظار</span>
+        <span><i class="cb-dot dot-unavailable"></i> محجوز</span>
+      </div>
+
+      <!-- Angular Material Datepicker inline -->
+      <div class="cb-calendar-wrap">
+        <mat-calendar
+          [(selected)]="calendarDate"
+          [minDate]="minDate"
+          [dateClass]="dateClass"
+          (selectedChange)="onDateSelected($event!)">
+        </mat-calendar>
+      </div>
+
+      <div class="cb-selected-date" *ngIf="selectedDate">
+        <i class="bi bi-calendar-check-fill"></i>
+        تاريخ محدد: <strong>{{ formatDate(selectedDate) }}</strong>
+        <span class="cb-avail-badge ms-2"
+              [class.green]="getAvailableCount()>0"
+              [class.amber]="getAvailableCount()===0">
+          {{ getAvailableCount() > 0 ? 'متاح ✅' : 'قائمة انتظار ⏳' }}
+        </span>
+      </div>
+
+      <div class="cb-price-tag" *ngIf="priceLoaded">
+        <i class="bi bi-tag-fill"></i>
+        السعر الأساسي: <strong>{{ basePrice | number }} د.أ</strong>
+      </div>
+      <div class="cb-loading-spinner small" *ngIf="basePriceLoading">
+        <div class="spinner-border spinner-border-sm text-success"></div> جاري تحميل السعر...
+      </div>
+
+      <button class="cb-btn-primary w-100 mt-4" (click)="goToStep(4)" [disabled]="!selectedDate">
+        التالي <i class="bi bi-arrow-left"></i>
+      </button>
+    </div>
+
+    <!-- ── STEP 4: Details & Extras ── -->
+    <div class="cb-step-panel" *ngIf="bookStep===4">
+      <button class="cb-back-btn" (click)="bookStep=3"><i class="bi bi-arrow-right"></i> رجوع</button>
+      <h3 class="cb-step-title">تفاصيل الحجز</h3>
+
+      <!-- Summary Card -->
+      <div class="cb-summary-mini">
+        <span>{{ chaletTypeLabel }}</span>
+        <span>{{ periodLabels[selectedPeriod] }}</span>
+        <span>{{ formatDate(selectedDate) }}</span>
+      </div>
+
+      <!-- Guests -->
+      <div class="cb-field-group">
+        <label><i class="bi bi-people-fill"></i> عدد الضيوف</label>
+        <div class="cb-counter">
+          <button (click)="numOfGuests = numOfGuests > 1 ? numOfGuests-1 : 1">
+            <i class="bi bi-dash-circle"></i>
+          </button>
+          <span>{{ numOfGuests }}</span>
+          <button (click)="numOfGuests = numOfGuests + 1">
+            <i class="bi bi-plus-circle"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Note -->
+      <div class="cb-field-group">
+        <label><i class="bi bi-pencil-fill"></i> ملاحظات (اختياري)</label>
+        <textarea [(ngModel)]="note" placeholder="أي طلبات خاصة..." class="cb-textarea" rows="3"></textarea>
+      </div>
+
+      <!-- Extras -->
+      <div class="cb-field-group" *ngIf="extras.length">
+        <label><i class="bi bi-stars"></i> إضافات</label>
+        <div class="cb-extras-add">
+          <select [(ngModel)]="addSelectedExtraId" class="cb-select flex-1">
+            <option value="0">-- اختر إضافة --</option>
+            <option *ngFor="let e of extras" [value]="e.id">{{ e.name }} ({{ e.price }} د.أ)</option>
+          </select>
+          <div class="cb-counter sm">
+            <button (click)="addSelectedExtraQty = addSelectedExtraQty>1 ? addSelectedExtraQty-1 : 1">
+              <i class="bi bi-dash"></i>
+            </button>
+            <span>{{ addSelectedExtraQty }}</span>
+            <button (click)="addSelectedExtraQty = addSelectedExtraQty+1">
+              <i class="bi bi-plus"></i>
+            </button>
+          </div>
+          <button class="cb-btn-secondary" (click)="addExtra()">
+            <i class="bi bi-plus-lg"></i>
+          </button>
+        </div>
+
+        <div class="cb-extras-list" *ngIf="addExtrasList.length">
+          <div class="cb-extra-row" *ngFor="let ex of addExtrasList; let i=index">
+            <span>{{ ex.name }}</span>
+            <span>x{{ ex.quantity }}</span>
+            <span>{{ ex.price * ex.quantity | number }} د.أ</span>
+            <button class="cb-btn-danger-sm" (click)="removeExtra(i)">
+              <i class="bi bi-trash3"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Price Total -->
+      <div class="cb-total-box">
+        <div class="cb-total-row">
+          <span>السعر الأساسي</span><span>{{ basePrice | number }} د.أ</span>
+        </div>
+        <div class="cb-total-row" *ngIf="extrasTotal > 0">
+          <span>الإضافات</span><span>{{ extrasTotal | number }} د.أ</span>
+        </div>
+        <div class="cb-total-row grand">
+          <span>الإجمالي</span><span>{{ grandTotal | number }} د.أ</span>
+        </div>
+      </div>
+
+      <button class="cb-btn-primary w-100 mt-3" (click)="openConfirmModal()">
+        <i class="bi bi-send-fill"></i> تأكيد الحجز
+      </button>
+    </div>
+
+  </main>
+
+</div><!-- /cb-app -->
+
+<!-- ══════════════════════════════════════════════════════════
+     WAITING LIST CONFIRM MODAL
+══════════════════════════════════════════════════════════ -->
+<div class="cb-modal-backdrop" *ngIf="showWaitingConfirm" (click)="cancelWaiting()">
+  <div class="cb-modal cb-modal-warn" (click)="$event.stopPropagation()">
+    <div class="cb-modal-icon">⏳</div>
+    <h3>قائمة الانتظار</h3>
+    <p>
+      الكوخ محجوز بالكامل في <strong>{{ waitingDateFormatted }}</strong>
+      — هل تريد أن تُضاف لقائمة الانتظار؟
+    </p>
+    <div class="cb-modal-actions">
+      <button class="cb-btn-secondary flex-1" (click)="cancelWaiting()">لا، تغيير التاريخ</button>
+      <button class="cb-btn-primary flex-1" (click)="confirmWaiting()">نعم، انضم للانتظار</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════
+     BOOKING CONFIRM MODAL
+══════════════════════════════════════════════════════════ -->
+<div class="cb-modal-backdrop" *ngIf="showConfirmModal" (click)="!isSubmitting && closeConfirmModal()">
+  <div class="cb-modal" (click)="$event.stopPropagation()">
+
+    <!-- Success State -->
+    <div class="cb-modal-success" *ngIf="submitSuccess">
+      <div class="cb-success-anim">🎉</div>
+      <h3>تم إرسال طلب الحجز!</h3>
+      <p>سيتم التواصل معك قريباً لتأكيد حجزك</p>
+      <button class="cb-btn-primary w-100 mt-3" (click)="closeConfirmModal()">رائع! 🏠</button>
+    </div>
+
+    <!-- Confirm State -->
+    <ng-container *ngIf="!submitSuccess">
+      <div class="cb-modal-header">
+        <h3><i class="bi bi-clipboard-check-fill"></i> تأكيد الحجز</h3>
+        <button class="cb-modal-close" (click)="closeConfirmModal()" [disabled]="isSubmitting">
+          <i class="bi bi-x-lg"></i>
+        </button>
+      </div>
+
+      <div class="cb-confirm-details">
+        <div class="cb-confirm-row"><span>الاسم</span><strong>{{ savedName }}</strong></div>
+        <div class="cb-confirm-row"><span>الجوال</span><strong>{{ savedPhone }}</strong></div>
+        <div class="cb-confirm-row"><span>الكوخ</span><strong>{{ chaletTypeLabel }}</strong></div>
+        <div class="cb-confirm-row"><span>الفترة</span><strong>{{ periodLabels[selectedPeriod] }}</strong></div>
+        <div class="cb-confirm-row"><span>التاريخ</span><strong>{{ formatDate(selectedDate) }}</strong></div>
+        <div class="cb-confirm-row"><span>الضيوف</span><strong>{{ numOfGuests }} أشخاص</strong></div>
+        <div class="cb-confirm-row" *ngIf="addExtrasList.length">
+          <span>الإضافات</span>
+          <span class="text-end">
+            <span *ngFor="let ex of addExtrasList" class="d-block">
+              {{ ex.name }} x{{ ex.quantity }} ({{ ex.price * ex.quantity | number }} د.أ)
+            </span>
+          </span>
+        </div>
+        <div class="cb-confirm-row grand">
+          <span>الإجمالي</span><strong>{{ grandTotal | number }} د.أ</strong>
+        </div>
+        <div class="cb-confirm-row" *ngIf="note">
+          <span>ملاحظات</span><span class="text-end">{{ note }}</span>
+        </div>
+      </div>
+
+      <p class="cb-submit-error" *ngIf="submitError">
+        <i class="bi bi-exclamation-triangle-fill"></i> {{ submitError }}
+      </p>
+
+      <div class="cb-modal-actions">
+        <button class="cb-btn-secondary flex-1" (click)="closeConfirmModal()" [disabled]="isSubmitting">
+          <i class="bi bi-pencil"></i> تعديل
+        </button>
+        <button class="cb-btn-primary flex-1" (click)="submitBooking()" [disabled]="isSubmitting">
+          <span *ngIf="!isSubmitting"><i class="bi bi-send-fill"></i> إرسال</span>
+          <span *ngIf="isSubmitting"><span class="spinner-border spinner-border-sm"></span> جاري...</span>
+        </button>
+      </div>
+    </ng-container>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════
+     MY BOOKINGS MODAL
+══════════════════════════════════════════════════════════ -->
+<div class="cb-modal-backdrop" *ngIf="showMyBookingsModal" (click)="closeMyBookings()">
+  <div class="cb-modal cb-modal-lg" (click)="$event.stopPropagation()">
+    <div class="cb-modal-header">
+      <h3><i class="bi bi-calendar2-check-fill"></i> حجوزاتي</h3>
+      <button class="cb-modal-close" (click)="closeMyBookings()"><i class="bi bi-x-lg"></i></button>
+    </div>
+
+    <div class="cb-loading-spinner" *ngIf="loadingMyBookings">
+      <div class="spinner-border text-success"></div>
+      <span>جاري تحميل حجوزاتك...</span>
+    </div>
+
+    <div class="cb-empty-state" *ngIf="!loadingMyBookings && myBookings.length===0">
+      <div class="cb-empty-icon">📋</div>
+      <p>لا توجد حجوزات بعد</p>
+      <button class="cb-btn-primary" (click)="closeMyBookings(); startBooking()">
+        <i class="bi bi-calendar-plus"></i> احجز الآن
+      </button>
+    </div>
+
+    <div class="cb-bookings-list" *ngIf="!loadingMyBookings && myBookings.length>0">
+      <div class="cb-booking-card" *ngFor="let b of myBookings">
+        <div class="cb-booking-top">
+          <div class="cb-booking-type">
+            <span>{{ b.chaletType === 1 ? '👑 رويال' : '🏠 عادي' }}</span>
+            <span class="cb-status-badge" [class]="getStatusClass(b.status)">
+              {{ getStatusLabel(b.status) }}
+            </span>
+          </div>
+          <div class="cb-booking-date">
+            <i class="bi bi-calendar3"></i> {{ formatDate(b.date) }}
+          </div>
+        </div>
+        <div class="cb-booking-details">
+          <span><i class="bi bi-clock"></i> {{ getPeriodLabel(b.period) }}</span>
+          <span><i class="bi bi-people"></i> {{ b.numOfGuests }} أشخاص</span>
+          <span *ngIf="b.totalPrice"><i class="bi bi-tag"></i> {{ b.totalPrice | number }} د.أ</span>
+        </div>
+        <!-- <div class="cb-booking-note" *ngIf="b.notes">
+          <i class="bi bi-chat-left-text"></i> {{ b.notes. }}
+        </div> -->
+      </div>
+    </div>
+  </div>
+</div>

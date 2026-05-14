@@ -6,7 +6,7 @@ import { FormsModule } from '@angular/forms';
 @Component({
   selector: 'app-extras-component',
   templateUrl: './extras-component.html',
-  imports:[CommonModule,FormsModule],
+  imports: [CommonModule, FormsModule],
   styleUrls: ['./extras-component.scss']
 })
 export class ExtrasComponent implements OnInit {
@@ -37,7 +37,7 @@ export class ExtrasComponent implements OnInit {
   toastType: 'success' | 'error' = 'success';
   showToast = false;
 
-  constructor(private extrasService: ExtrasService,  private cdr: ChangeDetectorRef) {}
+  constructor(private extrasService: ExtrasService, private cdr: ChangeDetectorRef) {}
 
   ngOnInit(): void {
     this.loadExtras();
@@ -50,14 +50,12 @@ export class ExtrasComponent implements OnInit {
         this.extras = data;
         this.applyFilter();
         this.loading = false;
-              this.cdr.detectChanges(); // 🔥 مهم
-
+        this.cdr.markForCheck();
       },
       error: () => {
         this.showNotification('حدث خطأ أثناء تحميل البيانات', 'error');
         this.loading = false;
-              this.cdr.detectChanges(); // 🔥 مهم
-
+        this.cdr.markForCheck();
       }
     });
   }
@@ -135,10 +133,12 @@ export class ExtrasComponent implements OnInit {
           this.closeModal();
           this.loadExtras();
           this.saving = false;
+          this.cdr.markForCheck();
         },
         error: () => {
           this.showNotification('حدث خطأ أثناء التحديث', 'error');
           this.saving = false;
+          this.cdr.markForCheck();
         }
       });
     } else {
@@ -152,10 +152,12 @@ export class ExtrasComponent implements OnInit {
           this.closeModal();
           this.loadExtras();
           this.saving = false;
+          this.cdr.markForCheck();
         },
         error: () => {
           this.showNotification('حدث خطأ أثناء الإضافة', 'error');
           this.saving = false;
+          this.cdr.markForCheck();
         }
       });
     }
@@ -180,10 +182,12 @@ export class ExtrasComponent implements OnInit {
         this.cancelDelete();
         this.loadExtras();
         this.deleting = false;
+        this.cdr.markForCheck();
       },
       error: () => {
         this.showNotification('حدث خطأ أثناء الحذف', 'error');
         this.deleting = false;
+        this.cdr.markForCheck();
       }
     });
   }
@@ -202,9 +206,11 @@ export class ExtrasComponent implements OnInit {
           extra.isActive ? 'تم تفعيل الخدمة' : 'تم إيقاف الخدمة',
           'success'
         );
+        this.cdr.markForCheck();
       },
       error: () => {
         this.showNotification('حدث خطأ', 'error');
+        this.cdr.markForCheck();
       }
     });
   }
@@ -213,8 +219,10 @@ export class ExtrasComponent implements OnInit {
     this.toastMessage = message;
     this.toastType = type;
     this.showToast = true;
+    this.cdr.markForCheck();
     setTimeout(() => {
       this.showToast = false;
+      this.cdr.markForCheck();
     }, 3000);
   }
 }

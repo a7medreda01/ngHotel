@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { AuthService, CreateUserRequest, UserItem } from '../../service/Auth-service';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -32,8 +32,9 @@ export class CreateUserComponent implements OnInit {
   deletingId: number | null = null;
   showDeleteConfirm = false;
   userToDelete: UserItem | null = null;
+  togglingId: number | null = null;
 
-  constructor(private auth: AuthService) {}
+  constructor(private auth: AuthService, private cdr: ChangeDetectorRef) {}
 
   ngOnInit(): void {
     this.loadUsers();
@@ -47,10 +48,12 @@ export class CreateUserComponent implements OnInit {
       next: (data) => {
         this.users = data;
         this.isLoadingUsers = false;
+        this.cdr.markForCheck();
       },
       error: () => {
         this.usersError = 'تعذّر تحميل قائمة المستخدمين';
         this.isLoadingUsers = false;
+        this.cdr.markForCheck();
       }
     });
   }
@@ -70,15 +73,16 @@ export class CreateUserComponent implements OnInit {
     this.deletingId = id;
     this.auth.deleteUser(id).subscribe({
       next: () => {
-        // تحديث لحظي — مفيش حاجة تتحمل تاني
         this.users = this.users.filter(u => u.id !== id);
         this.deletingId = null;
         this.closeDeleteConfirm();
+        this.cdr.markForCheck();
       },
       error: () => {
         this.deletingId = null;
         this.closeDeleteConfirm();
         this.usersError = 'حدث خطأ أثناء الحذف، حاول مرة أخرى';
+        this.cdr.markForCheck();
       }
     });
   }
@@ -97,8 +101,8 @@ export class CreateUserComponent implements OnInit {
         this.isLoading = false;
         this.successMessage = `تم إنشاء حساب "${this.form.fullName}" بنجاح!`;
         this.resetForm();
-        // تحديث لحظي — إعادة تحميل القائمة
         this.loadUsers();
+        this.cdr.markForCheck();
       },
       error: (err) => {
         this.isLoading = false;
@@ -107,6 +111,7 @@ export class CreateUserComponent implements OnInit {
         } else {
           this.errorMessage = 'حدث خطأ أثناء إنشاء الحساب';
         }
+        this.cdr.markForCheck();
       }
     });
   }
@@ -119,6 +124,23 @@ export class CreateUserComponent implements OnInit {
       role: 'Employee',
       partnerId: 0
     };
+  }
+
+  // ─── Toggle Active ────────────────────────────────────
+  toggleActive(user: UserItem): void {
+    this.togglingId = user.id;
+    this.auth.toggleActive(user.id).subscribe({
+      next: (res) => {
+        user.isActive = res.isActive;
+        this.togglingId = null;
+        this.cdr.markForCheck();
+      },
+      error: (err) => {
+        this.togglingId = null;
+        this.usersError = err.error?.message || 'حدث خطأ أثناء تغيير حالة الحساب';
+        this.cdr.markForCheck();
+      }
+    });
   }
 
   // ─── Helpers ──────────────────────────────────────────
@@ -148,21 +170,4 @@ export class CreateUserComponent implements OnInit {
     };
     return map[role] ?? 'bi-person-fill';
   }
-  // في الـ properties
-togglingId: number | null = null;
-
-// ميثود جديدة
-toggleActive(user: UserItem): void {
-  this.togglingId = user.id;
-  this.auth.toggleActive(user.id).subscribe({
-    next: (res) => {
-      user.isActive = res.isActive; // تحديث لحظي بدون reload
-      this.togglingId = null;
-    },
-    error: (err) => {
-      this.togglingId = null;
-      this.usersError = err.error?.message || 'حدث خطأ أثناء تغيير حالة الحساب';
-    }
-  });
-}
 }

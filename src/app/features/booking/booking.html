@@ -985,15 +985,16 @@
 <div class="form-group">
   <label>خصم (د.أ)</label>
 
-  <input
-    type="number"
-    [(ngModel)]="newBooking.discountAmount"
-    (ngModelChange)="validateDiscountNewBooking()"
-    min="0"
-    [max]="auth.hasRole('Manager') ? 999999 : 10"
-    class="form-input"
-    placeholder="ادخل الخصم" />
-
+<input
+  type="number"
+  [ngModel]="discountNewDisplay"
+  (ngModelChange)="onDiscountNewChange($event)"
+  (blur)="validateDiscountNewBooking()"
+  min="0"
+  [max]="auth.hasRole('Manager') ? 999999 : 10"
+  class="form-input"
+  placeholder="ادخل الخصم"
+/>
   <small *ngIf="!auth.hasRole('Manager')">
     أقصى خصم للموظف: 10 د.أ
   </small>
@@ -1161,8 +1162,20 @@
             <div class="form-group">
               <label>خصم (د.أ)</label>
 
-              <input type="number" [(ngModel)]="editForm.discountAmount" (ngModelChange)="validateDiscount()" min="0"
-                [max]="auth.hasRole('Manager') ? 999999 : 10" class="form-input" placeholder="ادخل الخصم" />
+              <input
+  type="number"
+  [ngModel]="discountDisplay"
+  (ngModelChange)="onDiscountChange($event)"
+  (blur)="validateDiscount()"
+  min="0"
+  [max]="auth.hasRole('Manager') ? 999999 : 10"
+  class="form-input"
+  placeholder="ادخل الخصم"
+/>
+
+              <small *ngIf="!auth.hasRole('Manager')">
+                أقصى خصم للموظف: 10 د.أ
+              </small>
             </div>
           </div>
         </div>

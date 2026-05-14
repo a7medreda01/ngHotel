@@ -13,6 +13,7 @@ import { ResetPasswordComponent } from './features/reset-password-component/rese
 import { ProfileComponent } from './features/profile-component/profile-component';
 import { Dashboard } from './features/dashboard/dashboard';
 import { BookingOverviewComponent } from './features/booking-overview-component/booking-overview';
+import { CustomerBooking } from './features/User/customer-booking/customer-booking';
 
 export const routes: Routes = [
   // 🔓 Public
@@ -21,6 +22,8 @@ export const routes: Routes = [
   { path: 'forget-password', component: ForgetPasswordComponent },
   { path: 'reset-password', component: ResetPasswordComponent },
   { path: 'create-user', component: CreateUserComponent, canActivate: [ManagerGuard] },
+  { path: 'book', component: CustomerBooking },
+
 
 
   // 🔐 Protected
