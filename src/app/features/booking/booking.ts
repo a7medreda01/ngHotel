@@ -1183,8 +1183,9 @@ ngOnDestroy() {
 
   get todayTotal(): number { return this.todayBookings.filter(b => b.status !== 'Cancelled').length; }
   get todayPending(): number { return this.todayBookings.filter(b => b.status === 'Pending' || b.status === 'WaitingList').length; }
-  get todayConfirmed(): number { return this.todayBookings.filter(b => b.status === 'Confirmed' || b.status === 'Done').length; }
-
+get todayConfirmed(): number {
+  return this.todayDepositPayments.length ;
+}
 
   dailyPayments!: DailyPaymentsResponse;
 
@@ -1199,7 +1200,12 @@ ngOnDestroy() {
       ?.filter(p => p.paymentReson === 0)
       ?.reduce((sum, p) => sum + p.amount, 0) ?? 0;
   }
-
+  get yesterdayDeposits(): number {
+    return this.dailyPayments?.yesterday?.payments
+      ?.filter(p => p.paymentReson === 0)
+      ?.reduce((sum, p) => sum + p.amount, 0) ?? 0;
+  }
+  
   get todayRevenuePayments(): DailyPaymentEntry[] {
     return this.dailyPayments?.today?.payments?.filter(p => p.paymentReson === 1) ?? [];
   }
@@ -1207,6 +1213,11 @@ ngOnDestroy() {
   get todayDepositPayments(): DailyPaymentEntry[] {
     return this.dailyPayments?.today?.payments?.filter(p => p.paymentReson === 0) ?? [];
   }
+  
+  get yesterdayDepositPayments(): DailyPaymentEntry[] {
+    return this.dailyPayments?.yesterday?.payments?.filter(p => p.paymentReson === 0) ?? [];
+  }
+
 
   get yesterdayRevenue(): number {
     return this.dailyPayments?.yesterday?.payments
@@ -1218,7 +1229,7 @@ ngOnDestroy() {
 
   get yesterdayTotal(): number { return this.yesterdayBookings.filter(b => b.status !== 'Cancelled').length; }
   get yesterdayPending(): number { return this.yesterdayBookings.filter(b => b.status === 'Pending' || b.status === 'WaitingList').length; }
-  get yesterdayConfirmed(): number { return this.yesterdayBookings.filter(b => b.status === 'Confirmed' || b.status === 'Done').length; }
+  get yesterdayConfirmed(): number { return this.yesterdayDepositPayments.length; }
 
 
   getDiff(t: number, y: number): number { return t - y; }
