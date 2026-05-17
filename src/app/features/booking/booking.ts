@@ -323,7 +323,9 @@ get filteredCountryCodes() {
   // ══════════════════════════════════════════════════════════════════════════
 
   ngOnInit(): void {
-    if (this.router.url === '/booking/new') this.showAddModal = true;
+      const openNew = this.router.url === '/booking/new'; // ← احفظ القيمة بس متفتحش
+
+    // if (this.router.url === '/booking/new') this.showAddModal = true;
 
     // ✅ التحسين 1: كل الـ requests الأولية في forkJoin واحد
     forkJoin({
@@ -342,6 +344,10 @@ get filteredCountryCodes() {
         this.loadTodayBookings();
         this.loadBookings();
         this.cdr.detectChanges();
+if (openNew) {
+  this.openAddModal();
+  this.router.navigate(['/booking'], { replaceUrl: true });
+}
 
         this.route.queryParams
           .pipe(takeUntil(this.destroy$))
