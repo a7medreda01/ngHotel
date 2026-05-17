@@ -346,7 +346,7 @@ get filteredCountryCodes() {
         this.cdr.detectChanges();
 if (openNew) {
   this.openAddModal();
-  this.router.navigate(['/booking'], { replaceUrl: true });
+  // this.router.navigate(['/booking/new'], { replaceUrl: true });
 }
 
         this.route.queryParams
