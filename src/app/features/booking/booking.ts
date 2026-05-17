@@ -1363,10 +1363,14 @@ additionalPhone: this.editForm.additionalPhone?.trim()
     return Math.max(0, (b.totalPrice ?? 0) - (paid !== undefined ? paid : (b.deposit ?? 0)));
   }
 
-  getTotalChaletsForType(type: number): number {
-    return Math.max(...[0, 1, 2].map(p => this.chaletCountMap[`${type}_${p}`] ?? 0));
-  }
-
+// getTotalChaletsForType(type: number): number {
+//   // صباحي أو مسائي بيمثلوا نفس الأكواخ تقريباً
+//   // خد الأكبر بين صباحي ومسائي بس، مش يوم كامل
+//   return Math.max(
+//     this.chaletCountMap[`${type}_0`] ?? 0,
+//     this.chaletCountMap[`${type}_1`] ?? 0
+//   );
+// }
   // ══════════════════════════════════════════════════════════════════════════
   // refreshUpcoming — ✅ التحسين 3: بيعمل dailyPayments جوّاه تلقائياً
   // ══════════════════════════════════════════════════════════════════════════

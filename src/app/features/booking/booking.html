@@ -796,14 +796,14 @@
                 (click)="newBooking.chaletType = 0; onChaletTypeChange()">
                 <span class="type-icon">🏠</span>
                 <span class="type-name">عادي</span>
-                <span class="type-count">{{ getTotalChaletsForType(0) }} كوخ</span>
+                <!-- <span class="type-count">{{ getTotalChaletsForType(0) }} كوخ</span> -->
                 <i class="bi bi-check-circle-fill type-check" *ngIf="newBooking.chaletType === 0"></i>
               </div>
               <div class="type-option" [class.selected]="newBooking.chaletType === 1"
                 (click)="newBooking.chaletType = 1; onChaletTypeChange()">
                 <span class="type-icon">👑</span>
                 <span class="type-name">رويال</span>
-                <span class="type-count">{{ getTotalChaletsForType(1) }} كوخ</span>
+                <!-- <span class="type-count">{{ getTotalChaletsForType(1) }} كوخ</span> -->
                 <i class="bi bi-check-circle-fill type-check" *ngIf="newBooking.chaletType === 1"></i>
               </div>
             </div>

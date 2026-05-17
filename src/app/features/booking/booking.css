@@ -506,7 +506,7 @@
 }
 .form-input:focus { border-color:#2d6a9f; box-shadow:0 0 0 3px rgba(45,106,159,.1); }
 
-.phone-row { display: flex; gap: 6px; }
+.phone-row { display: flex; gap: 6px;overflow: visible; }
 .country-select {
   border:1.5px solid #e5eaf0; border-radius:10px; padding:9px 8px;
   font-family:'Cairo',sans-serif; font-size:12px;
@@ -2056,11 +2056,11 @@ dp-btn-invoice {
 }
 
 /* Responsive */
-@media (max-width: 480px) {
+@media (max-width: 680px) {
   .country-dropdown {
     width: 220px;
     right: auto;
-    left: 0;
+    /* left: 0; */
   }
 
   .phone-row {
