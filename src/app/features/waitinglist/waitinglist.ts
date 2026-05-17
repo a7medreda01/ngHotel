@@ -9,6 +9,7 @@ import {
 } from '../../service/waitinglist-service';
 import { CommonModule } from '@angular/common';
 import { finalize } from 'rxjs';
+import { normalizeChaletType } from '../../service/booking-service';
 
 @Component({
   selector: 'app-waitinglist',
@@ -31,7 +32,8 @@ export class Waitinglist implements OnInit {
   pageSize    = 10;
   totalPages  = 1;
   totalCount  = 0;
-
+dateFrom = '';
+dateTo   = '';
   // ─── search (API-side) ────────────────────────────────────────────────────
   searchQuery = '';
   private searchTimer: any;
@@ -95,28 +97,7 @@ export class Waitinglist implements OnInit {
   }
 
   /** يجيب الصفحة الحالية من الـ API */
-  loadWaiting(): void {
-    this.isLoadingData = true;
-    this.errorMsg      = '';
-    this.cdr.detectChanges();
 
-    this.svc.getPaged({
-      page:     this.currentPage,
-      pageSize: this.pageSize,
-      search:   this.searchQuery.trim() || undefined,
-    })
-    .pipe(finalize(() => { this.isLoadingData = false; this.cdr.detectChanges(); }))
-    .subscribe({
-      next: res => {
-        this.pagedItems = res.data;
-        this.totalCount = res.total;
-        this.totalPages = res.totalPages;
-      },
-      error: () => {
-        this.errorMsg = 'تعذّر تحميل البيانات. تحقق من الاتصال بالخادم.';
-      },
-    });
-  }
 
   // alias للـ HTML القديم (زر التحديث بيستدعي loadData)
   loadData(): void {
@@ -128,13 +109,50 @@ export class Waitinglist implements OnInit {
   // Search & Filter
   // ══════════════════════════════════════════════════════════════════════════
 
-  onSearchChange(): void {
-    clearTimeout(this.searchTimer);
-    this.searchTimer = setTimeout(() => {
-      this.currentPage = 1;
-      this.loadWaiting();
-    }, 400);
-  }
+onSearchChange(): void {
+  clearTimeout(this.searchTimer);
+  this.searchTimer = setTimeout(() => {
+    this.currentPage = 1;
+    this.loadWaiting();
+  }, 400);
+}
+
+onDateChange(): void {       // ← جديد
+  this.currentPage = 1;
+  this.loadWaiting();
+}
+
+clearDateFilter(): void {    // ← جديد
+  this.dateFrom = '';
+  this.dateTo   = '';
+  this.currentPage = 1;
+  this.loadWaiting();
+}
+
+loadWaiting(): void {
+  this.isLoadingData = true;
+  this.errorMsg      = '';
+  this.cdr.detectChanges();
+
+  this.svc.getPaged({
+    page:     this.currentPage,
+    pageSize: this.pageSize,
+    search:   this.searchQuery.trim() || undefined,
+    dateFrom: this.dateFrom || undefined,   // ← جديد
+    dateTo:   this.dateTo   || undefined,   // ← جديد
+  })
+  .pipe(finalize(() => { this.isLoadingData = false; this.cdr.detectChanges(); }))
+  .subscribe({
+    next: res => {
+      this.pagedItems = res.data;
+      this.totalCount = res.total;
+      this.totalPages = res.totalPages;
+    },
+    error: () => {
+      this.errorMsg = 'تعذّر تحميل البيانات. تحقق من الاتصال بالخادم.';
+    },
+  });
+}
 
   onFilterChange(): void {
     // فلتر الحالة محلي فقط — مش محتاج reload
@@ -392,4 +410,7 @@ export class Waitinglist implements OnInit {
       this.cdr.detectChanges();
     }, 4500);
   }
+    getChaletTypeLabel(raw: any): string { return normalizeChaletType(raw) === 1 ? '👑 رويال' : '🏠 عادي'; }
+    isRoyal(raw: any): boolean { return normalizeChaletType(raw) === 1; }
+  
 }

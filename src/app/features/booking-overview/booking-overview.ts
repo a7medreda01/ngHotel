@@ -542,7 +542,7 @@ export class BookingOverviewComponent implements OnInit, OnChanges {
 
   getStatusLabel(s: string): string {
     const map: Record<string,string> = {
-      Pending: 'قيد الانتظار', Confirmed: 'مؤكد',
+      Pending: 'قيد التأكيد', Confirmed: 'مؤكد',
       Cancelled: 'ملغي', WaitingList: 'قائمة الانتظار', Done: 'تم الاستلام'
     };
     return map[s] ?? s;

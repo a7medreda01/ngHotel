@@ -68,7 +68,7 @@
       <div class="stat-icon"><i class="bi bi-hourglass-split"></i></div>
       <div class="stat-body">
         <span class="stat-value">{{ todayPending }}</span>
-        <span class="stat-label">قيد الانتظار اليوم</span>
+        <span class="stat-label">قيد التأكيد اليوم</span>
         <div class="stat-compare" *ngIf="showComparison">
           <span [ngClass]="getDiffClass(todayPending, yesterdayPending)">
             <i class="bi" [ngClass]="getDiffIcon(todayPending, yesterdayPending)"></i>
@@ -128,7 +128,7 @@
     <div class="status-filter">
       <select [(ngModel)]="filterStatus" (change)="applyFilter()">
         <option value="">كل الحالات</option>
-        <option value="Pending">قيد الانتظار</option>
+        <option value="Pending">قيد التأكيد</option>
         <option value="Confirmed">مؤكد</option>
         <!-- <option value="WaitingList">قائمة الانتظار</option> -->
         <option value="Cancelled">ملغي</option>
@@ -880,7 +880,7 @@
               <span><span class="dot grey"></span> أيام سابقة</span>
               <span><span class="dot green"></span> أكواخ متاحة</span>
               <span><span class="dot orange-border"></span> بعض الأكواخ محجوز</span>
-              <span><span class="dot orange"></span> قيد الانتظار</span>
+              <span><span class="dot orange"></span> قيد التأكيد</span>
               <span><span class="dot red"></span> مكتمل الحجز</span>
             </div>
 
@@ -906,7 +906,7 @@
               </div>
               <div class="avail-banner avail-yellow" *ngIf="getAvailableCountForSelectedDate() === 0">
                 <i class="bi bi-exclamation-triangle-fill"></i>
-                لا توجد أكواخ متاحة في {{ formatDate(calendarDate.toISOString()) }} —
+                لا توجد أكواخ متاحة في {{ formatDate(formatDateLocal(calendarDate!)) }} —
                 سيتم وضع الحجز في <strong>قائمة الانتظار</strong>
               </div>
             </div>
@@ -965,9 +965,29 @@
               <div class="form-group">
                 <label>رقم الهاتف *</label>
                 <div class="phone-row">
-                  <select [(ngModel)]="selectedCountryCode" class="country-select">
-                    <option *ngFor="let c of countryCodes" [value]="c.value">{{ c.label }}</option>
-                  </select>
+<div style="position:relative;">
+  <button type="button" class="country-btn"
+    (click)="openCountryDropdown('addPhone'); $event.stopPropagation()">
+    {{ getSelectedCountry('phone').flag }} {{ phoneCountryCode }}
+    <i class="bi bi-chevron-down"></i>
+  </button>
+  <div *ngIf="isCountryDropdownOpen('addPhone')" class="country-dropdown">
+    <div class="country-search-wrap">
+      <i class="bi bi-search"></i>
+      <input type="text" [(ngModel)]="countrySearch"
+             placeholder="ابحث باسم الدولة..."
+             class="country-search-input" autofocus />
+    </div>
+    <div class="country-list">
+      <button *ngFor="let c of filteredCountryCodes" type="button"
+        (click)="phoneCountryCode = c.code; closeCountryDropdown('addPhone'); countrySearch = ''">
+        <span>{{ c.flag }}</span>
+        <span class="country-name">{{ c.ar }}</span>
+        <span class="country-code-badge">{{ c.code }}</span>
+      </button>
+    </div>
+  </div>
+</div>
                   <input type="tel" inputmode="numeric" pattern="[0-9]*" [(ngModel)]="newBooking.phone"
                     placeholder="xxxxxxxx" class="form-input phone-input" />
                 </div>
@@ -975,9 +995,29 @@
               <div class="form-group">
                 <label>رقم هاتف إضافي</label>
                 <div class="phone-row">
-                  <select [(ngModel)]="selectedCountryCode" class="country-select">
-                    <option *ngFor="let c of countryCodes" [value]="c.value">{{ c.label }}</option>
-                  </select>
+<div style="position:relative;">
+  <button type="button" class="country-btn"
+    (click)="openCountryDropdown('addAdditional'); $event.stopPropagation()">
+    {{ getSelectedCountry('addAdditional').flag }} {{ additionalPhoneCountryCode }}
+    <i class="bi bi-chevron-down"></i>
+  </button>
+  <div *ngIf="isCountryDropdownOpen('addAdditional')" class="country-dropdown">
+    <div class="country-search-wrap">
+      <i class="bi bi-search"></i>
+      <input type="text" [(ngModel)]="countrySearch"
+             placeholder="ابحث باسم الدولة..."
+             class="country-search-input" autofocus />
+    </div>
+    <div class="country-list">
+      <button *ngFor="let c of filteredCountryCodes" type="button"
+        (click)="additionalPhoneCountryCode  = c.code; closeCountryDropdown('addAdditional'); countrySearch = ''">
+        <span>{{ c.flag }}</span>
+        <span class="country-name">{{ c.ar }}</span>
+        <span class="country-code-badge">{{ c.code }}</span>
+      </button>
+    </div>
+  </div>
+</div>
                   <input type="tel" inputmode="numeric" pattern="[0-9]*" [(ngModel)]="newBooking.additionalPhone"
                     placeholder="اختياري" class="form-input phone-input" />
                 </div>
@@ -1136,9 +1176,30 @@
             <div class="form-group">
               <label>رقم الهاتف</label>
               <div class="phone-row">
-                <select [(ngModel)]="editCountryCode" class="country-select">
-                  <option *ngFor="let c of countryCodes" [value]="c.value">{{ c.label }}</option>
-                </select>
+<div style="position:relative;">
+  <button type="button" class="country-btn"
+    (click)="openCountryDropdown('editPhone'); $event.stopPropagation()">
+    {{ getSelectedCountry('editPhone').flag }} {{ editPhoneCountryCode }}
+    <i class="bi bi-chevron-down"></i>
+  </button>
+  <div *ngIf="isCountryDropdownOpen('editPhone')" class="country-dropdown">
+    <div class="country-search-wrap">
+      <i class="bi bi-search"></i>
+      <input type="text" [(ngModel)]="countrySearch"
+             placeholder="ابحث باسم الدولة..."
+             class="country-search-input" autofocus />
+    </div>
+    <div class="country-list">
+      <button *ngFor="let c of filteredCountryCodes" type="button"
+        (click)="editPhoneCountryCode  = c.code; closeCountryDropdown('editPhone'); countrySearch = ''">
+        <span>{{ c.flag }}</span>
+        <span class="country-name">{{ c.ar }}</span>
+        <span class="country-code-badge">{{ c.code }}</span>
+      </button>
+    </div>
+  </div>
+</div>
+
                 <input type="tel" inputmode="numeric" pattern="[0-9]*" [(ngModel)]="editForm.phone"
                   class="form-input phone-input" />
               </div>
@@ -1152,9 +1213,30 @@
             <div class="form-group">
               <label>رقم هاتف إضافي</label>
               <div class="phone-row">
-                <select [(ngModel)]="editCountryCode" class="country-select">
-                  <option *ngFor="let c of countryCodes" [value]="c.value">{{ c.label }}</option>
-                </select>
+<div style="position:relative;">
+  <button type="button" class="country-btn"
+    (click)="openCountryDropdown('editAdditionalPhone'); $event.stopPropagation()">
+    {{ getSelectedCountry('editAdditionalPhone').flag }} {{ editAdditionalPhoneCountryCode }}
+    <i class="bi bi-chevron-down"></i>
+  </button>
+  <div *ngIf="isCountryDropdownOpen('editAdditionalPhone')" class="country-dropdown">
+    <div class="country-search-wrap">
+      <i class="bi bi-search"></i>
+      <input type="text" [(ngModel)]="countrySearch"
+             placeholder="ابحث باسم الدولة..."
+             class="country-search-input" autofocus />
+    </div>
+    <div class="country-list">
+      <button *ngFor="let c of filteredCountryCodes" type="button"
+        (click)="editAdditionalPhoneCountryCode  = c.code; closeCountryDropdown('editAdditionalPhone'); countrySearch = ''">
+        <span>{{ c.flag }}</span>
+        <span class="country-name">{{ c.ar }}</span>
+        <span class="country-code-badge">{{ c.code }}</span>
+      </button>
+    </div>
+  </div>
+</div>
+
                 <input type="tel" inputmode="numeric" pattern="[0-9]*" [(ngModel)]="editForm.additionalPhone"
                   class="form-input phone-input" placeholder="اختياري" />
               </div>
@@ -1739,7 +1821,7 @@
           <div class="">
             {{ invoiceBooking.status === 'Done' ? '✔ تم الاستلام' :
             invoiceBooking.status === 'Confirmed' ? '✔ مؤكد' :
-            invoiceBooking.status === 'Pending' ? '⏳ قيد الانتظار' : getStatusLabel(invoiceBooking.status) }}
+            invoiceBooking.status === 'Pending' ? '⏳ قيد التأكيد' : getStatusLabel(invoiceBooking.status) }}
           </div>
           <p class="inv-footer-note">شكراً لاختياركم — نتمنى لكم إقامة طيبة 🏕️</p>
           <p class="inv-footer-generated">تم إنشاء هذه الفاتورة تلقائياً | {{ formatDateTime(invoiceBooking.createdAt |

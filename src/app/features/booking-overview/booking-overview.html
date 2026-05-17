@@ -68,7 +68,7 @@
         <div class="ov-legend">
           <span class="leg-item"><span class="leg-dot leg-available"></span>متاح</span>
           <!-- <span class="leg-item"><span class="leg-dot leg-partial"></span>جزئي</span> -->
-          <span class="leg-item"><span class="leg-dot leg-pending"></span>انتظار</span>
+          <span class="leg-item"><span class="leg-dot leg-pending"></span>قيد التأكيد</span>
           <span class="leg-item"><span class="leg-dot leg-full"></span>مكتمل</span>
           <span class="leg-item"><span class="leg-dot leg-empty"></span>ماضي </span>
         </div>
@@ -120,7 +120,7 @@
           <div class="ms-item ms-pending">
             <span class="ms-icon">⏳</span>
             <span class="ms-val">{{ getMonthStat('pending') }}</span>
-            <span class="ms-lbl">انتظار</span>
+            <span class="ms-lbl">قيد التأكيد</span>
           </div>
           <div class="ms-item ms-available">
             <span class="ms-icon">🏠</span>
@@ -154,7 +154,7 @@
               [class.dsb-empty]="selectedDay.status === 'empty'">
               <span *ngIf="selectedDay.status === 'available'">✓ متاح بالكامل</span>
               <span *ngIf="selectedDay.status === 'partial'">◑ متاح جزئياً</span>
-              <span *ngIf="selectedDay.status === 'pending'">⏳ قيد الانتظار</span>
+              <span *ngIf="selectedDay.status === 'pending'">⏳ قيد التأكيد</span>
               <span *ngIf="selectedDay.status === 'full'">● مكتمل الحجز</span>
               <span *ngIf="selectedDay.status === 'empty'">○ لا حجوزات</span>
             </div>
@@ -188,7 +188,7 @@
           </div>
           <div class="ds-item ds-pending">
             <span class="ds-val">{{ selectedDay.totalPending }}</span>
-            <span class="ds-lbl">انتظار</span>
+            <span class="ds-lbl">قيد التأكيد</span>
           </div>
           <div class="ds-item ds-available">
             <span class="ds-val">{{ selectedDay.totalAvailable }}</span>

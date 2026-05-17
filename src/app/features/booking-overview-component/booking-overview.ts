@@ -42,7 +42,7 @@ export const CHALET_TYPE_LABELS: Record<number, string> = {
 };
 
 export const STATUS_LABELS: Record<string, string> = {
-  Pending:   'قيد الانتظار',
+  Pending:   'قيد التأكيد',
   Confirmed: 'مؤكد',
   Cancelled: 'ملغي',
   Done:      'منتهي',

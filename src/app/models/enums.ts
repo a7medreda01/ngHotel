@@ -1,5 +1,5 @@
 // export const BookingStatusMap: any = {
-//   Pending: 'قيد الانتظار',
+//   Pending: 'قيد التأكيد',
 //   Confirmed: 'مؤكد',
 //   Cancelled: 'ملغي'
 // };

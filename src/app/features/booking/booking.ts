@@ -26,7 +26,7 @@ import { BookingOverviewComponent, NewBookingRequest } from '../booking-overview
   selector: 'app-booking',
   standalone: true,
   imports: [
-    FormsModule, CommonModule, RouterLink,
+    FormsModule, CommonModule,
     MatDatepickerModule, MatFormFieldModule, MatInputModule, MatNativeDateModule, JordanDatePipe,
     BookingOverviewComponent
   ],
@@ -83,17 +83,151 @@ export class Booking implements OnInit {
     period: -1, chaletType: 0, numOfGuests: 1, extras: [], note: '', additionalPhone: ''
   };
   selectedCountryCode = '+962';
-  countryCodes = [
-    { label: '🇯🇴 +962', value: '+962' },
-    { label: '🇦🇪 +971', value: '+971' },
-    { label: '🇸🇦 +966', value: '+966' },
-    { label: '🇪🇬 +20', value: '+20' },
-    { label: '🇶🇦 +974', value: '+974' },
-    { label: '🇰🇼 +965', value: '+965' },
-    { label: '🇧🇭 +973', value: '+973' },
-    { label: '🇴🇲 +968', value: '+968' },
-  ];
+countryCodes = [
+  // ── العربية ──────────────────────────────────────
+  { flag: '🇯🇴', code: '+962', ar: 'الأردن' },
+  { flag: '🇸🇦', code: '+966', ar: 'السعودية' },
+  { flag: '🇦🇪', code: '+971', ar: 'الإمارات' },
+  { flag: '🇪🇬', code: '+20',  ar: 'مصر' },
+  { flag: '🇶🇦', code: '+974', ar: 'قطر' },
+  { flag: '🇰🇼', code: '+965', ar: 'الكويت' },
+  { flag: '🇧🇭', code: '+973', ar: 'البحرين' },
+  { flag: '🇴🇲', code: '+968', ar: 'عُمان' },
+  { flag: '🇮🇶', code: '+964', ar: 'العراق' },
+  { flag: '🇸🇾', code: '+963', ar: 'سوريا' },
+  { flag: '🇱🇧', code: '+961', ar: 'لبنان' },
+  { flag: '🇵🇸', code: '+970', ar: 'فلسطين' },
+  { flag: '🇾🇪', code: '+967', ar: 'اليمن' },
+  { flag: '🇱🇾', code: '+218', ar: 'ليبيا' },
+  { flag: '🇹🇳', code: '+216', ar: 'تونس' },
+  { flag: '🇩🇿', code: '+213', ar: 'الجزائر' },
+  { flag: '🇲🇦', code: '+212', ar: 'المغرب' },
+  { flag: '🇸🇩', code: '+249', ar: 'السودان' },
+  { flag: '🇸🇴', code: '+252', ar: 'الصومال' },
+  { flag: '🇲🇷', code: '+222', ar: 'موريتانيا' },
+  { flag: '🇩🇯', code: '+253', ar: 'جيبوتي' },
+  { flag: '🇰🇲', code: '+269', ar: 'جزر القمر' },
 
+  // ── أمريكا الشمالية ───────────────────────────────
+  { flag: '🇺🇸', code: '+1',   ar: 'الولايات المتحدة' },
+  { flag: '🇨🇦', code: '+1',   ar: 'كندا' },
+
+  // ── أمريكا اللاتينية ──────────────────────────────
+  { flag: '🇧🇷', code: '+55',  ar: 'البرازيل' },
+  { flag: '🇲🇽', code: '+52',  ar: 'المكسيك' },
+
+  // ── أوروبا ───────────────────────────────────────
+  { flag: '🇬🇧', code: '+44',  ar: 'المملكة المتحدة' },
+  { flag: '🇩🇪', code: '+49',  ar: 'ألمانيا' },
+  { flag: '🇫🇷', code: '+33',  ar: 'فرنسا' },
+  { flag: '🇮🇹', code: '+39',  ar: 'إيطاليا' },
+  { flag: '🇪🇸', code: '+34',  ar: 'إسبانيا' },
+  { flag: '🇳🇱', code: '+31',  ar: 'هولندا' },
+  { flag: '🇧🇪', code: '+32',  ar: 'بلجيكا' },
+  { flag: '🇨🇭', code: '+41',  ar: 'سويسرا' },
+  { flag: '🇦🇹', code: '+43',  ar: 'النمسا' },
+  { flag: '🇸🇪', code: '+46',  ar: 'السويد' },
+  { flag: '🇳🇴', code: '+47',  ar: 'النرويج' },
+  { flag: '🇩🇰', code: '+45',  ar: 'الدنمارك' },
+  { flag: '🇫🇮', code: '+358', ar: 'فنلندا' },
+  { flag: '🇮🇪', code: '+353', ar: 'أيرلندا' },
+  { flag: '🇵🇹', code: '+351', ar: 'البرتغال' },
+  { flag: '🇬🇷', code: '+30',  ar: 'اليونان' },
+  { flag: '🇵🇱', code: '+48',  ar: 'بولندا' },
+  { flag: '🇷🇴', code: '+40',  ar: 'رومانيا' },
+  { flag: '🇨🇿', code: '+420', ar: 'التشيك' },
+  { flag: '🇭🇺', code: '+36',  ar: 'المجر' },
+  { flag: '🇸🇰', code: '+421', ar: 'سلوفاكيا' },
+  { flag: '🇸🇮', code: '+386', ar: 'سلوفينيا' },
+  { flag: '🇭🇷', code: '+385', ar: 'كرواتيا' },
+  { flag: '🇷🇸', code: '+381', ar: 'صربيا' },
+  { flag: '🇧🇬', code: '+359', ar: 'بلغاريا' },
+  { flag: '🇺🇦', code: '+380', ar: 'أوكرانيا' },
+  { flag: '🇷🇺', code: '+7',   ar: 'روسيا' },
+  { flag: '🇨🇾', code: '+357', ar: 'قبرص' },
+  { flag: '🇲🇹', code: '+356', ar: 'مالطا' },
+  { flag: '🇮🇸', code: '+354', ar: 'آيسلندا' },
+  { flag: '🇹🇷', code: '+90',  ar: 'تركيا' },
+
+  // ── الشرق الأوسط (غير عربي) ───────────────────────
+  { flag: '🇮🇱', code: '+972', ar: 'إسرائيل' },
+  { flag: '🇮🇷', code: '+98',  ar: 'إيران' },
+
+  // ── أوقيانوسيا ───────────────────────────────────
+  { flag: '🇦🇺', code: '+61',  ar: 'أستراليا' },
+  { flag: '🇳🇿', code: '+64',  ar: 'نيوزيلندا' },
+
+  // ── آسيا ─────────────────────────────────────────
+  { flag: '🇮🇳', code: '+91',  ar: 'الهند' },
+  { flag: '🇵🇰', code: '+92',  ar: 'باكستان' },
+  { flag: '🇧🇩', code: '+880', ar: 'بنغلاديش' },
+  { flag: '🇱🇰', code: '+94',  ar: 'سريلانكا' },
+  { flag: '🇳🇵', code: '+977', ar: 'نيبال' },
+  { flag: '🇨🇳', code: '+86',  ar: 'الصين' },
+  { flag: '🇯🇵', code: '+81',  ar: 'اليابان' },
+  { flag: '🇰🇷', code: '+82',  ar: 'كوريا الجنوبية' },
+  { flag: '🇸🇬', code: '+65',  ar: 'سنغافورة' },
+  { flag: '🇲🇾', code: '+60',  ar: 'ماليزيا' },
+  { flag: '🇮🇩', code: '+62',  ar: 'إندونيسيا' },
+  { flag: '🇹🇭', code: '+66',  ar: 'تايلاند' },
+  { flag: '🇵🇭', code: '+63',  ar: 'الفلبين' },
+  { flag: '🇻🇳', code: '+84',  ar: 'فيتنام' },
+  { flag: '🇭🇰', code: '+852', ar: 'هونغ كونغ' },
+  { flag: '🇦🇫', code: '+93',  ar: 'أفغانستان' },
+  { flag: '🇰🇿', code: '+7',   ar: 'كازاخستان' },
+  { flag: '🇺🇿', code: '+998', ar: 'أوزبكستان' },
+  { flag: '🇦🇿', code: '+994', ar: 'أذربيجان' },
+  { flag: '🇬🇪', code: '+995', ar: 'جورجيا' },
+  { flag: '🇦🇲', code: '+374', ar: 'أرمينيا' },
+
+  // ── أفريقيا ───────────────────────────────────────
+  { flag: '🇳🇬', code: '+234', ar: 'نيجيريا' },
+  { flag: '🇿🇦', code: '+27',  ar: 'جنوب أفريقيا' },
+  { flag: '🇰🇪', code: '+254', ar: 'كينيا' },
+  { flag: '🇬🇭', code: '+233', ar: 'غانا' },
+  { flag: '🇪🇹', code: '+251', ar: 'إثيوبيا' },
+  { flag: '🇹🇿', code: '+255', ar: 'تنزانيا' },
+  { flag: '🇺🇬', code: '+256', ar: 'أوغندا' },
+  { flag: '🇸🇳', code: '+221', ar: 'السنغال' },
+  { flag: '🇨🇲', code: '+237', ar: 'الكاميرون' },
+];
+countrySearch        = '';
+countryDropdownOpen: Record<string, boolean> = {};
+openCountryDropdown(field: string) {
+  this.countryDropdownOpen = { [field]: true };
+}
+
+closeCountryDropdown(field: string) {
+  this.countryDropdownOpen[field] = false;
+}
+
+isCountryDropdownOpen(field: string): boolean {
+  return !!this.countryDropdownOpen[field];
+}
+// بدل selectedCountryCode واحد:
+phoneCountryCode = '+962';
+additionalPhoneCountryCode = '+962';
+editPhoneCountryCode = '+962';
+editAdditionalPhoneCountryCode = '+962';
+getSelectedCountry(field: string) {
+  const code = field === 'phone' ? this.phoneCountryCode :
+               field === 'additionalPhone' ? this.additionalPhoneCountryCode :
+               field === 'editPhone' ? this.editPhoneCountryCode :
+               this.editAdditionalPhoneCountryCode;
+  return this.countryCodes.find(c => c.code === code) ?? this.countryCodes[0];
+}
+get selectedCountry() {
+  return this.countryCodes.find(c => c.code === this.selectedCountryCode)
+      ?? this.countryCodes[0];
+}
+
+get filteredCountryCodes() {
+  const s = this.countrySearch.trim();
+  if (!s) return this.countryCodes;
+  return this.countryCodes.filter(c =>
+    c.ar.includes(s) || c.code.includes(s)
+  );
+}
   addSelectedExtraId = 0;
   addSelectedExtraQty = 1;
   addExtrasList: { extraId: number; name: string; price: number; quantity: number }[] = [];
@@ -119,7 +253,6 @@ export class Booking implements OnInit {
   totalPages = 0;
   isLoading = false;
 
-  // ✅ الحماية من الضغط المتكرر — الـ flag الرئيسي
   isSubmitting = false;
 
   // ─── Edit ────────────────────────────────────────────────────────────────
@@ -165,13 +298,15 @@ export class Booking implements OnInit {
 
   readonly periodLabels: Record<number, string> = { 0: 'صباحي', 1: 'مسائي', 2: 'يوم كامل' };
   readonly statusLabels: Record<string, string> = {
-    Pending: 'قيد الانتظار', Confirmed: 'مؤكد',
+    Pending: 'قيد التأكيد', Confirmed: 'مؤكد',
     Cancelled: 'ملغي', WaitingList: 'قائمة الانتظار', Done: 'تم الاستلام',
   };
   readonly statusClasses: Record<string, string> = {
     Pending: 'badge-pending', Confirmed: 'badge-confirmed',
     Cancelled: 'badge-cancelled', WaitingList: 'badge-waiting', Done: 'badge-done',
   };
+
+  private destroy$ = new Subject<void>();
 
   constructor(
     private bookingService: BookingService,
@@ -186,74 +321,82 @@ export class Booking implements OnInit {
   // ══════════════════════════════════════════════════════════════════════════
   // Lifecycle
   // ══════════════════════════════════════════════════════════════════════════
-private destroy$ = new Subject<void>();
+
   ngOnInit(): void {
     if (this.router.url === '/booking/new') this.showAddModal = true;
 
+    // ✅ التحسين 1: كل الـ requests الأولية في forkJoin واحد
     forkJoin({
-      chalets: this.chaletService.getAll(),
-      extras: this.extrasService.getAll(),
+      chalets:  this.chaletService.getAll(),
+      extras:   this.extrasService.getAll(),
       upcoming: this.bookingService.getUpcomingBookings(),
+      daily:    this.bookingService.getDailyPaymentSummary(),
     }).subscribe({
-      next: ({ chalets, extras, upcoming }) => {
-        this.chalets = chalets;
-        this.extras = extras.filter((e: any) => e.isActive);
+      next: ({ chalets, extras, upcoming, daily }) => {
+        this.chalets        = chalets;
+        this.extras         = extras.filter((e: any) => e.isActive);
         this.upcomingBookings = upcoming?.data ?? [];
+        this.dailyPayments  = daily;
         this.upcomingLoaded = true;
         this.buildBookingStatusMap();
-        this.cdr.detectChanges();
         this.loadTodayBookings();
         this.loadBookings();
+        this.cdr.detectChanges();
 
         this.route.queryParams
-  .pipe(takeUntil(this.destroy$))
-  .subscribe(params => {
-          const bookingId = params['openBooking'];
-          if (bookingId) {
-            const id = +bookingId;
-            this.bookingService.getBookingById(id).subscribe({
-              next: full => {
-                this.selectedBooking = full;
-                this._buildPaymentsMapFromBooking(full);
-                window.innerWidth < 768
-                  ? (this.showDetailSheet = true)
-                  : (this.showDetailPanel = true);
-                this.cdr.detectChanges();
-              }
-            });
-            this.router.navigate([], {
-              relativeTo: this.route, queryParams: {}, replaceUrl: true
-            });
-          }
-        });
+          .pipe(takeUntil(this.destroy$))
+          .subscribe(params => {
+            const bookingId = params['openBooking'];
+            if (bookingId) {
+              const id = +bookingId;
+              this.bookingService.getBookingById(id).subscribe({
+                next: full => {
+                  this.selectedBooking = full;
+                  this._buildPaymentsMapFromBooking(full);
+                  window.innerWidth < 768
+                    ? (this.showDetailSheet = true)
+                    : (this.showDetailPanel = true);
+                  this.cdr.detectChanges();
+                }
+              });
+              this.router.navigate([], {
+                relativeTo: this.route, queryParams: {}, replaceUrl: true
+              });
+            }
+          });
       },
       error: () => this.showNotification('فشل تحميل البيانات', 'error'),
     });
-    this.bookingService.getDailyPaymentSummary().subscribe(res => {
-      this.dailyPayments = res;
-    });
   }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
+  // ══════════════════════════════════════════════════════════════════════════
+  // Data Loading
+  // ══════════════════════════════════════════════════════════════════════════
 
   loadBookings(): void {
     this.isLoading = true;
     this.cdr.detectChanges();
 
     this.bookingService.getBookingsPaged({
-      page: this.currentPage,
+      page:     this.currentPage,
       pageSize: this.pageSize,
-      search: this.searchQuery.trim() || undefined,
-      status: this.filterStatus || undefined,
+      search:   this.searchQuery.trim() || undefined,
+      status:   this.filterStatus || undefined,
       dateFrom: this.getDateFrom() || undefined,
-      dateTo: this.getDateTo() || undefined,
+      dateTo:   this.getDateTo() || undefined,
     }).subscribe({
       next: res => {
-        this.bookings = [...res.data];
+        this.bookings        = [...res.data];
         this.filteredBookings = [...res.data];
-        this.pagedBookings = [...res.data];
-        this.total = res.total;
-        this.totalPages = res.totalPages;
-        this.isLoading = false;
-        console.log('Loaded bookings:', res);
+        this.pagedBookings   = [...res.data];
+        this.total           = res.total;
+        this.totalPages      = res.totalPages;
+        this.isLoading       = false;
         this._buildPaymentsMapFromBookings();
 
         if (this.selectedBooking) {
@@ -274,30 +417,27 @@ private destroy$ = new Subject<void>();
     const today = new Date();
     const fmt = (d: Date) => this.formatDateLocal(d);
     switch (this.filterDateRange) {
-      case 'today': return fmt(today);
-      case 'yesterday': { const y = new Date(today); y.setDate(y.getDate() - 1); return fmt(y); }
-      case 'week': { const w = new Date(today); w.setDate(w.getDate() - 7); return fmt(w); }
-      case 'month': { const m = new Date(today); m.setDate(m.getDate() - 30); return fmt(m); }
+      case 'today':      return fmt(today);
+      case 'yesterday':  { const y = new Date(today); y.setDate(y.getDate() - 1); return fmt(y); }
+      case 'week':       { const w = new Date(today); w.setDate(w.getDate() - 7); return fmt(w); }
+      case 'month':      { const m = new Date(today); m.setDate(m.getDate() - 30); return fmt(m); }
       case 'last_month': return fmt(new Date(today.getFullYear(), today.getMonth() - 1, 1));
-      case 'custom': return this.filterDateFrom;
-      default: return '';
+      case 'custom':     return this.filterDateFrom;
+      default:           return '';
     }
   }
-ngOnDestroy() {
-  this.destroy$.next();
-  this.destroy$.complete();
-}
+
   private getDateTo(): string {
     const today = new Date();
     const fmt = (d: Date) => this.formatDateLocal(d);
     switch (this.filterDateRange) {
-      case 'today': return fmt(today);
-      case 'yesterday': { const y = new Date(today); y.setDate(y.getDate() - 1); return fmt(y); }
+      case 'today':      return fmt(today);
+      case 'yesterday':  { const y = new Date(today); y.setDate(y.getDate() - 1); return fmt(y); }
       case 'week':
-      case 'month': return fmt(today);
+      case 'month':      return fmt(today);
       case 'last_month': return fmt(new Date(today.getFullYear(), today.getMonth(), 0));
-      case 'custom': return this.filterDateTo;
-      default: return '';
+      case 'custom':     return this.filterDateTo;
+      default:           return '';
     }
   }
 
@@ -305,9 +445,9 @@ ngOnDestroy() {
   // Payments Map Helpers
   // ══════════════════════════════════════════════════════════════════════════
 
+  // ✅ التحسين 2: شيل detectChanges الزيادة — loadBookings هيعملها
   private _buildPaymentsMapFromBookings(): void {
     for (const b of this.bookings) this._buildPaymentsMapFromBooking(b);
-    this.cdr.detectChanges();
   }
 
   private _buildPaymentsMapFromBooking(b: Bookings): void {
@@ -391,6 +531,8 @@ ngOnDestroy() {
   // ══════════════════════════════════════════════════════════════════════════
 
   openAddModal(): void {
+    this.phoneCountryCode = '+962';
+this.additionalPhoneCountryCode = '+962';
     this.addStep = 1;
     this.newBooking = {
       customerName: '', phone: '', additionalPhone: '', discountAmount: 0,
@@ -405,17 +547,13 @@ ngOnDestroy() {
     this.addSelectedExtraId = 0;
     this.addSelectedExtraQty = 1;
     this.chaletCountMap = {};
-
-    // ✅ reset الـ flag عند فتح المودال
     this.isSubmitting = false;
-
     this.showAddModal = true;
     this.loadChaletsForCurrentType();
   }
 
   closeAddModal(): void {
     this.showAddModal = false;
-    // ✅ reset الـ flag عند إغلاق المودال
     this.isSubmitting = false;
   }
 
@@ -434,7 +572,6 @@ ngOnDestroy() {
         this.chaletCountMap[`${type}_1`] = p1.length;
         this.chaletCountMap[`${type}_2`] = p2.length;
         this.loadingChaletsForType = false;
-        this.cdr.markForCheck();
         this.cdr.detectChanges();
       },
       error: () => {
@@ -442,7 +579,6 @@ ngOnDestroy() {
         this.chaletCountMap[`${type}_1`] = 0;
         this.chaletCountMap[`${type}_2`] = 0;
         this.loadingChaletsForType = false;
-        this.cdr.markForCheck();
         this.cdr.detectChanges();
       },
     });
@@ -549,12 +685,12 @@ ngOnDestroy() {
     for (const raw of source as any[]) {
       if (raw.status === 'Cancelled') continue;
 
-      const type = normalizeChaletType(raw.chaletType);
+      const type   = normalizeChaletType(raw.chaletType);
       const period = normalizePeriod(raw.period);
-      const d = this.parseDateStringAsLocal(raw.date);
-      const key = `${type}_${d}_${period}`;
+      const d      = this.parseDateStringAsLocal(raw.date);
+      const key    = `${type}_${d}_${period}`;
 
-      if (!this.bookingStatusMap[key]) this.bookingStatusMap[key] = { confirmed: 0, pending: 0 };
+      if (!this.bookingStatusMap[key])   this.bookingStatusMap[key]   = { confirmed: 0, pending: 0 };
       if (!this.bookedChaletIdsMap[key]) this.bookedChaletIdsMap[key] = new Set();
 
       if (raw.status === 'Confirmed' || raw.status === 'Done')
@@ -570,17 +706,17 @@ ngOnDestroy() {
     const today = new Date(); today.setHours(0, 0, 0, 0);
     if (date < today) return 'past-day';
 
-    const d = this.formatDateLocal(date);
-    const type = +this.newBooking.chaletType;
+    const d      = this.formatDateLocal(date);
+    const type   = +this.newBooking.chaletType;
     const period = +this.newBooking.period;
 
     const totalSupporting = this.getChaletCountForTypePeriod(type, period < 0 ? 0 : period);
     if (totalSupporting === 0) return 'unavailable-day';
 
-    const s = this.bookingStatusMap[`${type}_${d}_${period < 0 ? 0 : period}`];
+    const s         = this.bookingStatusMap[`${type}_${d}_${period < 0 ? 0 : period}`];
     const confirmed = s?.confirmed ?? 0;
-    const pending = s?.pending ?? 0;
-    const total = confirmed + pending;
+    const pending   = s?.pending ?? 0;
+    const total     = confirmed + pending;
     const available = totalSupporting - total;
 
     if (available <= 0 && confirmed >= totalSupporting) return 'unavailable-day';
@@ -591,11 +727,11 @@ ngOnDestroy() {
 
   getAvailableCountForSelectedDate(): number {
     if (!this.calendarDate || this.newBooking.period < 0) return 0;
-    const d = this.formatDateLocal(this.calendarDate);
-    const type = +this.newBooking.chaletType;
+    const d      = this.formatDateLocal(this.calendarDate);
+    const type   = +this.newBooking.chaletType;
     const period = +this.newBooking.period;
-    const total = this.getChaletCountForTypePeriod(type, period);
-    const s = this.bookingStatusMap[`${type}_${d}_${period}`];
+    const total  = this.getChaletCountForTypePeriod(type, period);
+    const s      = this.bookingStatusMap[`${type}_${d}_${period}`];
     const booked = (s?.confirmed ?? 0) + (s?.pending ?? 0);
     return Math.max(0, total - booked);
   }
@@ -627,14 +763,12 @@ ngOnDestroy() {
   }
 
   // ══════════════════════════════════════════════════════════════════════════
-  // ✅ Submit new booking — محمي من الضغط المتكرر
+  // Submit new booking
   // ══════════════════════════════════════════════════════════════════════════
 
   submitNewBooking(): void {
-    // ✅ الحماية الأولى: لو في request شغال، ارفض أي ضغطة تانية
     if (this.isSubmitting) return;
 
-    // Validation
     if (!this.newBooking.customerName?.trim()) {
       this.showNotification('يرجى إدخال اسم العميل', 'error'); return;
     }
@@ -645,51 +779,39 @@ ngOnDestroy() {
       this.showNotification('يرجى اختيار التاريخ', 'error'); return;
     }
 
-    // ✅ رفع الـ flag فوراً قبل الـ API call
     this.isSubmitting = true;
     this.cdr.detectChanges();
 
     const dto: CreateBookingDto = {
       customerName: this.newBooking.customerName.trim(),
-      phone: this.selectedCountryCode + this.newBooking.phone.trim(),
       date: this.newBooking.date,
       period: +this.newBooking.period,
       chaletType: +this.newBooking.chaletType,
       numOfGuests: this.newBooking.numOfGuests,
-      additionalPhone: this.newBooking.additionalPhone?.trim()
-        ? this.selectedCountryCode + this.newBooking.additionalPhone.trim()
-        : '', discountAmount: this.newBooking.discountAmount ?? 0,
+phone: this.phoneCountryCode + this.newBooking.phone.trim(),
+additionalPhone: this.newBooking.additionalPhone?.trim()
+  ? this.additionalPhoneCountryCode + this.newBooking.additionalPhone.trim()
+  : '',
+      discountAmount: this.newBooking.discountAmount ?? 0,
       note: this.newBooking.note,
       extras: this.addExtrasList.map(e => ({ extraId: e.extraId, quantity: e.quantity })),
     };
 
     this.bookingService.createBooking(dto).subscribe({
       next: (res: any) => {
-        // ✅ نزّل الـ flag بعد الاستجابة
         this.isSubmitting = false;
-
         const success = this.extractSuccess(res);
         const msg = this.extractMessage(res);
         this.showNotification(msg || (success ? 'تم إضافة الحجز بنجاح ✓' : 'حدث خطأ'), success ? 'success' : 'error');
 
         if (success) {
           this.closeAddModal();
-          // تحديث الـ upcoming وإعادة التحميل
-          this.bookingService.getUpcomingBookings().subscribe({
-            next: r => {
-              this.upcomingBookings = r?.data ?? [];
-              this.buildBookingStatusMap();
-              this.refreshUpcoming();
-              this.cdr.detectChanges();
-            }
-          });
           this.loadBookings();
+          this.refreshUpcoming(); // ✅ هو هيعمل dailyPayments + overview
         }
-
         this.cdr.detectChanges();
       },
       error: err => {
-        // ✅ نزّل الـ flag حتى لو الـ API فشل عشان المستخدم يقدر يحاول تاني
         this.isSubmitting = false;
         this.showNotification(err?.error?.message || 'فشل إنشاء الحجز', 'error');
         this.cdr.detectChanges();
@@ -701,37 +823,38 @@ ngOnDestroy() {
   // Edit Modal
   // ══════════════════════════════════════════════════════════════════════════
 
-  openEditModal(booking: Bookings, fromPanel = false): void {
-    this.selectedBooking = { ...booking, extras: booking.extras ? [...booking.extras] : [] };
+openEditModal(booking: Bookings, fromPanel = false): void {
+  this.selectedBooking = { ...booking, extras: booking.extras ? [...booking.extras] : [] };
 
-    const match = this.countryCodes.find(c => booking.phone.startsWith(c.value));
-    this.editCountryCode = match ? match.value : '+962';
-    const cleanPhone = match ? booking.phone.slice(match.value.length) : booking.phone;
+  const match = this.countryCodes.find(c => booking.phone.startsWith(c.code));
+  this.editPhoneCountryCode = match ? match.code : '+962';  // ← غير editCountryCode
+  const cleanPhone = match ? booking.phone.slice(match.code.length) : booking.phone;
 
-    let cleanAdditional = booking.additionalPhone ?? '';
-    const matchAdditional = this.countryCodes.find(c => cleanAdditional.startsWith(c.value));
-    if (matchAdditional) cleanAdditional = cleanAdditional.slice(matchAdditional.value.length);
+  let cleanAdditional = booking.additionalPhone ?? '';
+  const matchAdditional = this.countryCodes.find(c => cleanAdditional.startsWith(c.code));
+  this.editAdditionalPhoneCountryCode = matchAdditional ? matchAdditional.code : '+962';  // ← ضيف السطر ده
+  if (matchAdditional) cleanAdditional = cleanAdditional.slice(matchAdditional.code.length);
 
-    this.editForm = {
-      bookingId: booking.id,
-      customerName: booking.customerName,
-      phone: cleanPhone,
-      additionalPhone: cleanAdditional,
-      discountAmount: booking.discountAmount || null,
-      payMoney: null,
-      deposit: booking.deposit ?? 0,
-      removedExtraIds: [],
-    };
+  this.editForm = {
+    bookingId: booking.id,
+    customerName: booking.customerName,
+    phone: cleanPhone,
+    additionalPhone: cleanAdditional,
+    discountAmount: booking.discountAmount || null,
+    payMoney: null,
+    deposit: booking.deposit ?? 0,
+    removedExtraIds: [],
+  };
 
-    this.editAddExtraId = 0;
-    this.editAddExtraQty = 1;
-    this.editMessage = '';
-    this.editSaving = false;
-    this.editExtraAdding = false;
-    if (!fromPanel) { this.showDetailSheet = false; this.showDetailPanel = false; }
-    this.showEditModal = true;
-  }
-
+  this.editAddExtraId = 0;
+  this.editAddExtraQty = 1;
+  this.editMessage = '';
+  this.editSaving = false;
+  this.editExtraAdding = false;
+  this.countryDropdownOpen = {};  // ← ضيف عشان تتأكد مفيش dropdown مفتوح
+  if (!fromPanel) { this.showDetailSheet = false; this.showDetailPanel = false; }
+  this.showEditModal = true;
+}
   closeEditModal(): void { this.showEditModal = false; }
 
   toggleRemoveExtra(extraId: number): void {
@@ -751,11 +874,11 @@ ngOnDestroy() {
     const dto: UpdateBookingDto = {
       bookingId: this.editForm.bookingId,
       customerName: this.editForm.customerName,
-      phone: this.editCountryCode + this.editForm.phone,
       payMoney: this.editForm.payMoney ?? 0,
       deposit: this.editForm.deposit,
-      additionalPhone: this.newBooking.additionalPhone?.trim()
-  ? this.selectedCountryCode + this.newBooking.additionalPhone.trim()
+phone: this.editPhoneCountryCode + this.editForm.phone,
+additionalPhone: this.editForm.additionalPhone?.trim()
+  ? this.editAdditionalPhoneCountryCode + this.editForm.additionalPhone.trim()
   : '',
       discountAmount: this.editForm.discountAmount ?? 0,
       removedExtraIds: this.editForm.removedExtraIds,
@@ -768,8 +891,7 @@ ngOnDestroy() {
         this.editForm.payMoney = 0;
         this.showNotification(msg, 'success');
         this.loadBookings();
-        this.refreshUpcoming()
-
+        this.refreshUpcoming(); // ✅ هو هيعمل dailyPayments
         this.cdr.detectChanges();
       },
       error: err => {
@@ -847,9 +969,13 @@ ngOnDestroy() {
         this.depositSaving = false;
         const success = this.extractSuccess(res);
         this.showNotification(this.extractMessage(res) || 'تم تأكيد الحجز بنجاح ✓', success ? 'success' : 'error');
-        if (success) { this.closeDepositModal(); this.showDetailPanel = false; this.loadBookings(); }
+        if (success) {
+          this.closeDepositModal();
+          this.showDetailPanel = false;
+          this.loadBookings();
+        }
+        this.refreshUpcoming(); // ✅ هو هيعمل dailyPayments
         this.cdr.detectChanges();
-        this.refreshUpcoming();
       },
       error: err => {
         this.depositSaving = false;
@@ -885,9 +1011,8 @@ ngOnDestroy() {
         this.cancelTargetId = null;
         this.cancelReason = '';
         this.showNotification(this.extractMessage(res) || 'تم إلغاء الحجز', 'success');
-        this.refreshUpcoming()
-
         this.loadBookings();
+        this.refreshUpcoming();
         this.cdr.detectChanges();
       },
       error: err => {
@@ -929,8 +1054,8 @@ ngOnDestroy() {
     this.cdr.detectChanges();
 
     const datePart = this.parseDateStringAsLocal(booking.date);
-    const period = +booking.period;
-    const type = +booking.chaletType;
+    const period   = +booking.period;
+    const type     = +booking.chaletType;
 
     this.bookingService.getBookingsByTypeDatePeriod(type, datePart, period).subscribe({
       next: res => {
@@ -982,8 +1107,8 @@ ngOnDestroy() {
         this.doneTargetId = null;
         this.showNotification(this.extractMessage(res) || 'تم تسجيل الاستلام بنجاح ✓', 'success');
         this.loadBookings();
+        this.refreshUpcoming(); // ✅ هو هيعمل dailyPayments
         this.cdr.detectChanges();
-        this.refreshUpcoming();
       },
       error: err => {
         this.doneSaving = false;
@@ -1009,8 +1134,9 @@ ngOnDestroy() {
 
   closePaymentsModal(): void { this.showPaymentsModal = false; this.paymentsList = []; }
 
-  openTodayRevenueModal(): void { this.showTodayRevenueModal = true; this.cdr.detectChanges(); }
+  openTodayRevenueModal(): void  { this.showTodayRevenueModal = true; this.cdr.detectChanges(); }
   closeTodayRevenueModal(): void { this.showTodayRevenueModal = false; }
+
   openTodayDepositsModal(): void {
     if (!this.auth.hasRole('Manager')) return;
     this.showTodayDepositsModal = true;
@@ -1019,11 +1145,11 @@ ngOnDestroy() {
   closeTodayDepositsModal(): void { this.showTodayDepositsModal = false; }
 
   getPaymentCustomerName(p: any): string { return p._customerName ?? '—'; }
-  getPaymentBookingId(p: any): number { return p._bookingId ?? 0; }
+  getPaymentBookingId(p: any): number    { return p._bookingId ?? 0; }
 
-  get paymentsDeposit(): number { return this.paymentsList.filter(p => p.paymentReson === 0).reduce((s, p) => s + p.amount, 0); }
-  get paymentsPrice(): number { return this.paymentsList.filter(p => p.paymentReson === 1).reduce((s, p) => s + p.amount, 0); }
-  get paymentsTotalPaid(): number { return this.paymentsList.reduce((s, p) => s + p.amount, 0); }
+  get paymentsDeposit(): number    { return this.paymentsList.filter(p => p.paymentReson === 0).reduce((s, p) => s + p.amount, 0); }
+  get paymentsPrice(): number      { return this.paymentsList.filter(p => p.paymentReson === 1).reduce((s, p) => s + p.amount, 0); }
+  get paymentsTotalPaid(): number  { return this.paymentsList.reduce((s, p) => s + p.amount, 0); }
 
   // ══════════════════════════════════════════════════════════════════════════
   // Notes Modal
@@ -1089,26 +1215,25 @@ ngOnDestroy() {
     return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
   }
 
-  // ✅ الحل
   formatDateTime(date: any): string {
     if (!date) return '';
-    // لو مفيش Z في الآخر، أضفها عشان JavaScript يعرف إنه UTC
     const normalized = typeof date === 'string' && !date.endsWith('Z')
       ? date.replace(' ', 'T').split('.')[0] + 'Z'
       : date;
     return new Intl.DateTimeFormat('en-GB', {
       day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit', hour12: true,
-      timeZone: 'Asia/Amman',  // ✅ عرض بتوقيت الأردن دايماً
+      timeZone: 'Asia/Amman',
     }).format(new Date(normalized));
   }
+
   formatDate(d: string): string {
     if (!d) return '-';
     const [year, month, day] = d.split('T')[0].split('-').map(Number);
     return `${String(day).padStart(2, '0')}/${String(month).padStart(2, '0')}/${year}`;
   }
 
-  getStatusLabel(s: string): string { return this.statusLabels[s] ?? s; }
-  getStatusClass(s: string): string { return this.statusClasses[s] ?? ''; }
+  getStatusLabel(s: string): string  { return this.statusLabels[s] ?? s; }
+  getStatusClass(s: string): string  { return this.statusClasses[s] ?? ''; }
   getPeriodLabel(p: number | undefined): string { return p != null ? (this.periodLabels[p] ?? '-') : '-'; }
 
   getChaletName(id: number | null): string {
@@ -1116,7 +1241,7 @@ ngOnDestroy() {
   }
 
   getChaletTypeLabel(raw: any): string { return normalizeChaletType(raw) === 1 ? '👑 رويال' : '🏠 عادي'; }
-  isRoyal(raw: any): boolean { return normalizeChaletType(raw) === 1; }
+  isRoyal(raw: any): boolean          { return normalizeChaletType(raw) === 1; }
 
   getRemaining(b: Bookings): number {
     const paid = this.bookingPaymentsMap[b.id];
@@ -1138,8 +1263,8 @@ ngOnDestroy() {
 
   showNotification(message: string, type: 'success' | 'error'): void {
     this.toastMessage = message;
-    this.toastType = type;
-    this.showToast = true;
+    this.toastType    = type;
+    this.showToast    = true;
     this.cdr.detectChanges();
     setTimeout(() => { this.showToast = false; this.cdr.detectChanges(); }, 3500);
   }
@@ -1153,39 +1278,23 @@ ngOnDestroy() {
   }
 
   private parseUTCDate(dateStr: string): Date {
-    const normalized = dateStr.replace(' ', 'T').split('.')[0] + 'Z'; // ✅ صح
+    const normalized = dateStr.replace(' ', 'T').split('.')[0] + 'Z';
     return new Date(normalized);
-  }
-
-  private getTodayStr(): string { return this.getLocalDateStr(new Date()); }
-  private getYesterdayStr(): string {
-    const y = new Date(); y.setDate(y.getDate() - 1); return this.getLocalDateStr(y);
   }
 
   todayBookings: Bookings[] = [];
 
-  loadTodayBookings() {
+  loadTodayBookings(): void {
     this.bookingService.getTodayBookings().subscribe({
-      next: (res) => {
-        console.log('Today Bookings:', res);
-        this.todayBookings = res;
-      },
-      error: (err) => {
-        console.error(err);
-      }
+      next: res => { this.todayBookings = res; this.cdr.detectChanges(); },
+      error: err => console.error(err),
     });
   }
 
   get yesterdayBookings(): Bookings[] {
-    const yesterday = this.getYesterdayStr();
+    const yesterday = this.getLocalDateStr(new Date(Date.now() - 86400000));
     return this.bookings.filter(b => this.getLocalDateStr(this.parseUTCDate(b.createdAt)) === yesterday);
   }
-
-  get todayTotal(): number { return this.todayBookings.filter(b => b.status !== 'Cancelled').length; }
-  get todayPending(): number { return this.todayBookings.filter(b => b.status === 'Pending' || b.status === 'WaitingList').length; }
-get todayConfirmed(): number {
-  return this.todayDepositPayments.length ;
-}
 
   dailyPayments!: DailyPaymentsResponse;
 
@@ -1200,12 +1309,13 @@ get todayConfirmed(): number {
       ?.filter(p => p.paymentReson === 0)
       ?.reduce((sum, p) => sum + p.amount, 0) ?? 0;
   }
+
   get yesterdayDeposits(): number {
     return this.dailyPayments?.yesterday?.payments
       ?.filter(p => p.paymentReson === 0)
       ?.reduce((sum, p) => sum + p.amount, 0) ?? 0;
   }
-  
+
   get todayRevenuePayments(): DailyPaymentEntry[] {
     return this.dailyPayments?.today?.payments?.filter(p => p.paymentReson === 1) ?? [];
   }
@@ -1213,11 +1323,10 @@ get todayConfirmed(): number {
   get todayDepositPayments(): DailyPaymentEntry[] {
     return this.dailyPayments?.today?.payments?.filter(p => p.paymentReson === 0) ?? [];
   }
-  
+
   get yesterdayDepositPayments(): DailyPaymentEntry[] {
     return this.dailyPayments?.yesterday?.payments?.filter(p => p.paymentReson === 0) ?? [];
   }
-
 
   get yesterdayRevenue(): number {
     return this.dailyPayments?.yesterday?.payments
@@ -1225,20 +1334,17 @@ get todayConfirmed(): number {
       ?.reduce((sum, p) => sum + p.amount, 0) ?? 0;
   }
 
+  get todayTotal(): number     { return this.todayBookings.filter(b => b.status !== 'Cancelled').length; }
+  get todayPending(): number   { return this.todayBookings.filter(b => b.status === 'Pending' || b.status === 'WaitingList').length; }
+  get todayConfirmed(): number { return this.todayDepositPayments.length; }
 
-
-  get yesterdayTotal(): number { return this.yesterdayBookings.filter(b => b.status !== 'Cancelled').length; }
-  get yesterdayPending(): number { return this.yesterdayBookings.filter(b => b.status === 'Pending' || b.status === 'WaitingList').length; }
+  get yesterdayTotal(): number     { return this.yesterdayBookings.filter(b => b.status !== 'Cancelled').length; }
+  get yesterdayPending(): number   { return this.yesterdayBookings.filter(b => b.status === 'Pending' || b.status === 'WaitingList').length; }
   get yesterdayConfirmed(): number { return this.yesterdayDepositPayments.length; }
 
-
-  getDiff(t: number, y: number): number { return t - y; }
-  getDiffClass(t: number, y: number): string {
-    const d = t - y; return d > 0 ? 'diff-up' : d < 0 ? 'diff-down' : 'diff-same';
-  }
-  getDiffIcon(t: number, y: number): string {
-    const d = t - y; return d > 0 ? 'bi-arrow-up-short' : d < 0 ? 'bi-arrow-down-short' : 'bi-dash';
-  }
+  getDiff(t: number, y: number): number      { return t - y; }
+  getDiffClass(t: number, y: number): string { const d = t - y; return d > 0 ? 'diff-up' : d < 0 ? 'diff-down' : 'diff-same'; }
+  getDiffIcon(t: number, y: number): string  { const d = t - y; return d > 0 ? 'bi-arrow-up-short' : d < 0 ? 'bi-arrow-down-short' : 'bi-dash'; }
 
   get editExtrasTotal(): number {
     if (!this.selectedBooking?.extras) return 0;
@@ -1248,7 +1354,7 @@ get todayConfirmed(): number {
   }
 
   get startIndex(): number { return (this.currentPage - 1) * this.pageSize + 1; }
-  get endIndex(): number { return Math.min(this.currentPage * this.pageSize, this.total); }
+  get endIndex(): number   { return Math.min(this.currentPage * this.pageSize, this.total); }
 
   get doneBookingRemaining(): number {
     const b = this.bookings.find(x => x.id === this.doneTargetId);
@@ -1262,6 +1368,27 @@ get todayConfirmed(): number {
   }
 
   // ══════════════════════════════════════════════════════════════════════════
+  // refreshUpcoming — ✅ التحسين 3: بيعمل dailyPayments جوّاه تلقائياً
+  // ══════════════════════════════════════════════════════════════════════════
+
+  @ViewChild(BookingOverviewComponent) overviewRef!: BookingOverviewComponent;
+
+  private refreshUpcoming(): void {
+    forkJoin({
+      upcoming: this.bookingService.getUpcomingBookings(),
+      daily:    this.bookingService.getDailyPaymentSummary(),
+    }).subscribe({
+      next: ({ upcoming, daily }) => {
+        this.upcomingBookings = upcoming?.data ?? [];
+        this.dailyPayments    = daily;
+        this.buildBookingStatusMap();
+        this.overviewRef?.loadData();
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  // ══════════════════════════════════════════════════════════════════════════
   // Invoice
   // ══════════════════════════════════════════════════════════════════════════
 
@@ -1270,7 +1397,7 @@ get todayConfirmed(): number {
     this.invoiceBooking = { ...booking, chaletImageUrl: chalet?.images?.[0] ?? undefined };
     this.showInvoiceModal = true;
     this.shareBlob = null;
-    this.shareBtn = false;
+    this.shareBtn  = false;
     this.cdr.detectChanges();
     setTimeout(() => this.prepareShareImage(), 800);
   }
@@ -1292,16 +1419,16 @@ get todayConfirmed(): number {
     setTimeout(() => { win.print(); win.close(); }, 500);
   }
 
-  shareBtn = false;
+  shareBtn  = false;
   shareBlob: Blob | null = null;
 
   private async captureFixedWidthCanvas(sourceEl: HTMLElement): Promise<HTMLCanvasElement> {
-    const clone = sourceEl.cloneNode(true) as HTMLElement;
+    const clone     = sourceEl.cloneNode(true) as HTMLElement;
     const container = document.createElement('div');
     container.style.cssText = `position:fixed;top:-9999px;left:-9999px;width:800px;direction:rtl;font-family:'Cairo',sans-serif;background:#ffffff;z-index:-1;`;
-    clone.style.width = '800px';
+    clone.style.width    = '800px';
     clone.style.maxWidth = '800px';
-    clone.style.margin = '0';
+    clone.style.margin   = '0';
     container.appendChild(clone);
     document.body.appendChild(container);
 
@@ -1311,8 +1438,8 @@ get todayConfirmed(): number {
     const heroBanner = container.querySelector('.inv-hero-banner') as HTMLElement | null;
     if (heroBanner && this.invoiceBooking?.chaletImageUrl) {
       const base64 = await this.toBase64Image(this.invoiceBooking.chaletImageUrl);
-      heroBanner.style.backgroundImage = base64 ? `url(${base64})` : 'linear-gradient(135deg,#1a1a2e 0%,#2d3748 100%)';
-      heroBanner.style.backgroundSize = 'cover';
+      heroBanner.style.backgroundImage    = base64 ? `url(${base64})` : 'linear-gradient(135deg,#1a1a2e 0%,#2d3748 100%)';
+      heroBanner.style.backgroundSize     = 'cover';
       heroBanner.style.backgroundPosition = 'center';
     }
 
@@ -1323,7 +1450,9 @@ get todayConfirmed(): number {
     }
 
     await Promise.all(Array.from(container.querySelectorAll('img')).map(img =>
-      (img as HTMLImageElement).complete ? Promise.resolve() : new Promise(r => { (img as HTMLImageElement).onload = (img as HTMLImageElement).onerror = () => r(true); })
+      (img as HTMLImageElement).complete ? Promise.resolve() : new Promise(r => {
+        (img as HTMLImageElement).onload = (img as HTMLImageElement).onerror = () => r(true);
+      })
     ));
 
     await new Promise(r => setTimeout(r, 400));
@@ -1348,8 +1477,8 @@ get todayConfirmed(): number {
         await navigator.share({ files: [file] });
       } else {
         const url = URL.createObjectURL(this.shareBlob);
-        const a = document.createElement('a');
-        a.href = url;
+        const a   = document.createElement('a');
+        a.href     = url;
         a.download = `فاتورة-${this.invoiceBooking.id}.png`;
         a.click();
         URL.revokeObjectURL(url);
@@ -1370,10 +1499,10 @@ get todayConfirmed(): number {
   private async toBase64Image(url: string): Promise<string> {
     try {
       const response = await fetch(url, { mode: 'cors', cache: 'no-cache' });
-      const blob = await response.blob();
+      const blob     = await response.blob();
       return await new Promise(resolve => {
-        const reader = new FileReader();
-        reader.onloadend = () => resolve(reader.result as string);
+        const reader      = new FileReader();
+        reader.onloadend  = () => resolve(reader.result as string);
         reader.readAsDataURL(blob);
       });
     } catch { return ''; }
@@ -1391,16 +1520,16 @@ get todayConfirmed(): number {
 
   onOverviewNewBooking(params: NewBookingRequest): void {
     const chaletType = +params.chaletType;
-    const period = +params.period;
-    const date = params.date as string;
+    const period     = +params.period;
+    const date       = params.date as string;
 
-    this.addExtrasList = [];
+    this.addExtrasList       = [];
     this.selectedCountryCode = '+962';
-    this.addSelectedExtraId = 0;
+    this.addSelectedExtraId  = 0;
     this.addSelectedExtraQty = 1;
-    this.priceLoaded = false;
-    this.basePrice = 0;
-    this.isSubmitting = false;
+    this.priceLoaded         = false;
+    this.basePrice           = 0;
+    this.isSubmitting        = false;
 
     this.newBooking = {
       customerName: '', phone: '', additionalPhone: '',
@@ -1409,41 +1538,31 @@ get todayConfirmed(): number {
 
     this.calendarDate = new Date(date + 'T00:00:00');
 
-    // ✅ جلب أحدث بيانات قبل فتح المودال
     forkJoin({
       upcoming: this.bookingService.getUpcomingBookings(),
-      p0: this.bookingService.getChaletsByTypePeriod(chaletType, 0),
-      p1: this.bookingService.getChaletsByTypePeriod(chaletType, 1),
-      p2: this.bookingService.getChaletsByTypePeriod(chaletType, 2),
+      p0:    this.bookingService.getChaletsByTypePeriod(chaletType, 0),
+      p1:    this.bookingService.getChaletsByTypePeriod(chaletType, 1),
+      p2:    this.bookingService.getChaletsByTypePeriod(chaletType, 2),
       price: this.bookingService.getBasePrice(
         chaletType, period,
         ([5, 6].includes(this.calendarDate.getDay())) ? 1 : 0
       ),
     }).subscribe({
       next: ({ upcoming, p0, p1, p2, price }) => {
-        // ✅ تحديث الـ upcomingBookings بأحدث بيانات
-        this.upcomingBookings = upcoming?.data ?? [];
-
-        // ✅ تحديث chaletCountMap
+        this.upcomingBookings              = upcoming?.data ?? [];
         this.chaletCountMap[`${chaletType}_0`] = p0.length;
         this.chaletCountMap[`${chaletType}_1`] = p1.length;
         this.chaletCountMap[`${chaletType}_2`] = p2.length;
-
-        // ✅ إعادة بناء الـ map بعد التحديث
         this.buildBookingStatusMap();
-
-        // ✅ السعر
-        this.basePrice = typeof price === 'number' ? price : (price?.price ?? 0);
+        this.basePrice  = typeof price === 'number' ? price : (price?.price ?? 0);
         this.priceLoaded = true;
-
-        this.addStep = 3;
+        this.addStep     = 3;
         this.showAddModal = true;
         this.cdr.detectChanges();
       },
       error: () => {
-        // fallback — افتح المودال حتى لو في error
         this.buildBookingStatusMap();
-        this.addStep = 3;
+        this.addStep      = 3;
         this.showAddModal = true;
         this.cdr.detectChanges();
       }
@@ -1471,37 +1590,20 @@ get todayConfirmed(): number {
   getBookingById_local(id: number): Bookings {
     return this.bookings.find(b => b.id === id) ?? {} as Bookings;
   }
-  @ViewChild(BookingOverviewComponent) overviewRef!: BookingOverviewComponent;
 
-  private refreshUpcoming(): void {
-    this.bookingService.getUpcomingBookings().subscribe({
-      next: r => {
-        this.upcomingBookings = r?.data ?? [];
-        this.buildBookingStatusMap();
-
-        // ✅ استدعي loadData دايماً بدون شرط showModal
-        this.overviewRef?.loadData();
-
-        this.cdr.detectChanges();
-      }
-    });
-  }
   get discountDisplay(): number | any {
-  return this.editForm.discountAmount === 0
-    ? null
-    : this.editForm.discountAmount;
-}
+    return this.editForm.discountAmount === 0 ? null : this.editForm.discountAmount;
+  }
 
-onDiscountChange(value: number | any): void {
-  this.editForm.discountAmount = value ?? 0;
-}
-get discountNewDisplay(): number | any {
-  return this.newBooking.discountAmount === 0
-    ? null
-    : this.newBooking.discountAmount;
-}
+  onDiscountChange(value: number | any): void {
+    this.editForm.discountAmount = value ?? 0;
+  }
 
-onDiscountNewChange(value: number | null): void {
-  this.newBooking.discountAmount = value ?? 0;
-}
+  get discountNewDisplay(): number | any {
+    return this.newBooking.discountAmount === 0 ? null : this.newBooking.discountAmount;
+  }
+
+  onDiscountNewChange(value: number | null): void {
+    this.newBooking.discountAmount = value ?? 0;
+  }
 }

@@ -302,7 +302,7 @@ export class Dashboard implements OnInit, OnDestroy {
     this.statusBreakdown = [
       { label: 'مؤكدة',        count: data.confirmedBookings, pct: data.confirmedBookings / total * 100, color: '#22c55e' },
       { label: 'مستلمة',       count: data.doneBookings,      pct: data.doneBookings      / total * 100, color: '#8b5cf6' },
-      { label: 'قيد الانتظار', count: data.pendingBookings,   pct: data.pendingBookings   / total * 100, color: '#f59e0b' },
+      { label: 'قيد التأكيد', count: data.pendingBookings,   pct: data.pendingBookings   / total * 100, color: '#f59e0b' },
       { label: 'ملغية',        count: data.cancelledBookings, pct: data.cancelledBookings / total * 100, color: '#ef4444' },
     ];
 
@@ -404,7 +404,7 @@ export class Dashboard implements OnInit, OnDestroy {
   getStatusLabel(status: string): string {
     const map: Record<string, string> = {
       Confirmed: 'مؤكدة', Done: 'مستلمة',
-      Pending: 'قيد الانتظار', Cancelled: 'ملغية',
+      Pending: 'قيد التأكيد', Cancelled: 'ملغية',
     };
     return map[status] ?? status;
   }
@@ -467,7 +467,7 @@ export class Dashboard implements OnInit, OnDestroy {
     const periodMap: Record<number, string> = { 0: 'صباحي', 1: 'مسائي', 2: 'كامل' };
     const statusMap: Record<string, string> = {
       Confirmed: 'مؤكدة', Done: 'مستلمة',
-      Pending: 'قيد الانتظار', Cancelled: 'ملغية',
+      Pending: 'قيد التأكيد', Cancelled: 'ملغية',
     };
 
     const wb = XLSX.utils.book_new();
@@ -517,7 +517,7 @@ export class Dashboard implements OnInit, OnDestroy {
       { 'البيان': '═══ الحجوزات المُنشأة خلال الشهر (حسب تاريخ الإنشاء) ═══', 'القيمة': '', 'الوحدة': '' },
       { 'البيان': 'إجمالي الحجوزات المُنشأة',    'القيمة': createdInMonth.length,             'الوحدة': 'حجز' },
       { 'البيان': 'حجوزات مؤكدة',                'القيمة': countCreatedByStatus('Confirmed'), 'الوحدة': 'حجز' },
-      { 'البيان': 'قيد الانتظار',                'القيمة': countCreatedByStatus('Pending'),   'الوحدة': 'حجز' },
+      { 'البيان': 'قيد التأكيد',                'القيمة': countCreatedByStatus('Pending'),   'الوحدة': 'حجز' },
       { 'البيان': 'ملغية',                       'القيمة': countCreatedByStatus('Cancelled'), 'الوحدة': 'حجز' },
       { 'البيان': 'مستلمة',                      'القيمة': countCreatedByStatus('Done'),      'الوحدة': 'حجز' },
       { 'البيان': '═══ الحجوزات المُستلمة في الشهر (حسب تاريخ الحجز) ═══', 'القيمة': '', 'الوحدة': '' },
@@ -600,7 +600,7 @@ export class Dashboard implements OnInit, OnDestroy {
         'إجمالي الحجوزات':  cb.length,
         'مؤكدة':            cb.filter(b => b.status === 'Confirmed').length,
         'مستلمة':           cb.filter(b => b.status === 'Done').length,
-        'قيد الانتظار':     cb.filter(b => b.status === 'Pending').length,
+        'قيد التأكيد':     cb.filter(b => b.status === 'Pending').length,
         'ملغية':            cb.filter(b => b.status === 'Cancelled').length,
         'إيرادات الشاليه':  cbDone.reduce((s, b) => s + (b.chaletPrice ?? 0), 0),
         'إيرادات الإضافات': cbDone.reduce((s, b) => s + (b.extrasTotal ?? 0), 0),
@@ -647,7 +647,7 @@ export class Dashboard implements OnInit, OnDestroy {
       'إجمالي الحجوزات (مُنشأة)': v.total,
       'مؤكدة':                   v.confirmed,
       'مستلمة':                  v.done,
-      'قيد الانتظار':            v.pending,
+      'قيد التأكيد':            v.pending,
       'ملغية':                   v.cancelled,
       'عدد حجوزات بخصم':        v.discountCount,
       'إجمالي الخصومات':         v.discountAmount,

@@ -119,7 +119,7 @@ export class CustomerBooking implements OnInit {
     2: 'يوم كامل 🌞'
   };
   readonly statusLabels: Record<string, string> = {
-    Pending:     'قيد الانتظار',
+    Pending:     'قيد التأكيد',
     Confirmed:   'مؤكد',
     Cancelled:   'ملغي',
     WaitingList: 'قائمة الانتظار',

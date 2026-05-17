@@ -511,8 +511,8 @@ body.ov-modal-open {
   flex-shrink: 0;
 }
 .slot-info { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
-.slot-type-name { font-size: 13px; font-weight: 800; color: #1e3a5f; white-space: nowrap; }
-.slot-period    { font-size: 11px; color: #7a9ab5; font-weight: 600; white-space: nowrap; }
+.slot-type-name { font-size: 14px; font-weight: 800; color: #1e3a5f; white-space: nowrap; }
+.slot-period    { font-size: 12px; color: #7098b9; font-weight: 600; white-space: nowrap; }
 
 .slot-header-right {
   display: flex; align-items: center; gap: 6px;
@@ -563,7 +563,7 @@ body.ov-modal-open {
 
 /* Progress Bar */
 .slot-progress {
-  height: 3px;
+  height: 4px;
   background: #129c29;
   display: flex;
   overflow: hidden;
@@ -804,10 +804,10 @@ body.ov-modal-open {
   /* .slot-mini-stats { display: none; } */
 
   /* Compact slot header */
-  .slot-header   { padding: 10px 11px; }
+  .slot-header   { padding: 8px 9px; }
   .slot-type-icon { width: 30px; height: 30px; font-size: 14px; }
-  .slot-type-name { font-size: 12px; }
-  .slot-period    { font-size: 10px; }
+  .slot-type-name { font-size: 13px; }
+  .slot-period    { font-size: 12px; }
 
   /* Book button smaller */
   .slot-book-btn { padding: 4px 8px; font-size: 10px; }

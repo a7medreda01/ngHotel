@@ -2,7 +2,13 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment.prod';
-
+export interface PagedResult<T> {
+  data:       T[];
+  total:      number;
+  page:       number;
+  pageSize:   number;
+  totalPages: number;
+}
 export type WaitingStatus = 'Pending' | 'Contacted' | 'Booked' | 'Cancelled';
 
 export const WaitingStatusEnum: Record<number, WaitingStatus> = {
@@ -25,6 +31,7 @@ export interface WaitingListItem {
   phone: string;
   chaletId: number;
   chaletName: string;
+  chaletType: string;
   date: string;
   period: string;
   status: WaitingStatus;
@@ -82,18 +89,22 @@ export class WaitingListService {
       null
     );
   }
-  getPaged(params: {
-  page:      number;
-  pageSize:  number;
-  search?:   string;
-}): Observable<WaitingPagedResult> {
-  let p = new HttpParams()
-    .set('page',     params.page)
-    .set('pageSize', params.pageSize);
+getPaged(params: {
+  page: number;
+  pageSize: number;
+  search?: string;
+  dateFrom?: string;   // ← جديد
+  dateTo?: string;     // ← جديد
+}): Observable<PagedResult<WaitingListItem>> {
+  let httpParams = new HttpParams()
+    .set('page',     params.page.toString())
+    .set('pageSize', params.pageSize.toString());
 
-  if (params.search?.trim())
-    p = p.set('search', params.search.trim());
+  if (params.search)   httpParams = httpParams.set('search',   params.search);
+  if (params.dateFrom) httpParams = httpParams.set('dateFrom', params.dateFrom);
+  if (params.dateTo)   httpParams = httpParams.set('dateTo',   params.dateTo);
 
-  return this.http.get<WaitingPagedResult>(`${this.baseUrl}/paged`, { params: p });
+  return this.http.get<PagedResult<WaitingListItem>>(
+    `${this.baseUrl}/paged`, { params: httpParams });
 }
 }

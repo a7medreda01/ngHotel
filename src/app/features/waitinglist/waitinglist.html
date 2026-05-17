@@ -63,6 +63,32 @@
         <option *ngFor="let opt of filterOptions" [value]="opt.value">{{ opt.label }}</option>
       </select>
     </div>
+    <!-- Date Range Filter -->
+<div class="date-range-wrap">
+  <div class="date-field">
+    <label class="date-label">من</label>
+    <input
+      type="date"
+      class="filter-select"
+      [(ngModel)]="dateFrom"
+      (ngModelChange)="onDateChange()" />
+  </div>
+  <div class="date-field">
+    <label class="date-label">إلى</label>
+    <input
+      type="date"
+      class="filter-select"
+      [(ngModel)]="dateTo"
+      (ngModelChange)="onDateChange()" />
+  </div>
+  <button
+    *ngIf="dateFrom || dateTo"
+    class="btn-clear-date"
+    (click)="clearDateFilter()"
+    title="مسح الفلتر">
+    <i class="bi bi-x-circle-fill"></i>
+  </button>
+</div>
   </div>
 
   <!-- ══════════════ LOADING ══════════════ -->
@@ -133,7 +159,7 @@
 
             <td>
               <span class="chalet-cell">
-                <i class="bi bi-house-fill"></i> {{ item.chaletName }}
+                <i class="bi bi-house-fill"></i> {{ getChaletTypeLabel(item.chaletType) }}
               </span>
             </td>
 
@@ -221,7 +247,7 @@
         <div class="mc-details">
           <div class="mc-detail-item">
             <i class="bi bi-house-fill mc-detail-icon"></i>
-            <span>{{ item.chaletName }}</span>
+            <span>{{ getChaletTypeLabel(item.chaletType) }}</span>
           </div>
           <div class="mc-detail-item">
             <i class="bi bi-calendar3 mc-detail-icon"></i>
@@ -317,7 +343,7 @@
           </div>
           <div class="info-item">
             <span class="info-label"><i class="bi bi-house-fill"></i> الشاليه</span>
-            <span class="info-value">{{ selectedItem.chaletName }}</span>
+            <span class="info-value">{{ getChaletTypeLabel(selectedItem.chaletType) }}</span>
           </div>
           <div class="info-item">
             <span class="info-label"><i class="bi bi-calendar3"></i> التاريخ</span>
@@ -407,7 +433,7 @@
         <div class="convert-summary">
           <div class="convert-row">
             <span><i class="bi bi-house-fill"></i> الشاليه</span>
-            <strong>{{ convertItem.chaletName }}</strong>
+            <strong>{{ getChaletTypeLabel(convertItem.chaletType) }}</strong>
           </div>
           <div class="convert-row">
             <span><i class="bi bi-calendar3"></i> التاريخ</span>
