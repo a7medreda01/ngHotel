@@ -918,8 +918,9 @@
             <div class="price-summary" *ngIf="priceLoaded" style="margin-top:14px;">
               <div class="price-row">
                 <span><i class="bi bi-house-door"></i> سعر الكوخ
-                  <small *ngIf="calendarDate">({{ calendarDate.getDay() === 5 || calendarDate.getDay() === 6 ? 'عطلة' :
-                    'أيام عادية' }})</small>
+                  <small *ngIf="calendarDate">
+  ({{ [4, 5].includes(calendarDate.getDay()) ? 'عطلة' : 'أيام عادية' }})
+</small>
                 </span>
                 <span>{{ basePrice }} د.أ</span>
               </div>

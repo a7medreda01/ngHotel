@@ -6,6 +6,7 @@ import { routes } from './app.routes';
 import { HTTP_INTERCEPTORS, provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { AuthInterceptor } from './interceptor/AuthInterceptor';
 import { registerLocaleData } from '@angular/common';
+import { MAT_DATE_LOCALE } from '@angular/material/core';
 registerLocaleData(localeAr, 'ar-EG');
 
 export const appConfig: ApplicationConfig = {
@@ -21,8 +22,8 @@ export const appConfig: ApplicationConfig = {
     },
     // provideHttpClient(),
     { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },
-    { provide: LOCALE_ID, useValue: 'ar-EG' }
-
+    // { provide: LOCALE_ID, useValue: 'ar-EG' },
+{ provide: MAT_DATE_LOCALE, useValue: 'en-GB' },
 
   ]
 };

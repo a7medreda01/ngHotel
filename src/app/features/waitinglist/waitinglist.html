@@ -69,6 +69,7 @@
     <label class="date-label">من</label>
     <input
       type="date"
+      lang="en-GB"
       class="filter-select"
       [(ngModel)]="dateFrom"
       (ngModelChange)="onDateChange()" />
@@ -77,6 +78,7 @@
     <label class="date-label">إلى</label>
     <input
       type="date"
+      lang="en-GB"
       class="filter-select"
       [(ngModel)]="dateTo"
       (ngModelChange)="onDateChange()" />
@@ -394,9 +396,9 @@
       </div>
 
       <div class="modal-footer">
-        <button class="btn-secondary" (click)="closeDetailsModal()">
+        <!-- <button class="btn-secondary" (click)="closeDetailsModal()">
           <i class="bi bi-x-lg"></i> إلغاء
-        </button>
+        </button> -->
         <button class="btn-whatsapp-outline" (click)="openWhatsApp(selectedItem!.phone)">
           <i class="bi bi-whatsapp"></i> واتساب 1
         </button>
@@ -467,9 +469,9 @@
       </div>
 
       <div class="modal-footer">
-        <button class="btn-secondary" (click)="closeConvertModal()">
+        <!-- <button class="btn-secondary" (click)="closeConvertModal()">
           <i class="bi bi-x-lg"></i> إلغاء
-        </button>
+        </button> -->
         <button *ngIf="convertItem?.phone" class="btn-whatsapp-outline"
                 (click)="openWhatsApp(convertItem!.phone)">
           <i class="bi bi-whatsapp"></i> واتساب 1

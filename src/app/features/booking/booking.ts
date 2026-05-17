@@ -658,7 +658,7 @@ this.additionalPhoneCountryCode = '+962';
   fetchBasePrice(date?: Date): void {
     const type = this.newBooking.chaletType;
     const period = this.newBooking.period;
-    const dayType = date ? ([5, 6].includes(date.getDay()) ? 1 : 0) : 0;
+    const dayType = date ? ([4, 5].includes(date.getDay()) ? 1 : 0) : 0;
 
     this.basePriceLoading = true;
     this.priceLoaded = false;
@@ -1555,7 +1555,7 @@ additionalPhone: this.editForm.additionalPhone?.trim()
       p2:    this.bookingService.getChaletsByTypePeriod(chaletType, 2),
       price: this.bookingService.getBasePrice(
         chaletType, period,
-        ([5, 6].includes(this.calendarDate.getDay())) ? 1 : 0
+        ([4, 5].includes(this.calendarDate.getDay())) ? 1 : 0
       ),
     }).subscribe({
       next: ({ upcoming, p0, p1, p2, price }) => {

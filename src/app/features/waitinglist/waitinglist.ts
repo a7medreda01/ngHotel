@@ -70,7 +70,7 @@ dateTo   = '';
   readonly statusOptions: { label: string; value: number }[] = [
     { label: ' قائمة الانتظار', value: 0 },
     { label: 'تم التواصل',   value: 1 },
-    { label: 'محجوز',        value: 2 },
+    // { label: 'محجوز',        value: 2 },
     { label: 'ملغي',         value: 3 },
   ];
 
