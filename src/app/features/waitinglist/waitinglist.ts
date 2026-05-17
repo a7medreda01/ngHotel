@@ -326,12 +326,11 @@ loadWaiting(): void {
     window.open(`https://wa.me/${phone.replace(/\D/g, '')}`, '_blank');
   }
 
-  formatDate(dateStr: string): string {
-    if (!dateStr) return '—';
-    const d = new Date(dateStr);
-    return d.toLocaleDateString('en-EG', { year: 'numeric', month: '2-digit', day: 'numeric' });
-  }
-
+formatDate(d: string): string {
+  if (!d) return '-';
+  const [year, month, day] = d.split('T')[0].split('-').map(Number);
+  return `${String(day).padStart(2, '0')}/${String(month).padStart(2, '0')}/${year}`;
+}
   formatDateTime(dateStr: string | null | undefined): string {
     if (!dateStr) return '';
     const normalized = dateStr.endsWith('Z') ? dateStr : dateStr + 'Z';
@@ -413,4 +412,5 @@ loadWaiting(): void {
     getChaletTypeLabel(raw: any): string { return normalizeChaletType(raw) === 1 ? '👑 رويال' : '🏠 عادي'; }
     isRoyal(raw: any): boolean { return normalizeChaletType(raw) === 1; }
   
+    
 }

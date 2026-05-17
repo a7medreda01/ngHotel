@@ -78,7 +78,6 @@
     <label class="date-label">إلى</label>
     <input
       type="date"
-      lang="en-GB"
       class="filter-select"
       [(ngModel)]="dateTo"
       (ngModelChange)="onDateChange()" />
@@ -267,8 +266,8 @@
           </div>
         </div>
 
-        <div class="mc-notes" *ngIf="item.notes && item.notes !== 'لا يوجد ملاحظات'">
-          <i class="bi bi-chat-left-text"></i> {{ item.notes }}
+        <div class="mc-notes" *ngIf="item.note && item.note !== 'لا يوجد ملاحظات'">
+          <i class="bi bi-chat-left-text"></i> {{ item.note }}
         </div>
 
         <div class="mc-actions" (click)="$event.stopPropagation()">
@@ -374,9 +373,9 @@
           </div>
         </div>
 
-        <div class="info-item full-width" *ngIf="selectedItem.notes">
+        <div class="info-item full-width" *ngIf="selectedItem.note">
           <span class="info-label"><i class="bi bi-chat-left-text-fill"></i> الملاحظات</span>
-          <span class="info-value notes-text">{{ selectedItem.notes }}</span>
+          <span class="info-value notes-text">{{ selectedItem.note }}</span>
         </div>
 
         <div class="status-update-section">

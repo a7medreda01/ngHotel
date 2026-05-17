@@ -35,7 +35,7 @@ export interface WaitingListItem {
   date: string;
   period: string;
   status: WaitingStatus;
-  notes: string;
+  note: string;
   createdAt:any
     additionalPhone?: string;  // ← أضف السطر ده
 
